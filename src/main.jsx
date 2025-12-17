@@ -57,7 +57,7 @@ import LearningPage from "./pages/LearningPage";
 import TeacherOnlyRoute from "./routes/TeacherOnlyRoute";
 import BlogsTeacher from "./pages/Teacher/Blogs/BlogsTeacher";
 import BlogDetailsTeacher from "./pages/Teacher/Blogs/BlogDetailsTeacher";
-import QnaTeacher from "./pages/Teacher/QnA/QnATeacher";
+import QnaTeacher from "./pages/Teacher/QnA/QnaTeacher";
 import QuestionDetailsTeacher from "./pages/Teacher/QnA/QuestionDetailsTeacher";
 import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import CoursesTeacher from "./pages/Teacher/Course/CoursesTeacher";
