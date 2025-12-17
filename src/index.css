@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: "Hind Siliguri", sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-hind {
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+}
+
+.quill-editor .ql-toolbar {
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+}
+
+.quill-editor .ql-container {
+  min-height: 150px;
+}
+
+.quill-editor .ql-editor {
+  min-height: 150px;
+}
