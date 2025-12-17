@@ -11,17 +11,18 @@ const Carousel = () => {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/courses/featuredCourse");
-
-      console.log(res.data.courses);
-      
+      const res = await api.get("/courses/featuredCourse");      
       
       if (res.data.success) {
         setCourses(res.data.courses);
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message);
+      toast.error(
+    error?.response?.data?.message || 
+    error.message || 
+    "Something went wrong"
+  );
     } finally {
       setLoading(false);
     }
@@ -154,9 +155,15 @@ const Carousel = () => {
     </div>
   );
 
+  if(!courses) {
+    return (
+      <div>ইসলামিক জীবন গড়ে তুলতে আমাদের সাথে থাকুন</div>
+    )
+  } 
+
   return (
     <div className="relative font-hind w-full max-w-7xl mx-auto pt-20 lg:pt-8 px-4">
-      <style jsx global>{`
+      <style>{`
         @keyframes neon-glow {
           0%, 100% {
             border-color: #3b82f6;

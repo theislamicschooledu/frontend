@@ -17,7 +17,11 @@ const Instructors = () => {
 
       setTeachers(topThree);
     } catch (error) {
-      toast.error(error);
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Something went wrong"
+      );
     }
   };
 
@@ -31,10 +35,7 @@ const Instructors = () => {
     "from-amber-400 to-amber-600",
   ];
   return (
-    <section
-      id="instructors"
-      className="relative px-6 z-10"
-    >
+    <section id="instructors" className="relative px-6 z-10">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-3 gap-8">
           {teachers?.map((inst, idx) => (

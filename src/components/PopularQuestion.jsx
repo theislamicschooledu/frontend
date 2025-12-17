@@ -20,7 +20,11 @@ const PopularQuestion = () => {
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
@@ -31,6 +35,7 @@ const PopularQuestion = () => {
   }, []);
 
   if (loading) return <p className="text-center">Loading...</p>;
+  if (!questions) return <p className="text-center">Coming Soon...</p>;
 
   return (
     <div className="space-y-6 font-hind">
@@ -56,7 +61,7 @@ const PopularQuestion = () => {
               <span className="text-green-600 mr-2">Q:</span>
               {item.title}
             </h3>
-            <p className="text-gray-600 pl-5 border-l-2 border-green-200">
+            <div className="text-gray-600 pl-5 border-l-2 border-green-200">
               <span className="text-green-600 font-medium">A:</span>
               <div
                 className="prose prose-lg max-w-none mb-4 text-gray-600 line-clamp-3"
@@ -71,7 +76,7 @@ const PopularQuestion = () => {
                 Read More
                 <FiArrowUpRight className="ml-1" />
               </Link>
-            </p>
+            </div>
           </div>
         </motion.div>
       ))}

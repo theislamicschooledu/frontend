@@ -16,7 +16,11 @@ const FeaturedCourses = () => {
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message);
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
@@ -26,12 +30,12 @@ const FeaturedCourses = () => {
     fetchCourses();
   }, []);
 
-  if(loading) return <p>Loading</p>
+  if (loading) return <p>Loading</p>;
 
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 font-hind">
       {courses?.map((course, index) => (
-        <CourseCard course={course} index={index} />
+        <CourseCard course={course} index={index} key={index} />
       ))}
     </div>
   );
