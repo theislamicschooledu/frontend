@@ -67,7 +67,7 @@ const AskQuestion = () => {
 
       if (res.data.success) {
         toast.success("Question submitted successfully!");
-        navigate("/admin/questions");
+        navigate("/qa");
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
