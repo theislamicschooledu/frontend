@@ -5,7 +5,7 @@ const ResourcesSection = ({ resources }) => {
   return (
     <section className="bg-gray-800/50 p-4 rounded-2xl border border-gray-700/40">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-linear-to-r from-blue-500 to-purple-600 flex items-center justify-center">
           <FiDownload className="text-white" />
         </div>
         <h3 className="text-lg font-semibold">
@@ -25,7 +25,7 @@ const ResourcesSection = ({ resources }) => {
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-3 rounded-xl bg-gray-800/40 hover:bg-gray-700/50 transition group"
           >
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white group-hover:scale-105 transition">
+            <div className="w-12 h-12 rounded-lg bg-linear-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white group-hover:scale-105 transition">
               <FiDownload />
             </div>
             <div className="min-w-0">

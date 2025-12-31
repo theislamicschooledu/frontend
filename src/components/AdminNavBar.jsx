@@ -24,7 +24,7 @@ const AdminNavBar = ({ sidebarOpen, setSidebarOpen }) => {
         initial={{ x: -300 }}
         animate={{ x: 0 }}
         transition={{ duration: 0.3 }}
-        className={`fixed lg:relative z-50 w-64 h-screen bg-gradient-to-b from-green-600 to-emerald-700 text-white flex flex-col shadow-lg
+        className={`fixed lg:relative z-50 w-64 h-screen bg-linear-to-b from-green-600 to-emerald-700 text-white flex flex-col shadow-lg
         ${sidebarOpen ? "block" : "hidden lg:flex"} overflow-y-scroll`}
       >
         <div className="px-6 py-6 flex gap-2 items-center text-lg font-medium">

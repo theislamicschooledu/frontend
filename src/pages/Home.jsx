@@ -30,7 +30,7 @@ const Home = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans overflow-hidden">
+    <div className="w-full min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans overflow-hidden">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {[...Array(15)].map((_, i) => (
@@ -60,7 +60,7 @@ const Home = () => {
       </section>
 
       {/* Courses Section with Enhanced Animations */}
-      <section className="relative pt-8 bg-gradient-to-b from-blue-50 to-white px-6 z-10">
+      <section className="relative pt-8 bg-linear-to-b from-blue-50 to-white px-6 z-10">
         <div className="max-w-7xl mx-auto">
           {/* Featured Courses */}
 
@@ -95,14 +95,14 @@ const Home = () => {
 
       {/* Enhanced Instructors Section */}
 
-      <Heading text1={"আমাদের উস্তাদগণ"} text2={""} />
+      <Heading text1={"আমাদের উস্তাদগণ"} text2={"আমাদের দক্ষ উস্তাদগণ"} />
 
       <Instructors />
 
       {/* Enhanced Blogs Section */}
       <section
         id="blogs"
-        className="relative pt-8 px-6 bg-gradient-to-b from-sky-50 to-white z-10"
+        className="relative pt-8 px-6 bg-linear-to-b from-sky-50 to-white z-10"
       >
         <div className="max-w-7xl mx-auto">
           <Heading
@@ -137,7 +137,7 @@ const Home = () => {
       {/* Enhanced Q&A Section */}
       <section
         id="qa"
-        className="relative pt-8 px-6 bg-gradient-to-b from-white to-green-50 z-10"
+        className="relative pt-8 px-6 bg-linear-to-b from-white to-green-50 z-10"
       >
         <div className="max-w-5xl mx-auto">
           <Heading

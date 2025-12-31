@@ -214,7 +214,7 @@ const Profile = () => {
 
   if (!userData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading profile...</p>
@@ -224,7 +224,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans py-8 px-4 pt-24">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans py-8 px-4 pt-24">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -284,7 +284,7 @@ const Profile = () => {
           >
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
               {/* Profile Header */}
-              <div className="bg-gradient-to-br from-green-600 to-emerald-500 text-white p-8">
+              <div className="bg-linear-to-br from-green-600 to-emerald-500 text-white p-8">
                 <div className="flex items-center">
                   {/* Profile Image Upload */}
                   <div className="relative mr-6">
@@ -453,7 +453,7 @@ const Profile = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className={`bg-gradient-to-br ${stat.color} text-white p-6 rounded-2xl shadow-lg`}
+                  className={`bg-linear-to-br ${stat.color} text-white p-6 rounded-2xl shadow-lg`}
                 >
                   <div className="flex items-center justify-between">
                     <div>

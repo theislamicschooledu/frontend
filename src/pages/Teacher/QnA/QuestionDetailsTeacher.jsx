@@ -350,7 +350,7 @@ const QuestionDetailsTeacher = () => {
                 <div className="mb-8">
                   <div
                     ref={editorRef}
-                    className="quill-editor bg-white border border-gray-300 rounded-xl min-h-[200px] p-2"
+                    className="quill-editor bg-white border border-gray-300 rounded-xl min-h-50 p-2"
                   />
                 </div>
                 <motion.button

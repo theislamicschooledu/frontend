@@ -312,7 +312,7 @@ const CoursesAdmin = () => {
               >
                 {/* Course Information */}
                 <div className="col-span-4 flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-r from-green-100 to-emerald-100">
+                  <div className="shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-linear-to-r from-green-100 to-emerald-100">
                     {course.thumbnail ? (
                       <img
                         src={course.thumbnail}
@@ -320,7 +320,7 @@ const CoursesAdmin = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-green-100 to-emerald-100">
+                      <div className="w-full h-full flex items-center justify-center bg-linear-to-r from-green-100 to-emerald-100">
                         <FiBookOpen className="text-green-600 text-xl" />
                       </div>
                     )}
@@ -331,7 +331,7 @@ const CoursesAdmin = () => {
                         {course.title}
                       </h3>
                       {course.featured && (
-                        <FiStar className="text-amber-500 flex-shrink-0" />
+                        <FiStar className="text-amber-500 shrink-0" />
                       )}
                     </div>
                     <p className="text-sm text-gray-600 line-clamp-2 mb-2">

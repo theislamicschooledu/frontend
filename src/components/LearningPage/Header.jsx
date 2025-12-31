@@ -66,7 +66,7 @@ const Header = ({
             <div className="hidden md:flex items-center gap-3">
               <div className="w-36 bg-gray-700 rounded-full h-2 overflow-hidden">
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-green-400 to-blue-400 transition-all duration-500"
+                  className="h-2 rounded-full bg-linear-to-r from-green-400 to-blue-400 transition-all duration-500"
                   style={{ width: `${progress}%` }}
                 />
               </div>

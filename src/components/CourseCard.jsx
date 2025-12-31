@@ -57,16 +57,16 @@ const CourseCard = ({ course, index }) => {
         scale: 1.03,
         transition: { duration: 0.3 }
       }}
-      className="group relative bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-3xl shadow-2xl hover:shadow-3xl overflow-hidden transition-all duration-500 border border-gray-200/50 font-hind flex flex-col backdrop-blur-sm"
+      className="group relative bg-linear-to-br from-white via-gray-50 to-gray-100 rounded-3xl shadow-2xl hover:shadow-3xl overflow-hidden transition-all duration-500 border border-gray-200/50 font-hind flex flex-col backdrop-blur-sm"
       role="article"
     >
       {/* Background accent */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${difficultyColors[difficulty]} opacity-5 group-hover:opacity-10 transition-opacity duration-500`} />
+      <div className={`absolute inset-0 bg-linear-to-br ${difficultyColors[difficulty]} opacity-5 group-hover:opacity-10 transition-opacity duration-500`} />
       
       {/* Premium badge */}
       {course.isPremium && (
         <div className="absolute top-4 left-4 z-10">
-          <div className="bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 px-3 py-1.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-1.5 animate-pulse">
+          <div className="bg-linear-to-r from-amber-400 to-yellow-500 text-gray-900 px-3 py-1.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-1.5 animate-pulse">
             <FiStar size={12} />
             <span>PREMIUM</span>
           </div>
@@ -94,18 +94,18 @@ const CourseCard = ({ course, index }) => {
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-70 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-70 transition-opacity duration-500" />
           </>
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+          <div className="w-full h-full bg-linear-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center relative">
+            <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent" />
             <FiBookOpen className="text-5xl text-white opacity-90" />
           </div>
         )}
 
         {/* Enrollment badge */}
         <div className="absolute bottom-4 left-4">
-          <div className="bg-gradient-to-r from-orange-500 to-rose-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-2xl flex items-center gap-2 backdrop-blur-sm">
+          <div className="bg-linear-to-r from-orange-500 to-rose-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-2xl flex items-center gap-2 backdrop-blur-sm">
             <FiClock size={14} />
             <span>{getTimeRemaining(course.enrollmentEnd)}</span>
           </div>
@@ -126,13 +126,13 @@ const CourseCard = ({ course, index }) => {
       <div className="p-7 flex-1 flex flex-col relative">
         {/* Category badge */}
         <div className="mb-4">
-          <span className={`inline-block bg-gradient-to-r ${difficultyColors[difficulty]} text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg`}>
+          <span className={`inline-block bg-linear-to-r ${difficultyColors[difficulty]} text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg`}>
             {course.category?.name || "Uncategorized"}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className="text-2xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-500 leading-tight">
+        <h3 className="text-2xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-500 leading-tight">
           {course.title}
         </h3>
 
@@ -145,8 +145,8 @@ const CourseCard = ({ course, index }) => {
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="bg-gradient-to-br from-blue-50 to-white p-3 rounded-xl border border-blue-100 flex items-center gap-3 group/stat">
-            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2.5 rounded-lg">
+          <div className="bg-linear-to-br from-blue-50 to-white p-3 rounded-xl border border-blue-100 flex items-center gap-3 group/stat">
+            <div className="bg-linear-to-r from-blue-500 to-cyan-500 p-2.5 rounded-lg">
               <FiClock className="text-white" size={16} />
             </div>
             <div>
@@ -155,8 +155,8 @@ const CourseCard = ({ course, index }) => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-50 to-white p-3 rounded-xl border border-emerald-100 flex items-center gap-3 group/stat">
-            <div className="bg-gradient-to-r from-emerald-500 to-green-500 p-2.5 rounded-lg">
+          <div className="bg-linear-to-br from-emerald-50 to-white p-3 rounded-xl border border-emerald-100 flex items-center gap-3 group/stat">
+            <div className="bg-linear-to-r from-emerald-500 to-green-500 p-2.5 rounded-lg">
               <FiBook className="text-white" size={16} />
             </div>
             <div>
@@ -168,7 +168,7 @@ const CourseCard = ({ course, index }) => {
 
         {/* Teachers section */}
         {course.teachers && course.teachers.length > 0 && (
-          <div className="mb-5 p-4 bg-gradient-to-r from-gray-50/80 to-white/80 rounded-2xl border border-gray-200/50 backdrop-blur-sm">
+          <div className="mb-5 p-4 bg-linear-to-r from-gray-50/80 to-white/80 rounded-2xl border border-gray-200/50 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <FaChalkboardTeacher className="text-purple-600" size={18} />
@@ -202,7 +202,7 @@ const CourseCard = ({ course, index }) => {
               {course.skills.slice(0, 3).map((skill, idx) => (
                 <span 
                   key={idx}
-                  className="bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 flex items-center gap-1.5"
+                  className="bg-linear-to-r from-gray-100 to-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 flex items-center gap-1.5"
                 >
                   <FiCheckCircle size={12} className="text-green-500" />
                   {skill}
@@ -222,7 +222,7 @@ const CourseCard = ({ course, index }) => {
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
               <div className="flex items-baseline">
-                <span className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <span className="text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   {formatPrice(course.price)}
                 </span>
                 <span className="text-gray-500 text-sm ml-1.5">TK</span>
@@ -240,9 +240,9 @@ const CourseCard = ({ course, index }) => {
             >
               <Link
                 to={`/course/${course._id}`}
-                className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white px-7 py-3.5 rounded-xl font-bold hover:shadow-2xl transition-all duration-300 shadow-xl flex items-center gap-3 group/btn"
+                className="relative overflow-hidden bg-linear-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white px-7 py-3.5 rounded-xl font-bold hover:shadow-2xl transition-all duration-300 shadow-xl flex items-center gap-3 group/btn"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
                 <FiEye
                   size={18}
                   className="relative z-10 group-hover/btn:scale-110 transition-transform duration-300"

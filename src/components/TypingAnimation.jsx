@@ -34,7 +34,7 @@ const TypingAnimation = ({ text, speed = 30, delay = 0, className = "" }) => {
       {displayedText}
       {currentIndex < text?.length && (
         <motion.span
-          className="inline-block w-[2px] h-6 bg-green-600 ml-1 align-middle"
+          className="inline-block w-0.5 h-6 bg-green-600 ml-1 align-middle"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.8, repeat: Infinity }}
         />

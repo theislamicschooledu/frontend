@@ -43,16 +43,16 @@ const CourseListItem = ({ course, index }) => {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="w-full h-full bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
               <FiBookOpen className="text-3xl text-white opacity-80" />
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/20 via-transparent to-transparent" />
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
-            <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+            <div className="bg-linear-to-r from-orange-500 to-pink-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
               {getTimeRemaining(course.enrollmentEnd)}
             </div>
           </div>
@@ -128,7 +128,7 @@ const CourseListItem = ({ course, index }) => {
               <div className="flex gap-3">
                 <Link
                   to={`/course/${course._id}`}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold hover:shadow-xl transition-all duration-300 shadow-lg group/btn"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold hover:shadow-xl transition-all duration-300 shadow-lg group/btn"
                 >
                   <FiEye size={16} className="group-hover/btn:scale-110 transition-transform duration-300" />
                   Preview

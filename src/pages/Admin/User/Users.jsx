@@ -204,7 +204,7 @@ const StatCard = ({ title, count, icon, color }) => (
         <p className="text-gray-600 text-sm">{title}</p>
         <h3 className="text-2xl font-bold text-gray-800">{count}</h3>
       </div>
-      <div className={`p-3 rounded-xl bg-gradient-to-r ${color} text-white`}>
+      <div className={`p-3 rounded-xl bg-linear-to-r ${color} text-white`}>
         {icon}
       </div>
     </div>

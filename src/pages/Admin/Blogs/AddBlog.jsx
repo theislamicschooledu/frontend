@@ -192,7 +192,7 @@ const AddBlog = () => {
             <h2 className="text-xl font-bold text-gray-800 mb-3">Content</h2>
             <div
               ref={editorRef}
-              className="bg-gray-100 rounded-xl min-h-[300px] p-3"
+              className="bg-gray-100 rounded-xl min-h-75 p-3"
             ></div>
           </motion.div>
         </div>

@@ -101,7 +101,7 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-linear-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
                   <FiLock className="text-white" />
                 </div>
                 <div>
@@ -127,7 +127,7 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
                     className="w-16 h-16 rounded-xl object-cover"
                   />
                 ) : (
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
+                  <div className="w-16 h-16 bg-linear-to-r from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
                     <FiBook className="text-white text-xl" />
                   </div>
                 )}
@@ -233,7 +233,7 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
             {error && (
               <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <FiAlertCircle className="text-red-500 flex-shrink-0" />
+                  <FiAlertCircle className="text-red-500 shrink-0" />
                   <p className="text-red-700 text-sm">{error}</p>
                 </div>
               </div>
@@ -244,19 +244,19 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
               <h5 className="font-semibold text-gray-800 mb-3">What you'll get:</h5>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex items-center gap-3">
-                  <FiCheck className="text-green-500 flex-shrink-0" />
+                  <FiCheck className="text-green-500 shrink-0" />
                   <span>Full lifetime access</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <FiCheck className="text-green-500 flex-shrink-0" />
+                  <FiCheck className="text-green-500 shrink-0" />
                   <span>Certificate of completion</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <FiCheck className="text-green-500 flex-shrink-0" />
+                  <FiCheck className="text-green-500 shrink-0" />
                   <span>Access on mobile and TV</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <FiCheck className="text-green-500 flex-shrink-0" />
+                  <FiCheck className="text-green-500 shrink-0" />
                   <span>30-day money-back guarantee</span>
                 </div>
               </div>
@@ -267,7 +267,7 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
               <button
                 onClick={handleEnroll}
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                className="w-full bg-linear-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
               >
                 {loading ? (
                   <>

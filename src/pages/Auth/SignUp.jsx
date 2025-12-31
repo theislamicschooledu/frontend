@@ -101,7 +101,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans flex items-center justify-center py-24 px-4">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans flex items-center justify-center py-24 px-4">
       <div className="max-w-5xl w-full flex flex-col lg:flex-row rounded-3xl overflow-hidden shadow-2xl">
         {/* Left Side - Form */}
         <motion.div
@@ -347,7 +347,7 @@ const SignUp = () => {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {loading ? "Progressing..." : "Create Account"}
             </motion.button>
@@ -368,7 +368,7 @@ const SignUp = () => {
 
         {/* Right Side - Illustration */}
         <motion.div
-          className="w-full lg:w-1/2 bg-gradient-to-br from-green-600 to-emerald-500 text-white p-12 flex flex-col justify-center relative"
+          className="w-full lg:w-1/2 bg-linear-to-br from-green-600 to-emerald-500 text-white p-12 flex flex-col justify-center relative"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}

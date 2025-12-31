@@ -114,7 +114,7 @@ export default function ChangePassword() {
             whileTap={{ scale: 0.98 }}
             onClick={handleVerifyOld}
             disabled={localLoading}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {localLoading ? "Verifying..." : "Verify old password"}
           </motion.button>
@@ -160,7 +160,7 @@ export default function ChangePassword() {
             whileTap={{ scale: 0.98 }}
             onClick={handleChangePassword}
             disabled={localLoading}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {localLoading ? "Changing..." : "Change password"}
           </motion.button>

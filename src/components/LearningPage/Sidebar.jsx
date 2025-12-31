@@ -34,7 +34,7 @@ const Sidebar = ({
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -40, opacity: 0 }}
       transition={{ duration: 0.18 }}
-      className="w-80 flex-shrink-0 bg-gray-800/60 rounded-2xl p-4 border border-gray-700/50 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)]"
+      className="w-80 shrink-0 bg-gray-800/60 rounded-2xl p-4 border border-gray-700/50 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)]"
     >
       <div className="flex items-center gap-3 mb-4">
         {course.thumbnail ? (
@@ -44,7 +44,7 @@ const Sidebar = ({
             className="w-12 h-12 rounded-xl object-cover shadow-md"
           />
         ) : (
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-linear-to-r from-blue-500 to-purple-600 flex items-center justify-center">
             <FiBook className="text-white" />
           </div>
         )}
@@ -111,7 +111,7 @@ const Sidebar = ({
                 disabled={!hasVideo}
                 className={`w-full text-left p-3 rounded-xl flex items-start gap-3 transition group ${
                   isCurrent
-                    ? "bg-gradient-to-r from-blue-600/20 to-transparent border border-blue-500/20 shadow-sm"
+                    ? "bg-linear-to-r from-blue-600/20 to-transparent border border-blue-500/20 shadow-sm"
                     : "bg-gray-800/40 hover:bg-gray-700/40"
                 } ${
                   !hasVideo ? "opacity-60 cursor-not-allowed" : ""
@@ -173,7 +173,7 @@ const Sidebar = ({
         
         <button
           onClick={() => navigate("/my-courses")}
-          className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-gray-100 border border-blue-500/30"
+          className="w-full px-4 py-2 rounded-xl bg-linear-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-gray-100 border border-blue-500/30"
         >
           <div className="flex items-center justify-center gap-2">
             <FiHome /> Back to Courses

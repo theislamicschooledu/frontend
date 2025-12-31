@@ -69,35 +69,35 @@ const TeacherDashboard = () => {
       value: totalStudent,
       icon: FiUsers,
       color: "from-blue-500 to-cyan-500",
-      bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50",
+      bgColor: "bg-linear-to-br from-blue-50 to-cyan-50",
     },
     {
       title: "Total Courses",
       value: totalCourses,
       icon: FiBook,
       color: "from-green-500 to-emerald-500",
-      bgColor: "bg-gradient-to-br from-green-50 to-emerald-50",
+      bgColor: "bg-linear-to-br from-green-50 to-emerald-50",
     },
     {
       title: "Active Teachers",
       value: totalTeacher,
       icon: FiUserCheck,
       color: "from-purple-500 to-fuchsia-500",
-      bgColor: "bg-gradient-to-br from-purple-50 to-fuchsia-50",
+      bgColor: "bg-linear-to-br from-purple-50 to-fuchsia-50",
     },
     {
       title: "Total Blogs",
       value: totalBlogs,
       icon: ImBlog,
       color: "from-amber-500 to-orange-500",
-      bgColor: "bg-gradient-to-br from-amber-50 to-orange-50",
+      bgColor: "bg-linear-to-br from-amber-50 to-orange-50",
     },
     {
       title: "Total Questions",
       value: totalBlogs,
       icon: MdOutlineQuestionMark,
       color: "from-rose-500 to-pink-500",
-      bgColor: "bg-gradient-to-br from-rose-50 to-pink-50",
+      bgColor: "bg-linear-to-br from-rose-50 to-pink-50",
     },
   ];
 
@@ -149,14 +149,14 @@ const TeacherDashboard = () => {
                   </h3>
                 </div>
                 <div
-                  className={`p-3 rounded-xl bg-gradient-to-r ${stat.color} text-white shadow-md`}
+                  className={`p-3 rounded-xl bg-linear-to-r ${stat.color} text-white shadow-md`}
                 >
                   <stat.icon size={24} />
                 </div>
               </div>
             </div>
             <div
-              className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.color}`}
+              className={`absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r ${stat.color}`}
             ></div>
           </motion.div>
         ))}
@@ -212,7 +212,7 @@ const TeacherDashboard = () => {
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
                     statusColors[blog.status] || statusColors.default
-                  } flex-shrink-0 ml-2`}
+                  } shrink-0 ml-2`}
                 >
                   {blog.status}
                 </span>
@@ -266,7 +266,7 @@ const TeacherDashboard = () => {
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
                     statusColors[question.status] || statusColors.default
-                  } flex-shrink-0 ml-3`}
+                  } shrink-0 ml-3`}
                 >
                   {question.status}
                 </span>
@@ -320,7 +320,7 @@ const TeacherDashboard = () => {
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
                     statusColors[course.status] || statusColors.default
-                  } flex-shrink-0 ml-3`}
+                  } shrink-0 ml-3`}
                 >
                   {course.status}
                 </span>
@@ -351,7 +351,7 @@ const TeacherDashboard = () => {
             <motion.div
               whileHover={{ scale: 1.03, y: -5 }}
               whileTap={{ scale: 0.98 }}
-              className={`relative overflow-hidden bg-gradient-to-r ${card.gradient} text-white rounded-2xl shadow-lg p-6 cursor-pointer group hover:shadow-xl transition-all duration-300`}
+              className={`relative overflow-hidden bg-linear-to-r ${card.gradient} text-white rounded-2xl shadow-lg p-6 cursor-pointer group hover:shadow-xl transition-all duration-300`}
             >
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">

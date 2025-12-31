@@ -195,7 +195,7 @@ const Carousel = () => {
         }
       `}</style>
 
-      <div className="relative h-[350px] sm:h-[500px] md:h-[550px] lg:h-[600px] rounded-3xl overflow-visible perspective-1000">
+      <div className="relative h-87.5 sm:h-125 md:h-137.5 lg:h-150 rounded-3xl overflow-visible perspective-1000">
         <div className="relative w-full h-full flex items-center justify-center">
           {courses?.map((course, index) => (
             <div
@@ -227,7 +227,7 @@ const Carousel = () => {
               onClick={(e) => handleSlideClick(index, course._id, e)}
             >
               {/* Course Card */}
-              <div className={`w-full h-full bg-gradient-to-br ${getGradientClass(index)} text-white relative overflow-hidden`}>
+              <div className={`w-full h-full bg-linear-to-br ${getGradientClass(index)} text-white relative overflow-hidden`}>
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
@@ -263,7 +263,7 @@ const Carousel = () => {
                     </div>
 
                     {/* Student Count */}
-                    <div className="text-right ml-4 flex-shrink-0">
+                    <div className="text-right ml-4 shrink-0">
                       <div className="glass-effect px-2 sm:px-3 py-1 sm:py-2 rounded-xl text-center">
                         <div className="sm:text-sm md:text-2xl font-bold">{course.studentCount || 0}</div>
                         <div className="text-xs opacity-90">শিক্ষার্থী</div>
@@ -272,9 +272,9 @@ const Carousel = () => {
                   </div>
 
                   {/* Course Stats */}
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 flex-shrink-0">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 shrink-0">
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                         <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -286,7 +286,7 @@ const Carousel = () => {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                         <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -298,7 +298,7 @@ const Carousel = () => {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                         <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -310,7 +310,7 @@ const Carousel = () => {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                         <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
@@ -335,13 +335,13 @@ const Carousel = () => {
                     {index === currentIndex ? (
                       <Link
                         to={`/course/${course._id}`}
-                        className="bg-white text-gray-900 hover:bg-gray-100 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 flex-shrink-0 ml-2"
+                        className="bg-white text-gray-900 hover:bg-gray-100 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 shrink-0 ml-2"
                         onClick={(e) => e.stopPropagation()}
                       >
                         এনরোল করুন
                       </Link>
                     ) : (
-                      <button className="bg-white/50 text-gray-700 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base opacity-50 cursor-default flex-shrink-0 ml-2">
+                      <button className="bg-white/50 text-gray-700 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold text-sm sm:text-base opacity-50 cursor-default shrink-0 ml-2">
                         বিস্তারিত
                       </button>
                     )}

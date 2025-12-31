@@ -27,7 +27,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
         {/* Back Button */}
         <motion.div
@@ -53,7 +53,7 @@ const ForgotPassword = () => {
           className="bg-white rounded-3xl shadow-2xl overflow-hidden"
         >
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-green-600 to-emerald-500 text-white p-8 text-center">
+          <div className="bg-linear-to-r from-green-600 to-emerald-500 text-white p-8 text-center">
             <div className="w-20 h-20 mx-auto mb-6 bg-white/20 rounded-full flex items-center justify-center">
               <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-green-600 text-2xl">
                 <FiLock />
@@ -107,7 +107,7 @@ const ForgotPassword = () => {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md"
+                  className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md"
                 >
                   {loading ? "Sending..." : "Send Reset Link"}
                 </motion.button>
@@ -187,7 +187,7 @@ const ForgotPassword = () => {
           className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200"
         >
           <div className="flex items-start">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                 <FiLock className="text-green-600 text-xs" />
               </div>

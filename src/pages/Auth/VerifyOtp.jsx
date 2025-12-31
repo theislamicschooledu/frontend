@@ -56,7 +56,7 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 flex items-center justify-center py-24 px-4">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 flex items-center justify-center py-24 px-4">
       <motion.div
         className="w-full max-w-md bg-white p-8 rounded-3xl shadow-2xl"
         initial={{ opacity: 0, y: 20 }}
@@ -120,7 +120,7 @@ const VerifyOtp = () => {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Verifying..." : "Verify Account"}
           </motion.button>

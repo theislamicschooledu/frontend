@@ -155,7 +155,7 @@ const MyCourses = () => {
                   {/* ACTION */}
                   <Link
                     to={`/learn/${item.course._id}`}
-                    className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow hover:bg-blue-700 transition"
+                    className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow hover:bg-blue-700 transition"
                   >
                     <FiPlay />
                     {item.progress > 0 ? "Continue" : "Start Learning"}

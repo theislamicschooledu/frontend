@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const Heading = ({ text1, text2 }) => {
   return (
     <motion.div
-      className="text-center my-8 md:my-16"
+      className="text-center font-hind my-8 md:my-16"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}

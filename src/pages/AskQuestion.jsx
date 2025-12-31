@@ -77,9 +77,9 @@ const AskQuestion = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
       {/* Header */}
-      <div className="pt-24 bg-gradient-to-r from-green-600 to-emerald-500 text-white py-12 px-6">
+      <div className="pt-24 bg-linear-to-r from-green-600 to-emerald-500 text-white py-12 px-6">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -181,7 +181,7 @@ const AskQuestion = () => {
                       </label>
                       <div
                         ref={editorRef}
-                        className="bg-gray-100 rounded-xl min-h-[300px] p-3"
+                        className="bg-gray-100 rounded-xl min-h-75 p-3"
                       ></div>
                     </div>
 
@@ -191,7 +191,7 @@ const AskQuestion = () => {
                       disabled={submitting}
                       whileHover={{ scale: submitting ? 1 : 1.02 }}
                       whileTap={{ scale: submitting ? 1 : 0.98 }}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
+                      className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
                     >
                       {submitting ? (
                         <>
@@ -225,21 +225,21 @@ const AskQuestion = () => {
                 </h3>
                 <ul className="space-y-3 text-sm text-gray-600">
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
                     <span>
                       Be specific about your situation and child's age
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
                     <span>Focus on Islamic parenting principles</span>
                   </li>
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
                     <span>Be respectful in your wording</span>
                   </li>
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
                     <span>Include relevant context for better advice</span>
                   </li>
                 </ul>
@@ -247,7 +247,7 @@ const AskQuestion = () => {
 
               {/* Tips */}
               <motion.div
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 mb-8"
+                className="bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 mb-8"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
@@ -257,17 +257,17 @@ const AskQuestion = () => {
                 </h3>
                 <div className="space-y-3 text-green-100 text-sm">
                   <div className="flex items-start">
-                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
                     <span>
                       Mention your child's age for age-appropriate advice
                     </span>
                   </div>
                   <div className="flex items-start">
-                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
                     <span>Describe what you've already tried</span>
                   </div>
                   <div className="flex items-start">
-                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
                     <span>Ask about specific Islamic rulings if needed</span>
                   </div>
                 </div>

@@ -7,10 +7,12 @@ import api from "../utils/axios";
 
 const DirectorVoice = () => {
   const [directorVoice, setDirectorVoice] = useState(null);
+  const director = "মোঃ মুজাহিদুল ইসলাম"
   const fetchVoice = async () => {
     try {
       const res = await api.get("/documentation");
-      setDirectorVoice(res?.data?.data[0]?.sections?.directorVoice);
+      
+      setDirectorVoice(res?.data?.data?.principalVoice);
     } catch (error) {
       console.error(error);
     }
@@ -20,10 +22,20 @@ const DirectorVoice = () => {
     fetchVoice();
   }, []);
 
+  if(!directorVoice) {
+    return (
+      <section id="director-message"
+      className="relative font-hind pt-16 bg-linear-to-b from-white via-blue-50/40 to-blue-100/60 overflow-hidden"
+    >
+      <p className="text-xl"></p>
+    </section>
+    )
+  }
+
   return (
     <section
       id="director-message"
-      className="relative pb-16 pt-16 px-6 bg-gradient-to-b from-white via-blue-50/40 to-blue-100/60 overflow-hidden"
+      className="relative font-hind pb-16 pt-16 px-6 bg-linear-to-b from-white via-blue-50/40 to-blue-100/60 overflow-hidden"
     >
       {/* Floating Background Icons */}
       <div className="absolute inset-0 pointer-events-none opacity-10">
@@ -76,8 +88,8 @@ const DirectorVoice = () => {
             viewport={{ once: true }}
           >
             <div className="relative">
-              <div className="w-60 h-60 md:w-72 md:h-72 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden">
-                <img src={directorVoice?.image} alt={directorVoice?.designation} className="w-full" />
+              <div className="w-60 h-60 md:w-72 md:h-72 rounded-full bg-linear-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden">
+                <img src={directorVoice?.photo} alt={directorVoice?.title} className="w-full" />
               </div>
 
               {/* Floating Name Box */}
@@ -87,8 +99,8 @@ const DirectorVoice = () => {
                 transition={{ duration: 2.5, repeat: Infinity }}
               >
                 <div className="text-center">
-                  <h3 className="font-bold text-green-700">{directorVoice?.name}</h3>
-                  <p className="text-sm text-gray-600">{directorVoice?.designation}</p>
+                  <h3 className="font-bold text-green-700">{director}</h3>
+                  <p className="text-sm text-gray-600">{directorVoice?.title}</p>
                 </div>
               </motion.div>
             </div>

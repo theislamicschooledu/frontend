@@ -244,7 +244,7 @@ const CourseDetailsTeacher = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-r from-green-100 to-emerald-100 flex items-center justify-center">
+                <div className="w-full h-full bg-linear-to-r from-green-100 to-emerald-100 flex items-center justify-center">
                   <FiBookOpen className="text-4xl text-gray-400" />
                 </div>
               )}
@@ -283,7 +283,7 @@ const CourseDetailsTeacher = () => {
                     transition={{ delay: index * 0.1 }}
                     className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200"
                   >
-                    <div className="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                    <div className="shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                       <FiCheck className="text-green-600 text-sm" />
                     </div>
                     <span className="text-gray-700 font-medium">{feature}</span>

@@ -39,7 +39,7 @@ const NavBar = () => {
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-gradient-to-r from-indigo-600 to-blue-600 shadow-lg"
+          ? "bg-linear-to-r from-indigo-600 to-blue-600 shadow-lg"
           : "bg-white/70 backdrop-blur-md backdrop-saturate-150 shadow-sm"
       }`}
     >
@@ -149,7 +149,7 @@ const NavBar = () => {
                 className={`px-4 py-2 rounded-full font-medium transition text-sm lg:text-base ${
                   scrolled
                     ? "bg-white text-blue-600 hover:bg-blue-50 hover:shadow-md"
-                    : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:opacity-90 hover:shadow-lg"
+                    : "bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:opacity-90 hover:shadow-lg"
                 }`}
               >
                 লগ আউট
@@ -161,7 +161,7 @@ const NavBar = () => {
               className={`px-4 py-2 rounded-full shadow hover:opacity-90 transition text-sm lg:text-base font-semibold ${
                 scrolled
                   ? "bg-white text-blue-600 hover:bg-blue-50"
-                  : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
+                  : "bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
               }`}
             >
               Join Now
@@ -187,7 +187,7 @@ const NavBar = () => {
         <div
           className={`lg:hidden px-4 py-4 space-y-2 font-medium transition-all duration-300 ${
             scrolled
-              ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white"
+              ? "bg-linear-to-r from-indigo-600 to-blue-600 text-white"
               : "bg-white/95 backdrop-blur-md border-t border-gray-200"
           }`}
         >
@@ -244,7 +244,7 @@ const NavBar = () => {
                   className={`w-full px-4 py-3 rounded-lg font-semibold transition ${
                     scrolled
                       ? "bg-white text-blue-600 hover:bg-blue-50"
-                      : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
+                      : "bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
                   }`}
                 >
                   লগ আউট
@@ -257,7 +257,7 @@ const NavBar = () => {
                 className={`block w-full px-4 py-3 rounded-lg text-center font-semibold transition ${
                   scrolled
                     ? "bg-white text-blue-600 hover:bg-blue-50"
-                    : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
+                    : "bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
                 }`}
               >
                 Join Now

@@ -305,7 +305,7 @@ const LearningPage = () => {
     : false;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white pt-16">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white pt-16">
       <Header
         course={course}
         progress={progress}

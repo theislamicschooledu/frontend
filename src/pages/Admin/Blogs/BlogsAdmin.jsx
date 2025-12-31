@@ -272,7 +272,7 @@ const BlogsAdmin = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-r from-green-100 to-emerald-100" />
+                  <div className="w-full h-full bg-linear-to-r from-green-100 to-emerald-100" />
                 )}
                 {blog.featured && (
                   <div className="absolute top-4 left-4 px-3 py-1 bg-amber-500 text-white rounded-full text-xs font-medium">

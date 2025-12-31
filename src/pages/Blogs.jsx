@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import {
   FiUser,
@@ -7,45 +6,51 @@ import {
   FiBookOpen,
   FiCalendar,
   FiArrowUpRight,
+  FiInbox,
+  FiLoader
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
 import { Link } from "react-router";
 
 const Blogs = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [blogPosts, setBlogPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const fetchBlogs = async () => {
-    setLoading(true);
     try {
       const res = await api.get("/blogs/publishedBlog");
       setBlogPosts(res.data.blogs);
     } catch (error) {
       toast.error(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchBlogCategory = async () => {
-    setLoading(true);
     try {
       const res = await api.get("/blogs/blogCategory");
       setCategories(res.data.categories);
     } catch (error) {
       toast.error(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBlogs();
-    fetchBlogCategory();
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([fetchBlogs(), fetchBlogCategory()]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
   }, []);
 
   const categoryCounts = blogPosts.reduce((acc, post) => {
@@ -69,12 +74,138 @@ const Blogs = () => {
     return matchesSearch && matchesCategory;
   });
 
-  if (loading) return <p className="text-center py-10">Loading...</p>;
+  // Custom Loader Component
+  const LoadingSpinner = () => (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-sky-50 to-green-50">
+      <div className="relative">
+        <motion.div
+          className="w-20 h-20 border-4 border-green-200 rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        >
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-green-500 border-r-green-500 rounded-full"></div>
+        </motion.div>
+        <div className="mt-6 text-center">
+          <motion.h3 
+            className="text-xl font-semibold text-gray-700 mb-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            Loading Articles
+          </motion.h3>
+          <motion.p 
+            className="text-gray-500"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            Please wait while we fetch the latest content...
+          </motion.p>
+          <motion.div 
+            className="flex justify-center space-x-1 mt-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="w-2 h-2 bg-green-500 rounded-full"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ 
+                  duration: 0.6, 
+                  repeat: Infinity, 
+                  delay: i * 0.2 
+                }}
+              />
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // No Data Component
+  const NoDataComponent = () => (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-sky-50 to-green-50 px-6">
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center"
+      >
+        <div className="mb-6">
+          <div className="relative inline-block">
+            <FiInbox className="text-6xl text-gray-300 mx-auto" />
+            <motion.div
+              className="absolute -top-2 -right-2"
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <FiLoader className="text-2xl text-green-500" />
+            </motion.div>
+          </div>
+        </div>
+        
+        <motion.h2 
+          className="text-2xl font-bold text-gray-800 mb-3"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          No Articles Found
+        </motion.h2>
+        
+        <motion.p 
+          className="text-gray-600 mb-6"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {searchTerm || selectedCategory 
+            ? "No articles match your search criteria. Try different keywords or categories."
+            : "There are no published articles available at the moment. Please check back later."}
+        </motion.p>
+        
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="space-y-4"
+        >
+          {(searchTerm || selectedCategory) && (
+            <>
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory(null);
+                }}
+                className="w-full bg-green-500 text-white py-3 rounded-xl font-medium hover:bg-green-600 transition-colors duration-300"
+              >
+                Clear Filters
+              </button>
+              <p className="text-sm text-gray-500">
+                Showing results for: 
+                {searchTerm && ` Search: "${searchTerm}"`}
+                {selectedCategory && categories.find(c => c._id === selectedCategory)?.name && 
+                  ` Category: "${categories.find(c => c._id === selectedCategory)?.name}"`}
+              </p>
+            </>
+          )}
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+
+  if (loading) return <LoadingSpinner />;
+  
+  if (!loading && blogPosts.length === 0) return <NoDataComponent />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
-     {/* Header */}
-      <div className="pt-24 flex flex-col md:flex-row justify-between items-center bg-gradient-to-r from-green-600 to-emerald-500 text-white py-6 px-6">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
+      {/* Header */}
+      <div className="pt-24 flex flex-col md:flex-row justify-between items-center bg-linear-to-r from-green-600 to-emerald-500 text-white py-6 px-6">
         <motion.h1
           className="text-2xl md:text-4xl font-extrabold mb-6 text-center"
           initial={{ opacity: 0, y: 20 }}
@@ -114,12 +245,32 @@ const Blogs = () => {
                 <h2 className="text-2xl font-bold text-gray-800">
                   Latest Articles
                 </h2>
+                {filteredBlogs.length > 0 && (
+                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    {filteredBlogs.length} {filteredBlogs.length === 1 ? 'article' : 'articles'} found
+                  </span>
+                )}
               </div>
 
               {filteredBlogs.length === 0 ? (
-                <p className="text-gray-500 text-center py-10">
-                  No articles found.
-                </p>
+                <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                  <FiInbox className="text-5xl text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                    No Matching Articles
+                  </h3>
+                  <p className="text-gray-500 mb-6">
+                    Try adjusting your search or filter to find what you're looking for.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSelectedCategory(null);
+                    }}
+                    className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-8">
                   {filteredBlogs.map((post, index) => (
@@ -240,7 +391,7 @@ const Blogs = () => {
               </motion.div>
 
               <motion.div
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 text-center"
+                className="bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 text-center"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}

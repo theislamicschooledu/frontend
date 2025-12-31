@@ -122,12 +122,12 @@ const AddCourseCategory = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex-1 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-6 border border-amber-100 shadow-md"
+          className="flex-1 bg-linear-to-br from-orange-50 to-amber-50 rounded-2xl p-6 border border-amber-100 shadow-md"
         >
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">
             All Categories
           </h2>
-          <div className="space-y-3 max-h-[400px] overflow-x-hidden overflow-y-auto">
+          <div className="space-y-3 max-h-100 overflow-x-hidden overflow-y-auto">
             {allCategory.length === 0 ? (
               <p className="text-gray-500">No categories found.</p>
             ) : (

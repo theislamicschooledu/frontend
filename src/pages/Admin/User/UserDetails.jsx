@@ -213,7 +213,7 @@ const UserDetails = () => {
         initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6 rounded-2xl shadow-lg mb-6 flex justify-between items-center"
+        className="bg-linear-to-r from-amber-500 to-orange-500 text-white p-6 rounded-2xl shadow-lg mb-6 flex justify-between items-center"
       >
         <div>
           <h2 className="text-2xl font-bold">User Details</h2>
@@ -283,7 +283,7 @@ const UserDetails = () => {
         {/* Activity + Actions */}
         <div className="lg:col-span-2 space-y-6">
           {/* Activity Card */}
-          <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-amber-100 shadow-sm">
+          <div className="bg-linear-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-amber-100 shadow-sm">
             <h4 className="font-semibold text-gray-800 mb-4 text-lg">
               Activity
             </h4>
@@ -316,7 +316,7 @@ const UserDetails = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 rounded-2xl p-6 border border-fuchsia-100 shadow-sm">
+          <div className="bg-linear-to-r from-purple-50 to-fuchsia-50 rounded-2xl p-6 border border-fuchsia-100 shadow-sm">
             <h4 className="font-semibold text-gray-800 mb-4 text-lg">
               Quick Actions
             </h4>

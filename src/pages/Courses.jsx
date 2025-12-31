@@ -131,7 +131,7 @@ const Courses = () => {
 
   if (loading && courses.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-green-50 flex items-center justify-center font-hind">
+      <div className="min-h-screen bg-linear-to-br from-sky-50 to-green-50 flex items-center justify-center font-hind">
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
@@ -152,7 +152,7 @@ const Courses = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans overflow-x-hidden font-hind">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans overflow-x-hidden font-hind">
       {/* Enhanced animated background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         {[...Array(8)].map((_, i) => (
@@ -184,7 +184,7 @@ const Courses = () => {
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="relative pt-28 px-4 bg-gradient-to-r from-emerald-600 via-green-500 to-teal-500 text-white pb-32 mb-8 overflow-hidden rounded-b-4xl"
+        className="relative pt-28 px-4 bg-linear-to-r from-emerald-600 via-green-500 to-teal-500 text-white pb-32 mb-8 overflow-hidden rounded-b-4xl"
       >
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10">
@@ -269,7 +269,7 @@ const Courses = () => {
                 whileTap={{ scale: 0.95 }}
                 className={`px-5 py-3 rounded-2xl font-semibold transition-all duration-300 flex items-center gap-2 border ${
                   selectedCategory === "all"
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg border-transparent"
+                    ? "bg-linear-to-r from-blue-500 to-purple-500 text-white shadow-lg border-transparent"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
                 }`}
               >
@@ -285,7 +285,7 @@ const Courses = () => {
                   whileTap={{ scale: 0.95 }}
                   className={`px-5 py-3 rounded-2xl font-semibold transition-all duration-300 border ${
                     selectedCategory === category._id
-                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg border-transparent"
+                      ? "bg-linear-to-r from-blue-500 to-purple-500 text-white shadow-lg border-transparent"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
                   }`}
                 >
@@ -342,7 +342,7 @@ const Courses = () => {
                   animate={{ scale: 1 }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-2xl hover:shadow-lg transition-all duration-300 font-semibold shadow-md"
+                  className="flex items-center gap-2 px-5 py-3 bg-linear-to-r from-orange-500 to-pink-500 text-white rounded-2xl hover:shadow-lg transition-all duration-300 font-semibold shadow-md"
                 >
                   <FiX size={18} />
                   Clear Filters
@@ -384,7 +384,7 @@ const Courses = () => {
                     onClick={clearFilters}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-semibold shadow-lg"
+                    className="px-8 py-4 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-semibold shadow-lg"
                   >
                     Show All Courses
                   </motion.button>
@@ -436,7 +436,7 @@ const Courses = () => {
         whileHover={{ scale: 1.1, rotate: 5 }}
         whileTap={{ scale: 0.9 }}
       >
-        <button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center group">
+        <button className="bg-linear-to-r from-green-500 to-emerald-600 text-white p-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center group">
           <FiTrendingUp
             className="group-hover:scale-110 transition-transform duration-300"
             size={24}

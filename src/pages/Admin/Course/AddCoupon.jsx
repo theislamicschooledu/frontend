@@ -345,7 +345,7 @@ const AddCoupon = () => {
                   Discount Preview
                 </h2>
                 
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6">
+                <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-xl p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Original Price</p>

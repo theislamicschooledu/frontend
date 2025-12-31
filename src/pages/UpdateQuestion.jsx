@@ -189,7 +189,7 @@ const UpdateQuestion = () => {
                       </h2>
                       <div
                         ref={editorRef}
-                        className="bg-gray-100 rounded-xl min-h-[250px] p-3"
+                        className="bg-gray-100 rounded-xl min-h-62.5 p-3"
                       ></div>
                     </motion.div>
 
@@ -226,19 +226,19 @@ const UpdateQuestion = () => {
               </h3>
               <ul className="space-y-3 text-sm text-gray-600">
                 <li className="flex items-start">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
                   <span>Be specific about your situation and child's age</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
                   <span>Focus on Islamic parenting principles</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
                   <span>Be respectful in your wording</span>
                 </li>
                 <li className="flex items-start">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
                   <span>Include relevant context for better advice</span>
                 </li>
               </ul>
@@ -246,7 +246,7 @@ const UpdateQuestion = () => {
 
             {/* Tips */}
             <motion.div
-              className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 mb-8"
+              className="bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 mb-8"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -256,17 +256,17 @@ const UpdateQuestion = () => {
               </h3>
               <div className="space-y-3 text-green-100 text-sm">
                 <div className="flex items-start">
-                  <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
                   <span>
                     Mention your child's age for age-appropriate advice
                   </span>
                 </div>
                 <div className="flex items-start">
-                  <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
                   <span>Describe what you've already tried</span>
                 </div>
                 <div className="flex items-start">
-                  <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
                   <span>Ask about specific Islamic rulings if needed</span>
                 </div>
               </div>

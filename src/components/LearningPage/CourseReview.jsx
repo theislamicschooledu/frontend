@@ -197,7 +197,7 @@ const CourseReview = ({ courseId, userId }) => {
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl mb-6">
         <div className="flex flex-col md:flex-row justify-between items-center md:items-center gap-6">
           <div className="flex-1">
-            <h3 className="text-2xl text-center font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h3 className="text-2xl text-center font-bold bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Course Rating
             </h3>
             <div className="flex items-center justify-between gap-4 mt-2">
@@ -218,7 +218,7 @@ const CourseReview = ({ courseId, userId }) => {
                     <FiStar className="text-yellow-400" />
                     <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full"
+                        className="h-full bg-linear-to-r from-yellow-400 to-orange-400 rounded-full"
                         style={{ width: `${calculateRatingPercentage(star)}%` }}
                       />
                     </div>
@@ -238,7 +238,7 @@ const CourseReview = ({ courseId, userId }) => {
             </p>
             <button
               onClick={() => setShowReviewModal(true)}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+              className="w-full bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
             >
               {myReview ? (
                 <>
@@ -292,7 +292,7 @@ const CourseReview = ({ courseId, userId }) => {
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                      <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
                         {review.user?.name?.charAt(0) || "U"}
                       </div>
                       <div>
@@ -311,7 +311,7 @@ const CourseReview = ({ courseId, userId }) => {
                   {review.comment && (
                     <div className="mt-3">
                       <div className="flex items-start gap-2">
-                        <FiMessageSquare className="text-gray-500 mt-1 flex-shrink-0" />
+                        <FiMessageSquare className="text-gray-500 mt-1 shrink-0" />
                         <p className="text-gray-300 leading-relaxed">
                           {review.comment}
                         </p>
@@ -375,7 +375,7 @@ const CourseReview = ({ courseId, userId }) => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 w-full max-w-md border border-gray-700/50 shadow-2xl"
+              className="bg-linear-to-br from-gray-800 to-gray-900 rounded-2xl p-6 w-full max-w-md border border-gray-700/50 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
@@ -448,7 +448,7 @@ const CourseReview = ({ courseId, userId }) => {
                   <button
                     type="submit"
                     disabled={!formData.rating || submitting}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
+                    className="flex-1 py-3 px-4 bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
                   >
                     {submitting ? (
                       <>
@@ -480,7 +480,7 @@ const CourseReview = ({ courseId, userId }) => {
           </p>
           <button
             onClick={() => setShowReviewModal(true)}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-xl inline-flex items-center gap-2 transition-all duration-300 transform hover:scale-[1.02]"
+            className="bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-xl inline-flex items-center gap-2 transition-all duration-300 transform hover:scale-[1.02]"
           >
             <FiStar /> Be the First Reviewer
           </button>

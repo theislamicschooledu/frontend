@@ -50,7 +50,7 @@ const Question = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 flex items-center justify-center">
         <p className="text-gray-600">Loading...</p>
       </div>
     );
@@ -58,16 +58,16 @@ const Question = () => {
 
   if (!question) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 flex items-center justify-center">
         <p className="text-gray-600">Question not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
       {/* Header */}
-      <div className="pt-24 bg-gradient-to-r from-green-600 to-emerald-500 text-white py-12 px-6">
+      <div className="pt-24 bg-linear-to-r from-green-600 to-emerald-500 text-white py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -202,7 +202,7 @@ const Question = () => {
                   About the Author
                 </h3>
                 <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                  <div className="w-12 h-12 bg-linear-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
                     {question.askedBy?.name?.charAt(0) || "U"}
                   </div>
                   <div>
@@ -265,7 +265,7 @@ const Question = () => {
 
               {/* Ask Question */}
               <motion.div
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 text-center"
+                className="bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 text-center"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}

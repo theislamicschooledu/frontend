@@ -167,7 +167,7 @@ const CourseDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading course details...</p>
@@ -178,7 +178,7 @@ const CourseDetails = () => {
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <FiBookOpen className="text-6xl text-gray-300 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-gray-600 mb-2">
@@ -186,7 +186,7 @@ const CourseDetails = () => {
           </h3>
           <button
             onClick={() => navigate("/courses")}
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:shadow-lg transition-all"
+            className="px-6 py-3 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:shadow-lg transition-all"
           >
             Browse Courses
           </button>
@@ -196,9 +196,9 @@ const CourseDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50">
       {/* Course Header */}
-      <div className="pt-16 sm:pt-20 bg-gradient-to-br from-blue-600 to-purple-600 text-white relative overflow-hidden">
+      <div className="pt-16 sm:pt-20 bg-linear-to-br from-blue-600 to-purple-600 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div
             className="absolute inset-0"
@@ -313,7 +313,7 @@ const CourseDetails = () => {
                       alt={course.title}
                       className="w-full h-32 sm:h-40 object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
                     <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
                       <button
                         onClick={toggleWishlist}
@@ -328,7 +328,7 @@ const CourseDetails = () => {
                     </div>
                   </>
                 ) : (
-                  <div className="w-full h-32 sm:h-40 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                  <div className="w-full h-32 sm:h-40 bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center">
                     <FiBookOpen className="text-3xl sm:text-4xl text-white" />
                   </div>
                 )}
@@ -347,7 +347,7 @@ const CourseDetails = () => {
                 )}
               </div>
 
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-center mb-3 sm:mb-4">
+              <div className="bg-linear-to-r from-amber-500 to-orange-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-center mb-3 sm:mb-4">
                 <div className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
                   <FaRegClock className="text-xs sm:text-sm" />
                   {getTimeRemaining(course.enrollmentEnd)}
@@ -358,7 +358,7 @@ const CourseDetails = () => {
                 {enrolled ? (
                   <div className="space-y-2 sm:space-y-3">
                     <button
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+                      className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
                       onClick={() => navigate(`/learn/${course._id}`)}
                     >
                       <FiPlay className="text-sm sm:text-base" />
@@ -372,7 +372,7 @@ const CourseDetails = () => {
                   <div className="space-y-2 sm:space-y-3">
                     <button
                       onClick={handleEnrollClick}
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105 duration-200 text-sm sm:text-base"
+                      className="w-full bg-linear-to-r from-blue-500 to-purple-500 text-white py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105 duration-200 text-sm sm:text-base"
                     >
                       Enroll Now
                     </button>
@@ -450,7 +450,7 @@ const CourseDetails = () => {
                       onClick={() => setActiveTab(tab.id)}
                       className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
                         activeTab === tab.id
-                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md sm:shadow-lg shadow-blue-500/25"
+                          ? "bg-linear-to-r from-blue-500 to-purple-500 text-white shadow-md sm:shadow-lg shadow-blue-500/25"
                           : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                       }`}
                     >
@@ -486,7 +486,7 @@ const CourseDetails = () => {
                         />
                       </div>
 
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8">
+                      <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8">
                         <h4 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
                           <FiAward className="text-blue-600 text-base sm:text-xl" />
                           What You'll Learn
@@ -500,7 +500,7 @@ const CourseDetails = () => {
                               transition={{ delay: index * 0.1 }}
                               className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl shadow-sm"
                             >
-                              <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-green-500 rounded-full flex items-center justify-center shrink-0">
                                 <FiCheck className="text-white text-xs sm:text-sm" />
                               </div>
                               <span className="text-gray-700 font-medium text-sm sm:text-base">
@@ -531,7 +531,7 @@ const CourseDetails = () => {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: index * 0.1 }}
-                              className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6"
+                              className="bg-linear-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6"
                             >
                               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
                                 <div className="relative">
@@ -652,7 +652,7 @@ const CourseDetails = () => {
                             </motion.div>
                           ))
                         ) : (
-                          <div className="text-center py-8 sm:py-12 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl">
+                          <div className="text-center py-8 sm:py-12 bg-linear-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl">
                             <FiStar className="text-4xl sm:text-6xl text-gray-300 mx-auto mb-3 sm:mb-4" />
                             <h4 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">
                               No reviews yet
@@ -751,7 +751,7 @@ const CourseDetails = () => {
                             </motion.div>
                           ))
                         ) : (
-                          <div className="text-center py-8 sm:py-12 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl">
+                          <div className="text-center py-8 sm:py-12 bg-linear-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl">
                             <FiBook className="text-4xl sm:text-6xl text-gray-300 mx-auto mb-3 sm:mb-4" />
                             <p className="text-gray-500 text-sm sm:text-base">
                               No lectures added yet

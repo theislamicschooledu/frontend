@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-b from-emerald-700 to-green-900 text-white py-12 px-6 md:px-20">
+    <footer className="bg-linear-to-b from-emerald-700 to-green-900 text-white py-12 px-6 md:px-20">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}

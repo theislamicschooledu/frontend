@@ -12,7 +12,7 @@ const VideoPlayer = ({
 }) => {
   if (!lecture || !lecture.videoUrl) {
     return (
-      <div className="flex items-center justify-center h-64 lg:h-[60vh] bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl">
+      <div className="flex items-center justify-center h-64 lg:h-[60vh] bg-linear-to-br from-gray-800 to-gray-900 rounded-2xl">
         <div className="text-center text-gray-300">
           <FiYoutube className="mx-auto text-5xl mb-3" />
           <div className="text-lg font-semibold">No Video Available</div>
@@ -28,7 +28,7 @@ const VideoPlayer = ({
 
   if (!embedUrl) {
     return (
-      <div className="flex items-center justify-center h-64 lg:h-[60vh] bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl">
+      <div className="flex items-center justify-center h-64 lg:h-[60vh] bg-linear-to-br from-gray-800 to-gray-900 rounded-2xl">
         <div className="text-center text-gray-300">
           <FiYoutube className="mx-auto text-5xl mb-3" />
           <div className="text-lg font-semibold">Invalid Video URL</div>
@@ -38,7 +38,7 @@ const VideoPlayer = ({
           <div className="flex gap-2 justify-center">
             <button
               onClick={openVideoInNewTab}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+              className="px-4 py-2 rounded-lg bg-linear-to-r from-blue-500 to-purple-600 text-white"
             >
               Open Original
             </button>
@@ -50,7 +50,7 @@ const VideoPlayer = ({
 
   if (videoError) {
     return (
-      <div className="flex items-center justify-center h-64 lg:h-[60vh] bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl">
+      <div className="flex items-center justify-center h-64 lg:h-[60vh] bg-linear-to-br from-gray-800 to-gray-900 rounded-2xl">
         <div className="text-center text-gray-300">
           <FiYoutube className="mx-auto text-5xl mb-3 text-red-400" />
           <div className="text-lg font-semibold">Video Unavailable</div>
@@ -66,7 +66,7 @@ const VideoPlayer = ({
             </button>
             <button
               onClick={openVideoInNewTab}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+              className="px-4 py-2 rounded-lg bg-linear-to-r from-blue-500 to-purple-600 text-white"
             >
               Open in YouTube
             </button>

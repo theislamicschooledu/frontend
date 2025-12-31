@@ -52,7 +52,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans flex items-center justify-center py-24 px-4">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans flex items-center justify-center py-24 px-4">
       <div className="max-w-5xl w-full flex flex-col lg:flex-row rounded-3xl overflow-hidden shadow-2xl">
         <motion.div
           className="w-full lg:w-3/5 bg-white p-8 md:p-12"
@@ -173,7 +173,7 @@ const Login = () => {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {loading ? "Signing In..." : "Sign In"}
             </motion.button>
@@ -194,7 +194,7 @@ const Login = () => {
 
         {/* Right Side - Illustration */}
         <motion.div
-          className="w-full lg:w-2/5 bg-gradient-to-br from-green-600 to-emerald-500 text-white p-8 md:p-12 flex flex-col justify-center relative"
+          className="w-full lg:w-2/5 bg-linear-to-br from-green-600 to-emerald-500 text-white p-8 md:p-12 flex flex-col justify-center relative"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
@@ -226,7 +226,7 @@ const Login = () => {
                 </div>
               </div>
               <div className="absolute -bottom-2 -right-2 bg-white/90 text-green-600 rounded-full p-2 shadow-lg">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-400 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-linear-to-r from-green-500 to-emerald-400 flex items-center justify-center">
                   <span className="text-white font-bold">100%</span>
                 </div>
               </div>

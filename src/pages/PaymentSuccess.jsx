@@ -38,7 +38,7 @@ const PaymentSuccess = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-green-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Verifying your payment...</p>
@@ -48,7 +48,7 @@ const PaymentSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-green-50 to-blue-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -121,11 +121,11 @@ const PaymentSuccess = () => {
                       className="w-full h-48 object-cover rounded-xl"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gradient-to-r from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
+                    <div className="w-full h-48 bg-linear-to-r from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
                       <FiPlay className="text-white text-4xl" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-xl" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent rounded-xl" />
                 </div>
               </div>
             </motion.div>
@@ -135,7 +135,7 @@ const PaymentSuccess = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to={enrollment ? `/learn/${enrollment.course._id}` : "/courses"}
-              className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl font-semibold hover:shadow-lg transition-all"
+              className="flex items-center gap-3 px-8 py-4 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-2xl font-semibold hover:shadow-lg transition-all"
             >
               <FiPlay />
               Start Learning

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import {
   FiUser,
@@ -9,30 +8,29 @@ import {
   FiHeart,
   FiCalendar,
   FiArrowUpRight,
+  FiInbox,
+  FiLoader,
+  FiHelpCircle
 } from "react-icons/fi";
 import { Link } from "react-router";
 import api from "../utils/axios";
 import toast from "react-hot-toast";
 
 const QnA = () => {
-  const [loading, setLoading] = useState(null);
-  const [questions, setQuestions] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [questions, setQuestions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const fetchQuestions = async () => {
-    setLoading(true);
     try {
       const res = await api.get("/qna/publishQuestion");
       if (res.data.success) {
         setQuestions(res.data.questions);
-        setLoading(false);
       }
     } catch (error) {
       toast.error(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -46,8 +44,18 @@ const QnA = () => {
   };
 
   useEffect(() => {
-    fetchQuestions();
-    fetchCategories();
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([fetchQuestions(), fetchCategories()]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
   }, []);
 
   const categoryCounts = questions?.reduce((acc, post) => {
@@ -71,12 +79,146 @@ const QnA = () => {
     return matchesSearch && matchesCategory;
   });
 
-  if (loading) return <p className="text-center py-10">Loading...</p>;
+  // Custom Loader Component for QnA
+  const LoadingSpinner = () => (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-sky-50 to-green-50">
+      <div className="relative">
+        <motion.div
+          className="w-20 h-20 border-4 border-green-200 rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        >
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-green-500 border-r-green-500 rounded-full"></div>
+        </motion.div>
+        <div className="mt-6 text-center">
+          <motion.h3 
+            className="text-xl font-semibold text-gray-700 mb-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            Loading Questions
+          </motion.h3>
+          <motion.p 
+            className="text-gray-500"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            Fetching questions from our scholars...
+          </motion.p>
+          <motion.div 
+            className="flex justify-center space-x-1 mt-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="w-2 h-2 bg-green-500 rounded-full"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ 
+                  duration: 0.6, 
+                  repeat: Infinity, 
+                  delay: i * 0.2 
+                }}
+              />
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // No Data Component for QnA
+  const NoDataComponent = () => (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-sky-50 to-green-50 px-6">
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center"
+      >
+        <div className="mb-6">
+          <div className="relative inline-block">
+            <FiHelpCircle className="text-6xl text-gray-300 mx-auto" />
+            <motion.div
+              className="absolute -top-2 -right-2"
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <FiLoader className="text-2xl text-green-500" />
+            </motion.div>
+          </div>
+        </div>
+        
+        <motion.h2 
+          className="text-2xl font-bold text-gray-800 mb-3"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          No Questions Found
+        </motion.h2>
+        
+        <motion.p 
+          className="text-gray-600 mb-6"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {searchTerm || selectedCategory 
+            ? "No questions match your search criteria. Try different keywords or categories."
+            : "There are no published questions available at the moment. Be the first to ask!"}
+        </motion.p>
+        
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="space-y-4"
+        >
+          {(searchTerm || selectedCategory) && (
+            <>
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory(null);
+                }}
+                className="w-full bg-green-500 text-white py-3 rounded-xl font-medium hover:bg-green-600 transition-colors duration-300"
+              >
+                Clear Filters
+              </button>
+              <p className="text-sm text-gray-500">
+                Showing results for: 
+                {searchTerm && ` Search: "${searchTerm}"`}
+                {selectedCategory && categories.find(c => c._id === selectedCategory)?.name && 
+                  ` Category: "${categories.find(c => c._id === selectedCategory)?.name}"`}
+              </p>
+            </>
+          )}
+          
+          <Link
+            to={"/qa/ask-question"}
+            className="block w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3 rounded-xl font-medium hover:from-green-700 hover:to-emerald-600 transition-all duration-300"
+          >
+            <FiMessageSquare className="inline mr-2" />
+            Ask Your First Question
+          </Link>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+
+  if (loading) return <LoadingSpinner />;
+  
+  if (!loading && questions.length === 0) return <NoDataComponent />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
       {/* Header */}
-      <div className="pt-24 flex flex-col md:flex-row justify-between items-center bg-gradient-to-r from-green-600 to-emerald-500 text-white py-6 px-6">
+      <div className="pt-24 flex flex-col md:flex-row justify-between items-center bg-linear-to-r from-green-600 to-emerald-500 text-white py-6 px-6">
         <motion.h1
           className="text-2xl md:text-4xl font-extrabold text-center mb-4"
           initial={{ opacity: 0, y: 20 }}
@@ -97,7 +239,7 @@ const QnA = () => {
             <FiSearch className="absolute left-4 top-3.5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search articles..."
+              placeholder="Search questions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 text-black bg-gray-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-300"
@@ -113,9 +255,16 @@ const QnA = () => {
             {/* Main Content */}
             <div className="lg:w-2/3">
               <div className="flex justify-between items-center mb-10">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Recent Questions
-                </h2>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    Recent Questions
+                  </h2>
+                  {filteredQuestion?.length > 0 && (
+                    <p className="text-gray-500 text-sm mt-1">
+                      {filteredQuestion.length} {filteredQuestion.length === 1 ? 'question' : 'questions'} found
+                    </p>
+                  )}
+                </div>
                 <Link
                   to={"/qa/ask-question"}
                   className="bg-green-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-green-700 transition flex items-center"
@@ -127,9 +276,36 @@ const QnA = () => {
 
               <div className="space-y-6">
                 {filteredQuestion?.length === 0 ? (
-                  <p className="text-gray-500 text-center py-10">
-                    No question found.
-                  </p>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white rounded-2xl shadow-lg p-12 text-center"
+                  >
+                    <FiHelpCircle className="text-5xl text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                      No Matching Questions
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                      We couldn't find any questions matching your criteria.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button
+                        onClick={() => {
+                          setSearchTerm("");
+                          setSelectedCategory(null);
+                        }}
+                        className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300"
+                      >
+                        Reset Filters
+                      </button>
+                      <Link
+                        to={"/qa/ask-question"}
+                        className="bg-linear-to-r from-green-600 to-emerald-500 text-white px-6 py-2 rounded-lg hover:from-green-700 hover:to-emerald-600 transition-all duration-300"
+                      >
+                        Ask New Question
+                      </Link>
+                    </div>
+                  </motion.div>
                 ) : (
                   <>
                     {filteredQuestion?.map((qna, index) => (
@@ -167,7 +343,7 @@ const QnA = () => {
                               <div
                                 className="prose prose-lg max-w-none mb-6"
                                 dangerouslySetInnerHTML={{
-                                  __html: qna.answers[0].text.slice(0, 120),
+                                  __html: qna.answers[0]?.text?.slice(0, 120) || "No answer yet"
                                 }}
                               />
                             </p>
@@ -177,10 +353,18 @@ const QnA = () => {
                             <div className="flex items-center text-sm text-gray-600">
                               <FiUser className="mr-1" />
                               <span>
-                                Answered by{" "}
-                                <span className="text-green-500 font-medium">
-                                  {qna.answers[0].answeredBy.name}
-                                </span>
+                                {qna.answers[0] ? (
+                                  <>
+                                    Answered by{" "}
+                                    <span className="text-green-500 font-medium">
+                                      {qna.answers[0]?.answeredBy?.name || "Scholar"}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-gray-500">
+                                    Awaiting answer from scholars
+                                  </span>
+                                )}
                               </span>
                             </div>
                             <Link
@@ -222,7 +406,7 @@ const QnA = () => {
                     >
                       <span>All</span>
                       <span className="bg-gray-100 text-xs px-2 py-1 rounded-full">
-                        {questions?.length}
+                        {questions?.length || 0}
                       </span>
                     </button>
                   </li>
@@ -247,7 +431,7 @@ const QnA = () => {
               </motion.div>
 
               <motion.div
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 text-center"
+                className="bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 text-center"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}

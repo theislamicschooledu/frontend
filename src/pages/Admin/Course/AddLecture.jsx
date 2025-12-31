@@ -185,7 +185,7 @@ const AddLecture = () => {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <div className="flex items-start">
-                    <FiVideo className="text-blue-500 mt-1 mr-3 flex-shrink-0" />
+                    <FiVideo className="text-blue-500 mt-1 mr-3 shrink-0" />
                     <div>
                       <p className="text-blue-800 font-medium mb-1">
                         Video URL Instructions
