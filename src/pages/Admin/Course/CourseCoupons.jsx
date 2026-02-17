@@ -32,12 +32,12 @@ const CourseCoupons = () => {
       try {
         setLoading(true);
         const [courseRes, couponsRes] = await Promise.all([
-          api.get(`/courses/courseDetails/${courseId}`),
+          api.get(`/courses/details/${courseId}`),
           api.get(`/coupons/course/${courseId}`),
-        ]);
+        ]);        
 
-        if (courseRes.data) {
-          setCourse(courseRes.data);
+        if (courseRes.data.success) {
+          setCourse(courseRes.data.data);
         }
 
         if (couponsRes.data.success) {

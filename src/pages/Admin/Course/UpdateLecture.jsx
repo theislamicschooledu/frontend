@@ -36,16 +36,19 @@ const UpdateLecture = () => {
       try {
         setFetchLoading(true);
         const [courseRes, lectureRes] = await Promise.all([
-          api.get(`/courses/courseDetails/${courseId}`),
+          api.get(`/courses/details/${courseId}`),
           api.get(`/courses/lectures/${lectureId}`),
-        ]);        
+        ]);
 
-        if (courseRes.data) {
-          setCourse(courseRes.data);
+        console.log(lectureRes.data);
+        
+
+        if (courseRes.data.success) {
+          setCourse(courseRes.data.data);
         }
 
         if (lectureRes.data.success) {
-          const lecture = lectureRes.data.lecture;
+          const lecture = lectureRes.data.data;
           setTitle(lecture.title);
           setVideoUrl(lecture.videoUrl);
           setExistingResources(lecture.resources || []);
@@ -115,16 +118,6 @@ const UpdateLecture = () => {
 
     if (!title.trim()) {
       toast.error("Lecture title is required");
-      return;
-    }
-
-    if (!videoUrl.trim()) {
-      toast.error("Video URL is required");
-      return;
-    }
-
-    if (!validateVideoUrl(videoUrl)) {
-      toast.error("Please enter a valid video URL");
       return;
     }
 
@@ -233,7 +226,6 @@ const UpdateLecture = () => {
                   onChange={(e) => setVideoUrl(e.target.value)}
                   placeholder="https://example.com/video.mp4"
                   className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
-                  required
                 />
 
                 {videoUrl && validateVideoUrl(videoUrl) && (

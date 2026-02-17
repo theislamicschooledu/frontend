@@ -10,8 +10,14 @@ import {
   FiGrid,
   FiList,
   FiTrendingUp,
+  FiClock,
+  FiCalendar,
+  FiUsers,
+  FiFilter,
+  FiChevronDown,
+  FiChevronUp,
 } from "react-icons/fi";
-import { FaRegLaughBeam } from "react-icons/fa";
+import { FaRegLaughBeam, FaGraduationCap } from "react-icons/fa";
 import api from "../utils/axios";
 import SkeletonCard from "../components/SkeletonCard";
 import CourseCard from "../components/CourseCard";
@@ -19,6 +25,68 @@ import CourseListItem from "../components/CourseListItem";
 
 // Utility: safely strip HTML
 const stripHtml = (html) => (html ? String(html).replace(/<[^>]*>/g, "") : "");
+
+// Course status badge component
+const CourseStatusBadge = ({ status }) => {
+  const getStatusConfig = (status) => {
+    switch (status) {
+      case "coming_soon":
+        return {
+          text: "Coming Soon",
+          bg: "bg-purple-100",
+          textColor: "text-purple-700",
+          icon: FiClock,
+        };
+      case "upcoming":
+        return {
+          text: "Upcoming",
+          bg: "bg-blue-100",
+          textColor: "text-blue-700",
+          icon: FiCalendar,
+        };
+      case "enrollment_open":
+        return {
+          text: "Enrollment Open",
+          bg: "bg-green-100",
+          textColor: "text-green-700",
+          icon: FiUsers,
+        };
+      case "enrollment_closed":
+        return {
+          text: "Enrollment Closed",
+          bg: "bg-orange-100",
+          textColor: "text-orange-700",
+          icon: FiX,
+        };
+      case "course_started":
+        return {
+          text: "Course Started",
+          bg: "bg-teal-100",
+          textColor: "text-teal-700",
+          icon: FaGraduationCap,
+        };
+      default:
+        return {
+          text: "Published",
+          bg: "bg-gray-100",
+          textColor: "text-gray-700",
+          icon: FiBookOpen,
+        };
+    }
+  };
+
+  const config = getStatusConfig(status);
+  const Icon = config.icon;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.textColor}`}
+    >
+      <Icon size={12} />
+      {config.text}
+    </span>
+  );
+};
 
 const Courses = () => {
   const [loading, setLoading] = useState(false);
@@ -29,14 +97,33 @@ const Courses = () => {
   const [categories, setCategories] = useState([]);
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("grid");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // মোবাইলের জন্য ফিল্টার টগল স্টেট
+
+  // Status options for filtering
+  const statusOptions = [
+    { value: "all", label: "All Courses", icon: FiBookOpen },
+    { value: "coming_soon", label: "Coming Soon", icon: FiClock },
+    { value: "upcoming", label: "Upcoming", icon: FiCalendar },
+    { value: "enrollment_open", label: "Enrollment Open", icon: FiUsers },
+    { value: "enrollment_closed", label: "Enrollment Closed", icon: FiX },
+    { value: "course_started", label: "Course Started", icon: FaGraduationCap },
+  ];
 
   // Fetch courses
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/courses/publicCourse");
+      const res = await api.get("/courses/published");
       const data = res?.data;
-      if (data?.success && Array.isArray(data.courses)) {
+
+      if (data?.success && Array.isArray(data.data)) {
+        const sorted = data.data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setCourses(sorted);
+        setFilteredCourses(sorted);
+      } else if (data?.success && Array.isArray(data.courses)) {
         const sorted = data.courses.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
@@ -61,9 +148,12 @@ const Courses = () => {
   // Fetch categories
   const fetchCategories = async () => {
     try {
-      const res = await api.get("/courses/courseCategory");
+      const res = await api.get("/courses/category");
       const data = res?.data;
-      if (data?.success && Array.isArray(data.categories)) {
+
+      if (data?.success && Array.isArray(data.data)) {
+        setCategories(data.data);
+      } else if (data?.success && Array.isArray(data.categories)) {
         setCategories(data.categories);
       }
     } catch (error) {
@@ -85,6 +175,7 @@ const Courses = () => {
   useEffect(() => {
     let result = [...courses];
 
+    // Search filter
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       result = result.filter((c) => {
@@ -94,6 +185,7 @@ const Courses = () => {
       });
     }
 
+    // Category filter
     if (selectedCategory !== "all") {
       result = result.filter((course) => {
         const catId = course.category?._id || course.category;
@@ -101,6 +193,14 @@ const Courses = () => {
       });
     }
 
+    // Status filter
+    if (selectedStatus !== "all") {
+      result = result.filter(
+        (course) => course.currentStatus === selectedStatus
+      );
+    }
+
+    // Sorting
     result.sort((a, b) => {
       switch (sortBy) {
         case "newest":
@@ -115,18 +215,32 @@ const Courses = () => {
           return (b.averageRating || 0) - (a.averageRating || 0);
         case "duration":
           return (b.duration || 0) - (a.duration || 0);
+        case "enrollment-start":
+          return (
+            new Date(a.enrollmentStart || 0) - new Date(b.enrollmentStart || 0)
+          );
         default:
           return new Date(b.createdAt) - new Date(a.createdAt);
       }
     });
 
     setFilteredCourses(result);
-  }, [courses, searchTerm, selectedCategory, sortBy]);
+  }, [courses, searchTerm, selectedCategory, selectedStatus, sortBy]);
 
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedCategory("all");
+    setSelectedStatus("all");
     setSortBy("newest");
+  };
+
+  // Get active filter count
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (selectedCategory !== "all") count++;
+    if (selectedStatus !== "all") count++;
+    return count;
   };
 
   if (loading && courses.length === 0) {
@@ -152,8 +266,8 @@ const Courses = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans overflow-x-hidden font-hind">
-      {/* Enhanced animated background */}
+    <div className="md:pt-8 min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans overflow-x-hidden font-hind">
+      {/* Animated background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         {[...Array(8)].map((_, i) => (
           <motion.div
@@ -179,12 +293,12 @@ const Courses = () => {
         ))}
       </div>
 
-      {/* Enhanced Header */}
+      {/* Header - উপরের অংশের জায়গা কমানো হয়েছে */}
       <motion.section
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="relative pt-28 px-4 bg-linear-to-r from-emerald-600 via-green-500 to-teal-500 text-white pb-32 mb-8 overflow-hidden rounded-b-4xl"
+        className="relative pt-20 px-4 bg-linear-to-r from-emerald-600 via-green-500 to-teal-500 text-white pb-16 mb-4 overflow-hidden rounded-b-3xl"
       >
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10">
@@ -197,164 +311,248 @@ const Courses = () => {
           ></div>
         </div>
 
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <motion.h1
-            className="text-4xl md:text-6xl font-extrabold mb-6"
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            Discover{" "}
-            <span className="text-yellow-300 drop-shadow-lg">Amazing</span>{" "}
-            Courses!
-            <motion.span
-              className="ml-4 inline-block"
-              animate={{
-                rotate: [0, 10, -10, 0],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatDelay: 4,
-              }}
+        <div className="max-w-6xl mx-auto text-center relative z-10 flex flex-col md:flex-row items-center justify-between md:gap-16">
+          <div>
+            <motion.h1
+              className="text-3xl md:text-5xl font-extrabold mb-4"
+              initial={{ opacity: 0, y: 25 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              🚀
-            </motion.span>
-          </motion.h1>
+              Discover{" "}
+              <span className="text-yellow-300 drop-shadow-lg">Amazing</span>{" "}
+              Courses!
+              <motion.span
+                className="ml-2 inline-block"
+                animate={{
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 4,
+                }}
+              >
+                🚀
+              </motion.span>
+            </motion.h1>
 
-          <motion.p
-            className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-green-100 font-medium leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            Learn Quran, Islamic manners and more with fun interactive lessons
-            designed for all ages!
-          </motion.p>
+            <motion.p
+              className="text-base md:text-lg mb-6 md:mb-0 max-w-2xl mx-auto text-green-100 font-medium leading-relaxed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              Learn Quran, Islamic manners and more with fun interactive lessons
+              designed for all ages!
+            </motion.p>
+          </div>
 
+          {/* Search bar - সাইজ কমানো হয়েছে */}
           <motion.div
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-auto border border-green-200/30"
+            className="bg-white rounded-2xl shadow-xl w-full max-w-xl mx-auto border border-green-200/30"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             <div className="relative">
-              <FiSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search for fun courses... 🌟"
-                className="w-full pl-14 pr-6 py-5 text-gray-800 bg-transparent rounded-3xl text-lg focus:outline-none focus:ring-4 focus:ring-emerald-200/50 border-0 placeholder-gray-400"
+                className="w-full pl-12 pr-4 py-3 text-gray-800 bg-transparent rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-emerald-200/50 border-0 placeholder-gray-400"
               />
             </div>
           </motion.div>
         </div>
       </motion.section>
 
-      {/* Enhanced Filters Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
+      {/* Filters Section - জায়গা কমানো হয়েছে */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10">
         <motion.div
-          className="rounded-3xl shadow-2xl p-6 mb-8 border border-gray-100 backdrop-blur-sm bg-white/95"
+          className="rounded-2xl shadow-xl p-4 mb-6 border border-gray-100 backdrop-blur-sm bg-white/95"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            {/* Categories */}
-            <div className="flex flex-wrap gap-3 items-center">
-              <motion.button
-                onClick={() => setSelectedCategory("all")}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-5 py-3 rounded-2xl font-semibold transition-all duration-300 flex items-center gap-2 border ${
-                  selectedCategory === "all"
-                    ? "bg-linear-to-r from-blue-500 to-purple-500 text-white shadow-lg border-transparent"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
-                }`}
-              >
-                <FaRegLaughBeam />
-                All Courses
-              </motion.button>
-
-              {categories.map((category) => (
-                <motion.button
-                  key={category._id || category.name}
-                  onClick={() => setSelectedCategory(category._id)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-5 py-3 rounded-2xl font-semibold transition-all duration-300 border ${
-                    selectedCategory === category._id
-                      ? "bg-linear-to-r from-blue-500 to-purple-500 text-white shadow-lg border-transparent"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
-                  }`}
-                >
-                  {category.name}
-                </motion.button>
-              ))}
+          {/* Active filters count badge */}
+          {getActiveFilterCount() > 0 && (
+            <div className="mb-3 flex items-center gap-2">
+              <span className="text-xs text-gray-500">Active filters:</span>
+              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                {getActiveFilterCount()} active
+              </span>
             </div>
+          )}
 
-            {/* View controls and sort */}
-            <div className="flex items-center gap-4 flex-wrap">
-              {/* View toggle */}
-              <div className="flex bg-gray-100 rounded-2xl p-1.5 border border-gray-200">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-3 rounded-xl transition-all duration-300 ${
-                    viewMode === "grid"
-                      ? "bg-white text-blue-600 shadow-md"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  <FiGrid size={20} />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-3 rounded-xl transition-all duration-300 ${
-                    viewMode === "list"
-                      ? "bg-white text-blue-600 shadow-md"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  <FiList size={20} />
-                </button>
+          {/* মোবাইলের জন্য ফিল্টার টগল বাটন */}
+          <div className="lg:hidden mb-3">
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="w-full flex items-center justify-between bg-gray-100 hover:bg-gray-200 px-4 py-2.5 rounded-xl text-gray-700 font-medium transition-colors duration-200"
+            >
+              <div className="flex items-center gap-2">
+                <FiFilter className="text-lg" />
+                <span>Filters & Sort</span>
+                {getActiveFilterCount() > 0 && (
+                  <span className="bg-blue-500 text-white px-2 py-0.5 rounded-full text-xs">
+                    {getActiveFilterCount()}
+                  </span>
+                )}
+              </div>
+              {isFilterOpen ? <FiChevronUp /> : <FiChevronDown />}
+            </button>
+          </div>
+
+          {/* ফিল্টার কন্টেন্ট - ডেস্কটপে সবসময় দেখা যাবে, মোবাইলে টগল করে */}
+          <div className={`${isFilterOpen ? "block" : "hidden"} lg:block`}>
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+              {/* Left side filters */}
+              <div className="flex-1 space-y-3">
+                {/* Categories */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 mb-2">
+                    Categories
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    <motion.button
+                      onClick={() => setSelectedCategory("all")}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`px-3 py-1.5 rounded-lg font-medium text-sm transition-all duration-300 border ${
+                        selectedCategory === "all"
+                          ? "bg-linear-to-r from-blue-500 to-purple-500 text-white shadow border-transparent"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+                      }`}
+                    >
+                      <FaRegLaughBeam className="inline mr-1 text-xs" />
+                      All
+                    </motion.button>
+
+                    {categories.map((category) => (
+                      <motion.button
+                        key={category._id || category.name}
+                        onClick={() => setSelectedCategory(category._id)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`px-3 py-1.5 rounded-lg font-medium text-sm transition-all duration-300 border ${
+                          selectedCategory === category._id
+                            ? "bg-linear-to-r from-blue-500 to-purple-500 text-white shadow border-transparent"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+                        }`}
+                      >
+                        {category.name}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status filters */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 mb-2">
+                    Course Status
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {statusOptions.map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <motion.button
+                          key={option.value}
+                          onClick={() => setSelectedStatus(option.value)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`px-3 py-1.5 rounded-lg font-medium text-sm transition-all duration-300 border flex items-center gap-1 ${
+                            selectedStatus === option.value
+                              ? "bg-linear-to-r from-green-500 to-teal-500 text-white shadow border-transparent"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200"
+                          }`}
+                        >
+                          <Icon size={14} />
+                          {option.label}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
-              {/* Sort dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-100 rounded-2xl px-5 py-3 focus:ring-4 focus:ring-emerald-200 outline-none text-gray-700 font-semibold appearance-none cursor-pointer border border-gray-200 hover:bg-gray-200 transition-colors duration-200"
-              >
-                <option value="newest">🆕 Newest First</option>
-                <option value="oldest">📜 Oldest First</option>
-                <option value="price-low">💰 Price: Low to High</option>
-                <option value="price-high">💎 Price: High to Low</option>
-                <option value="rating">⭐ Highest Rated</option>
-                <option value="duration">⏰ Longest Duration</option>
-              </select>
+              {/* Right side controls */}
+              <div className="lg:w-auto flex flex-col gap-3">
+                {/* View and sort controls */}
+                <div className="flex items-center gap-3 flex-wrap lg:flex-nowrap">
+                  {/* View toggle */}
+                  <div className="flex bg-gray-100 rounded-xl p-1 border border-gray-200">
+                    <button
+                      onClick={() => setViewMode("grid")}
+                      className={`p-2 rounded-lg transition-all duration-300 ${
+                        viewMode === "grid"
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                      title="Grid view"
+                    >
+                      <FiGrid size={18} />
+                    </button>
+                    <button
+                      onClick={() => setViewMode("list")}
+                      className={`p-2 rounded-lg transition-all duration-300 ${
+                        viewMode === "list"
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                      title="List view"
+                    >
+                      <FiList size={18} />
+                    </button>
+                  </div>
 
-              {/* Clear filters */}
-              {(searchTerm || selectedCategory !== "all") && (
-                <motion.button
-                  onClick={clearFilters}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-5 py-3 bg-linear-to-r from-orange-500 to-pink-500 text-white rounded-2xl hover:shadow-lg transition-all duration-300 font-semibold shadow-md"
-                >
-                  <FiX size={18} />
-                  Clear Filters
-                </motion.button>
-              )}
+                  {/* Sort dropdown */}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-gray-100 rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-200 outline-none text-gray-700 font-medium text-sm appearance-none cursor-pointer border border-gray-200 hover:bg-gray-200 transition-colors duration-200 min-w-40"
+                  >
+                    <option value="newest">🆕 Newest First</option>
+                    <option value="oldest">📜 Oldest First</option>
+                    <option value="price-low">💰 Price: Low to High</option>
+                    <option value="price-high">💎 Price: High to Low</option>
+                    <option value="rating">⭐ Highest Rated</option>
+                    <option value="duration">⏰ Longest Duration</option>
+                    <option value="enrollment-start">
+                      📅 Enrollment Start
+                    </option>
+                  </select>
+
+                  {/* Clear filters */}
+                  {getActiveFilterCount() > 0 && (
+                    <motion.button
+                      onClick={clearFilters}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex items-center gap-1 px-3 py-2 bg-linear-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:shadow transition-all duration-300 font-medium text-sm shadow whitespace-nowrap"
+                    >
+                      <FiX size={16} />
+                      Clear All
+                    </motion.button>
+                  )}
+                </div>
+
+                {/* Results count */}
+                <div className="text-right text-xs text-gray-500">
+                  Showing {filteredCourses.length} of {courses.length} courses
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
       </section>
 
-      {/* Enhanced Courses Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-28">
+      {/* Courses Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <AnimatePresence mode="wait">
           {filteredCourses.length === 0 ? (
             <motion.div
@@ -362,31 +560,31 @@ const Courses = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="text-center py-20"
+              className="text-center py-16"
             >
-              <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-md mx-auto border border-gray-100">
+              <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto border border-gray-100">
                 <motion.div
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <FiBookOpen className="text-6xl text-gray-300 mx-auto mb-6" />
+                  <FiBookOpen className="text-5xl text-gray-300 mx-auto mb-4" />
                 </motion.div>
-                <h3 className="text-2xl font-bold text-gray-700 mb-3">
+                <h3 className="text-xl font-bold text-gray-700 mb-2">
                   No courses found 😢
                 </h3>
-                <p className="text-gray-500 mb-8 leading-relaxed">
-                  {searchTerm || selectedCategory !== "all"
-                    ? "Try adjusting your search or filters to find what you're looking for."
+                <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                  {getActiveFilterCount() > 0
+                    ? "Try adjusting your filters to find what you're looking for."
                     : "We're preparing amazing courses for you! Check back soon."}
                 </p>
-                {(searchTerm || selectedCategory !== "all") && (
+                {getActiveFilterCount() > 0 && (
                   <motion.button
                     onClick={clearFilters}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-semibold shadow-lg"
+                    className="px-6 py-3 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:shadow transition-all duration-300 font-medium text-sm shadow"
                   >
-                    Show All Courses
+                    Clear All Filters
                   </motion.button>
                 )}
               </div>
@@ -397,49 +595,81 @@ const Courses = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className={
-                viewMode === "grid"
-                  ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
-                  : "space-y-6"
-              }
             >
-              {loading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <SkeletonCard key={i} view={viewMode} />
-                  ))
-                : filteredCourses.map((course, i) =>
-                    viewMode === "grid" ? (
-                      <CourseCard
-                        key={course._id || i}
-                        course={course}
-                        index={i}
-                      />
-                    ) : (
-                      <CourseListItem
-                        key={course._id || i}
-                        course={course}
-                        index={i}
-                      />
-                    )
-                  )}
+              {/* Status summary (optional) */}
+              <div className="mb-4 flex flex-wrap gap-2 justify-end">
+                {[
+                  "coming_soon",
+                  "upcoming",
+                  "enrollment_open",
+                  "enrollment_closed",
+                  "course_started",
+                ].map((status) => {
+                  const count = filteredCourses.filter(
+                    (c) => c.currentStatus === status
+                  ).length;
+                  if (count === 0) return null;
+                  const statusOption = statusOptions.find(
+                    (opt) => opt.value === status
+                  );
+                  const Icon = statusOption?.icon || FiBookOpen;
+                  return (
+                    <span
+                      key={status}
+                      className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
+                    >
+                      <Icon size={10} />
+                      {statusOption?.label}: {count}
+                    </span>
+                  );
+                })}
+              </div>
+
+              <div
+                className={
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                    : "space-y-4"
+                }
+              >
+                {loading
+                  ? Array.from({ length: 6 }).map((_, i) => (
+                      <SkeletonCard key={i} view={viewMode} />
+                    ))
+                  : filteredCourses.map((course, i) =>
+                      viewMode === "grid" ? (
+                        <CourseCard
+                          key={course._id || i}
+                          course={course}
+                          index={i}
+                        />
+                      ) : (
+                        <CourseListItem
+                          key={course._id || i}
+                          course={course}
+                          index={i}
+                        />
+                      )
+                    )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </section>
 
-      {/* Enhanced Floating Action Button */}
+      {/* Floating Action Button */}
       <motion.div
-        className="fixed bottom-8 right-8 z-50"
+        className="fixed bottom-6 right-6 z-50"
         initial={{ scale: 0, rotate: -90 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ duration: 0.5, delay: 0.8 }}
         whileHover={{ scale: 1.1, rotate: 5 }}
         whileTap={{ scale: 0.9 }}
       >
-        <button className="bg-linear-to-r from-green-500 to-emerald-600 text-white p-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center group">
+        <button className="bg-linear-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center group">
           <FiTrendingUp
             className="group-hover:scale-110 transition-transform duration-300"
-            size={24}
+            size={20}
           />
         </button>
       </motion.div>

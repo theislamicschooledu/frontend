@@ -30,10 +30,10 @@ const AddLecture = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const res = await api.get(`/courses/courseDetails/${courseId}`);
+        const res = await api.get(`/courses/details/${courseId}`);
 
         if (res.data.success) {
-          setCourse(res.data.course);
+          setCourse(res.data.data);
         }
       } catch (error) {
         toast.error("Failed to fetch course details", error);

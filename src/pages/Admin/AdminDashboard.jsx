@@ -73,8 +73,8 @@ const AdminDashboard = () => {
 
     const fetchCourses = async () => {
       const res = await api.get("/courses");
-      setTotalCourses(res.data.length);
-      const sliceCourse = res.data.slice(0, 5);
+      setTotalCourses(res.data.count);
+      const sliceCourse = res.data.data.slice(0, 5);
       setCourses(sliceCourse);
     };
 
@@ -802,7 +802,7 @@ const AdminDashboard = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-6"
+        className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-fr"
       >
         {[
           {
@@ -840,51 +840,38 @@ const AdminDashboard = () => {
             to: "#",
             onClick: documentation ? handleEdit : handleCreate,
           },
-        ].map((card, idx) =>
-          card.to === "#" ? (
-            <button key={idx} onClick={card.onClick} className="text-left">
-              <motion.div
-                whileHover={{ scale: 1.03, y: -5 }}
-                whileTap={{ scale: 0.98 }}
-                className={`relative overflow-hidden bg-linear-to-r ${card.gradient} text-white rounded-2xl shadow-lg p-6 cursor-pointer group hover:shadow-xl transition-all duration-300`}
-              >
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <card.icon size={28} className="opacity-90" />
-                    <card.actionIcon
-                      size={20}
-                      className="opacity-80 group-hover:translate-x-1 transition-transform"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
-                  <p className="text-sm opacity-90">{card.description}</p>
+        ].map((card, idx) => {
+          const CardContent = (
+            <motion.div
+              whileHover={{ scale: 1.03, y: -5 }}
+              whileTap={{ scale: 0.98 }}
+              className={`relative overflow-hidden bg-linear-to-r ${card.gradient} text-white rounded-2xl shadow-lg p-6 cursor-pointer group hover:shadow-xl transition-all duration-300 h-full flex flex-col`}
+            >
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <card.icon size={28} className="opacity-90" />
+                  <card.actionIcon
+                    size={20}
+                    className="opacity-80 group-hover:translate-x-1 transition-transform"
+                  />
                 </div>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </motion.div>
+                <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
+                <p className="text-sm opacity-90 grow">{card.description}</p>
+              </div>
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </motion.div>
+          );
+
+          return card.to === "#" ? (
+            <button key={idx} onClick={card.onClick} className="text-left h-full">
+              {CardContent}
             </button>
           ) : (
-            <Link to={card.to} key={idx}>
-              <motion.div
-                whileHover={{ scale: 1.03, y: -5 }}
-                whileTap={{ scale: 0.98 }}
-                className={`relative overflow-hidden bg-linear-to-r ${card.gradient} text-white rounded-2xl shadow-lg p-6 cursor-pointer group hover:shadow-xl transition-all duration-300`}
-              >
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <card.icon size={28} className="opacity-90" />
-                    <card.actionIcon
-                      size={20}
-                      className="opacity-80 group-hover:translate-x-1 transition-transform"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
-                  <p className="text-sm opacity-90">{card.description}</p>
-                </div>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </motion.div>
+            <Link to={card.to} key={idx} className="h-full">
+              {CardContent}
             </Link>
-          )
-        )}
+          );
+        })}
       </motion.div>
 
       {/* View Details Modal */}

@@ -15,6 +15,8 @@ import {
   FiPlus,
   FiX,
   FiCheck,
+  FiInfo,
+  FiAlertCircle
 } from "react-icons/fi";
 import { useNavigate, useParams } from "react-router-dom";
 import Quill from "quill";
@@ -39,50 +41,76 @@ const UpdateCourse = () => {
   const [duration, setDuration] = useState("");
   const [featured, setFeatured] = useState(false);
   const [status, setStatus] = useState("pending");
-  const [features, setFeatures] = useState([""]); // নতুন state for features
-  const [newFeature, setNewFeature] = useState(""); // নতুন state for single feature input
+  const [features, setFeatures] = useState([""]);
+  const [newFeature, setNewFeature] = useState("");
+  const [isUpcoming, setIsUpcoming] = useState(false);
+  const [dateError, setDateError] = useState("");
+  const [currentStatus, setCurrentStatus] = useState("");
 
   const editorRef = useRef(null);
   const quillRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch course data
+  // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().slice(0, 16);
+    } catch (error) {
+      return "";
+    }
+  };
+
+  // Fetch course data - ফিক্সড API endpoint
   const fetchCourse = useCallback(async () => {
     try {
-      const res = await api.get(`/courses/${id}`);
+      const res = await api.get(`/courses/details/${id}`);
 
-      if (res.data) {
-        const courseData = res.data;
+      if (res.data.success) {
+        const courseData = res.data.data || res.data.course;
         setCourse(courseData);
-        setTitle(courseData.title);
-        setPrice(courseData.price);
-        setSelectedCategory(courseData.category?._id || courseData.category);
+        setTitle(courseData.title || "");
+        setPrice(courseData.price?.toString() || "");
+        setSelectedCategory(courseData.category?._id || courseData.category || "");
         setSelectedTeachers(
           courseData.teachers?.map((teacher) => teacher._id || teacher) || []
         );
-        setEnrollmentStart(
-          new Date(courseData.enrollmentStart).toISOString().slice(0, 16)
-        );
-        setEnrollmentEnd(
-          new Date(courseData.enrollmentEnd).toISOString().slice(0, 16)
-        );
-        setCourseStart(
-          new Date(courseData.courseStart).toISOString().slice(0, 16)
-        );
-        setDuration(courseData.duration);
-        setFeatured(courseData.featured);
-        setStatus(courseData.status);
-        setPreview(courseData.thumbnail);
+        
+        // Check if course is upcoming
+        const isUpcomingCourse = courseData.isUpcoming === true;
+        setIsUpcoming(isUpcomingCourse);
+        setCurrentStatus(courseData.currentStatus || courseData.status);
+        
+        // Set dates if available
+        if (courseData.enrollmentStart) {
+          setEnrollmentStart(formatDateForInput(courseData.enrollmentStart));
+        }
+        if (courseData.enrollmentEnd) {
+          setEnrollmentEnd(formatDateForInput(courseData.enrollmentEnd));
+        }
+        if (courseData.courseStart) {
+          setCourseStart(formatDateForInput(courseData.courseStart));
+        }
+        
+        setDuration(courseData.duration?.toString() || "");
+        setFeatured(courseData.featured || false);
+        setStatus(courseData.status || "pending");
+        setPreview(courseData.thumbnail || null);
         
         // Set features from course data
-        setFeatures(courseData.features || [""]);
+        setFeatures(
+          courseData.features && courseData.features.length > 0 
+            ? courseData.features 
+            : [""]
+        );
 
         // Set Quill content after editor is initialized
         if (quillRef.current) {
           quillRef.current.root.innerHTML = courseData.description || "";
         }
       } else {
-        toast.error(res?.data?.message);
+        toast.error(res?.data?.message || "Failed to load course");
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
@@ -91,14 +119,14 @@ const UpdateCourse = () => {
     }
   }, [id]);
 
-  // Fetch categories
+  // Fetch categories - ফিক্সড API রেসপন্স
   const fetchCategories = async () => {
     try {
-      const res = await api.get("/courses/courseCategory");
+      const res = await api.get("/courses/category");
       if (res.data.success) {
-        setCategories(res.data.categories);
+        setCategories(res.data.data || res.data.categories || []);
       } else {
-        toast.error(res?.data?.message);
+        toast.error(res?.data?.message || "Failed to load categories");
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
@@ -110,9 +138,9 @@ const UpdateCourse = () => {
     try {
       const res = await api.get("/auth/teachers");
       if (res.data.success) {
-        setTeachers(res.data.teachers);
+        setTeachers(res.data.data || res.data.teachers || []);
       } else {
-        toast.error(res?.data?.message);
+        toast.error(res?.data?.message || "Failed to load teachers");
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
@@ -125,6 +153,34 @@ const UpdateCourse = () => {
     fetchCourse();
   }, [fetchCourse]);
 
+  // Handle upcoming toggle effect
+  useEffect(() => {
+    if (isUpcoming) {
+      // If enabling upcoming, status should be published
+      setStatus("published");
+    }
+  }, [isUpcoming]);
+
+  // Validate dates when they change
+  useEffect(() => {
+    if (!isUpcoming && enrollmentStart && enrollmentEnd && courseStart) {
+      const start = new Date(enrollmentStart);
+      const end = new Date(enrollmentEnd);
+      const courseStartDate = new Date(courseStart);
+
+      if (start > end) {
+        setDateError("Enrollment end date must be after start date");
+      } else if (end > courseStartDate) {
+        setDateError("Course must start on or after enrollment ends");
+      } else {
+        setDateError("");
+      }
+    } else {
+      setDateError("");
+    }
+  }, [enrollmentStart, enrollmentEnd, courseStart, isUpcoming]);
+
+  // Initialize Quill editor
   useEffect(() => {
     const initializeEditor = () => {
       if (editorRef.current && !quillRef.current) {
@@ -136,8 +192,7 @@ const UpdateCourse = () => {
               [{ header: [1, 2, 3, false] }],
               ["bold", "italic", "underline", "strike"],
               [{ list: "ordered" }, { list: "bullet" }],
-              ["link", "image"],
-              ["clean"],
+              ["link", "clean"],
             ],
           },
         });
@@ -158,6 +213,7 @@ const UpdateCourse = () => {
     };
   }, [course?.description]);
 
+  // Cleanup preview URL
   useEffect(() => {
     return () => {
       if (preview && preview.startsWith("blob:")) {
@@ -170,6 +226,14 @@ const UpdateCourse = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG, and WEBP images are allowed");
+      return;
+    }
+
+    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File size should be less than 5MB");
       return;
@@ -192,17 +256,27 @@ const UpdateCourse = () => {
   // Features related functions
   const addFeature = () => {
     if (newFeature.trim()) {
-      setFeatures(prev => [...prev, newFeature.trim()]);
+      setFeatures(prev => {
+        const filtered = prev.filter(f => f.trim() !== "");
+        return [...filtered, newFeature.trim()];
+      });
       setNewFeature("");
     }
   };
 
   const removeFeature = (index) => {
-    setFeatures(prev => prev.filter((_, i) => i !== index));
+    setFeatures(prev => {
+      const filtered = prev.filter((_, i) => i !== index);
+      return filtered.length > 0 ? filtered : [""];
+    });
   };
 
   const updateFeature = (index, value) => {
-    setFeatures(prev => prev.map((feature, i) => i === index ? value : feature));
+    setFeatures(prev => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
   };
 
   const handleFeatureKeyPress = (e) => {
@@ -215,24 +289,66 @@ const UpdateCourse = () => {
   const validateForm = () => {
     const editorContent = quillRef.current?.root.innerHTML || "";
 
-    if (!title || editorContent.length === 0 || !selectedCategory) {
-      toast.error("Title, description and category are required!");
+    if (!title.trim()) {
+      toast.error("Title is required!");
       return false;
     }
 
-    if (!enrollmentStart || !enrollmentEnd) {
-      toast.error("Enrollment start and end dates are required!");
+    if (!price || parseFloat(price) <= 0) {
+      toast.error("Valid price is required!");
       return false;
     }
 
-    if (new Date(enrollmentStart) >= new Date(enrollmentEnd)) {
-      toast.error("Enrollment end date must be after start date!");
+    if (!editorContent.trim() || editorContent === "<p><br></p>") {
+      toast.error("Description is required!");
       return false;
     }
 
-    if (!duration || duration <= 0) {
+    if (!selectedCategory) {
+      toast.error("Category is required!");
+      return false;
+    }
+
+    if (!duration || parseInt(duration) <= 0) {
       toast.error("Duration must be a positive number!");
       return false;
+    }
+
+    // Date validations for non-upcoming courses
+    if (!isUpcoming) {
+      if (!enrollmentStart) {
+        toast.error("Enrollment start date is required!");
+        return false;
+      }
+
+      if (!enrollmentEnd) {
+        toast.error("Enrollment end date is required!");
+        return false;
+      }
+
+      if (!courseStart) {
+        toast.error("Course start date is required!");
+        return false;
+      }
+
+      const start = new Date(enrollmentStart);
+      const end = new Date(enrollmentEnd);
+      const courseStartDate = new Date(courseStart);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime()) || isNaN(courseStartDate.getTime())) {
+        toast.error("Invalid date format!");
+        return false;
+      }
+
+      if (start > end) {
+        toast.error("Enrollment end date must be after start date!");
+        return false;
+      }
+
+      if (end > courseStartDate) {
+        toast.error("Course must start on or after enrollment ends!");
+        return false;
+      }
     }
 
     if (selectedTeachers.length === 0) {
@@ -241,7 +357,7 @@ const UpdateCourse = () => {
     }
 
     // Validate features
-    const validFeatures = features.filter(feature => feature.trim() !== "");
+    const validFeatures = features.filter(feature => feature && feature.trim() !== "");
     if (validFeatures.length === 0) {
       toast.error("Please add at least one course feature!");
       return false;
@@ -261,31 +377,48 @@ const UpdateCourse = () => {
 
       const formData = new FormData();
 
-      // Convert dates to ISO string format
-      const startDate = new Date(enrollmentStart).toISOString();
-      const endDate = new Date(enrollmentEnd).toISOString();
-      const courseStartDate = new Date(courseStart).toISOString();
-
-      formData.append("title", title);
-      formData.append("price", price.toString());
+      // Required fields
+      formData.append("title", title.trim());
+      formData.append("price", parseFloat(price).toString());
       formData.append("description", editorContent);
       formData.append("category", selectedCategory);
-      formData.append("enrollmentStart", startDate);
-      formData.append("enrollmentEnd", endDate);
-      formData.append("courseStart", courseStartDate); // Only once
-      formData.append("duration", duration.toString());
+      formData.append("duration", parseInt(duration).toString());
       formData.append("status", status);
-      formData.append("featured", featured.toString());
-      formData.append("teachers", JSON.stringify(selectedTeachers));
+      formData.append("featured", featured ? "true" : "false");
+      formData.append("isUpcoming", isUpcoming ? "true" : "false");
 
-      // Append features as array
-      const validFeatures = features.filter(feature => feature.trim() !== "");
-      validFeatures.forEach(feature => {
-        formData.append("features", feature);
+      // Handle dates based on upcoming status
+      if (enrollmentStart) {
+        formData.append("enrollmentStart", new Date(enrollmentStart).toISOString());
+      }
+      if (enrollmentEnd) {
+        formData.append("enrollmentEnd", new Date(enrollmentEnd).toISOString());
+      }
+      if (courseStart) {
+        formData.append("courseStart", new Date(courseStart).toISOString());
+      }
+
+      // Append teachers as array
+      selectedTeachers.forEach(teacherId => {
+        formData.append("teachers", teacherId);
       });
 
+      // Append features as array
+      const validFeatures = features.filter(feature => feature && feature.trim() !== "");
+      validFeatures.forEach(feature => {
+        formData.append("features", feature.trim());
+      });
+
+      // Handle thumbnail
       if (cover) {
         formData.append("thumbnail", cover);
+      }
+
+      // Log FormData for debugging (development only)
+      if (process.env.NODE_ENV === 'development') {
+        for (let pair of formData.entries()) {
+          console.log(pair[0] + ': ' + pair[1]);
+        }
       }
 
       const { data } = await api.put(`/courses/${id}`, formData, {
@@ -296,14 +429,15 @@ const UpdateCourse = () => {
       });
 
       if (data.success) {
-        toast.success("✅ Course updated successfully!");
+        toast.success(`✅ ${isUpcoming ? "Coming Soon" : ""} Course updated successfully!`);
         navigate("/admin/courses");
       }
     } catch (error) {
       console.error("Update error:", error.response?.data);
-      toast.error(
-        `❌ ${error.response?.data?.message || "Failed to update course"}`
-      );
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.errors?.[0] || 
+                          "Failed to update course";
+      toast.error(`❌ ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -329,10 +463,11 @@ const UpdateCourse = () => {
         className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
       >
         <button
-          onClick={() => window.history.back()}
+          type="button"
+          onClick={() => navigate("/admin/courses")}
           className="flex items-center px-4 py-2 text-gray-600 hover:bg-white rounded-xl transition"
         >
-          <FiArrowLeft className="mr-2" /> Back
+          <FiArrowLeft className="mr-2" /> Back to Courses
         </button>
         <div className="text-center sm:text-left">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
@@ -346,7 +481,7 @@ const UpdateCourse = () => {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-4"
       >
-        {/* Left Section */}
+        {/* Left Section - Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Title */}
           <motion.div
@@ -355,7 +490,7 @@ const UpdateCourse = () => {
             className="bg-white rounded-2xl shadow-lg p-6"
           >
             <h2 className="text-xl font-bold text-gray-800 mb-3">
-              Course Title
+              Course Title *
             </h2>
             <input
               type="text"
@@ -368,6 +503,57 @@ const UpdateCourse = () => {
             />
           </motion.div>
 
+          {/* Coming Soon Toggle */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-white rounded-2xl shadow-lg p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                  <FiInfo className="mr-2" /> Coming Soon Course
+                </h2>
+                <p className="text-gray-600 text-sm mt-1">
+                  Enable to mark as "Coming Soon" course (dates are optional)
+                </p>
+              </div>
+              <label className="flex items-center cursor-pointer">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={isUpcoming}
+                    onChange={(e) => setIsUpcoming(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div className={`block w-14 h-8 rounded-full transition ${
+                    isUpcoming ? "bg-purple-500" : "bg-gray-300"
+                  }`}></div>
+                  <div className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform ${
+                    isUpcoming ? "transform translate-x-6" : ""
+                  }`}></div>
+                </div>
+                <span className="ml-3 text-gray-700 font-medium">
+                  {isUpcoming ? "Enabled" : "Disabled"}
+                </span>
+              </label>
+            </div>
+            
+            {isUpcoming && (
+              <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                <div className="flex items-start">
+                  <FiInfo className="text-purple-500 mt-1 mr-3 shrink-0" />
+                  <div>
+                    <p className="text-purple-800 font-medium">Coming Soon Mode Active</p>
+                    <p className="text-purple-600 text-sm mt-1">
+                      This course will be marked as "Coming Soon". Dates are optional and can be added or updated.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+
           {/* Basic Information Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Category */}
@@ -377,7 +563,7 @@ const UpdateCourse = () => {
               transition={{ delay: 0.05 }}
               className="bg-white rounded-2xl shadow-lg p-6"
             >
-              <h2 className="text-xl font-bold text-gray-800 mb-3">Category</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-3">Category *</h2>
               <select
                 className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
                 value={selectedCategory}
@@ -402,19 +588,22 @@ const UpdateCourse = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-3">
-                Price ($)
+                Price (৳) *
               </h2>
-              <input
-                type="number"
-                name="price"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="Enter course price..."
-                min="0"
-                step="0.01"
-                className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
-                required
-              />
+              <div className="relative">
+                <span className="absolute left-4 top-4 text-gray-500">৳</span>
+                <input
+                  type="number"
+                  name="price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  className="w-full p-4 pl-8 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
+                  required
+                />
+              </div>
             </motion.div>
 
             {/* Duration */}
@@ -424,37 +613,38 @@ const UpdateCourse = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-3 flex items-center">
-                <FiClock className="mr-2" /> Duration (hours)
+                <FiClock className="mr-2" /> Duration (weeks) *
               </h2>
               <input
                 type="number"
                 name="duration"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                placeholder="Course duration in hours..."
+                placeholder="Course duration in weeks..."
                 min="1"
                 className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
                 required
               />
             </motion.div>
 
-            {/* Status */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-2xl shadow-lg p-6"
-            >
-              <h2 className="text-xl font-bold text-gray-800 mb-3">Status</h2>
-              <select
-                className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
+            {/* Status - only for non-upcoming courses */}
+            {!isUpcoming && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-2xl shadow-lg p-6"
               >
-                <option value="pending">Pending</option>
-                <option value="published">Published</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </motion.div>
+                <h2 className="text-xl font-bold text-gray-800 mb-3">Status</h2>
+                <select
+                  className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="published">Published</option>
+                </select>
+              </motion.div>
+            )}
           </div>
 
           {/* Course Features */}
@@ -466,34 +656,32 @@ const UpdateCourse = () => {
           >
             <h2 className="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
               <FiCheck className="text-green-600" />
-              Course Features
+              Course Features *
             </h2>
             <p className="text-gray-600 mb-4">Update course features and benefits</p>
             
             {/* Existing Features List */}
             <div className="space-y-3 mb-4">
               {features.map((feature, index) => (
-                feature.trim() && (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="flex-1 bg-gray-100 rounded-xl p-3 flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                      <input
-                        type="text"
-                        value={feature}
-                        onChange={(e) => updateFeature(index, e.target.value)}
-                        placeholder="Enter feature..."
-                        className="flex-1 bg-transparent outline-none"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFeature(index)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-                    >
-                      <FiX size={18} />
-                    </button>
+                <div key={index} className="flex items-center gap-2">
+                  <div className="flex-1 bg-gray-100 rounded-xl p-3 flex items-center">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                    <input
+                      type="text"
+                      value={feature}
+                      onChange={(e) => updateFeature(index, e.target.value)}
+                      placeholder="Enter feature..."
+                      className="flex-1 bg-transparent outline-none"
+                    />
                   </div>
-                )
+                  <button
+                    type="button"
+                    onClick={() => removeFeature(index)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <FiX size={18} />
+                  </button>
+                </div>
               ))}
             </div>
 
@@ -523,7 +711,7 @@ const UpdateCourse = () => {
             </p>
           </motion.div>
 
-          {/* Enrollment Period */}
+          {/* Course Dates Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -531,46 +719,106 @@ const UpdateCourse = () => {
             className="bg-white rounded-2xl shadow-lg p-6"
           >
             <h2 className="text-xl font-bold text-gray-800 mb-3 flex items-center">
-              <FiCalendar className="mr-2" /> Enrollment Period
+              <FiCalendar className="mr-2" /> Course Dates {!isUpcoming && "*"}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Start Date
-                </label>
-                <input
-                  type="datetime-local"
-                  value={enrollmentStart}
-                  onChange={(e) => setEnrollmentStart(e.target.value)}
-                  className="w-full p-4 bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
-                  required
-                />
+            
+            {isUpcoming ? (
+              <div className="border-2 border-dashed border-purple-200 bg-purple-50 rounded-xl p-4">
+                <div className="flex items-start">
+                  <FiInfo className="text-purple-500 mt-1 mr-3 shrink-0" />
+                  <div>
+                    <p className="text-purple-800 font-medium">Dates Optional for Coming Soon Course</p>
+                    <p className="text-purple-600 text-sm mt-1">
+                      You can add or update dates. They are optional for coming soon courses.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Enrollment Start
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={enrollmentStart}
+                          onChange={(e) => setEnrollmentStart(e.target.value)}
+                          className="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-purple-300 outline-none border border-purple-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Enrollment End
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={enrollmentEnd}
+                          onChange={(e) => setEnrollmentEnd(e.target.value)}
+                          className="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-purple-300 outline-none border border-purple-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Course Start
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={courseStart}
+                          onChange={(e) => setCourseStart(e.target.value)}
+                          className="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-purple-300 outline-none border border-purple-200"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  End Date
-                </label>
-                <input
-                  type="datetime-local"
-                  value={enrollmentEnd}
-                  onChange={(e) => setEnrollmentEnd(e.target.value)}
-                  className="w-full p-4 bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Course Start
-                </label>
-                <input
-                  type="datetime-local"
-                  value={courseStart}
-                  onChange={(e) => setCourseStart(e.target.value)}
-                  className="w-full p-4 bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
-                  required
-                />
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Enrollment Start *
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={enrollmentStart}
+                      onChange={(e) => setEnrollmentStart(e.target.value)}
+                      className="w-full p-3 bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Enrollment End *
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={enrollmentEnd}
+                      onChange={(e) => setEnrollmentEnd(e.target.value)}
+                      className="w-full p-3 bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Course Start *
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={courseStart}
+                      onChange={(e) => setCourseStart(e.target.value)}
+                      className="w-full p-3 bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                {/* Date Validation Error */}
+                {dateError && (
+                  <div className="mt-3 flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-xl">
+                    <FiAlertCircle size={18} />
+                    <span className="text-sm">{dateError}</span>
+                  </div>
+                )}
+              </>
+            )}
           </motion.div>
 
           {/* Teachers Selection */}
@@ -581,47 +829,46 @@ const UpdateCourse = () => {
             className="bg-white rounded-2xl shadow-lg p-6"
           >
             <h2 className="text-xl font-bold text-gray-800 mb-3">
-              Select Teachers
+              Select Teachers *
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-              {teachers.map((teacher) => (
-                <label
-                  key={teacher._id}
-                  className={`flex items-center p-3 border rounded-xl cursor-pointer transition ${
-                    selectedTeachers.includes(teacher._id)
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200 hover:bg-gray-50"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedTeachers.includes(teacher._id)}
-                    onChange={() => handleTeacherSelection(teacher._id)}
-                    className="hidden"
-                  />
-                  <div
-                    className={`w-4 h-4 border rounded mr-3 flex items-center justify-center ${
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-1">
+              {teachers.length > 0 ? (
+                teachers.map((teacher) => (
+                  <label
+                    key={teacher._id}
+                    className={`flex items-center p-3 border rounded-xl cursor-pointer transition ${
+                      selectedTeachers.includes(teacher._id)
+                        ? "border-green-500 bg-green-50"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedTeachers.includes(teacher._id)}
+                      onChange={() => handleTeacherSelection(teacher._id)}
+                      className="hidden"
+                    />
+                    <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
                       selectedTeachers.includes(teacher._id)
                         ? "bg-green-500 border-green-500"
                         : "border-gray-300"
-                    }`}
-                  >
-                    {selectedTeachers.includes(teacher._id) && (
-                      <span className="text-white text-xs">✓</span>
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">{teacher.name}</p>
-                    <p className="text-sm text-gray-600">{teacher.email}</p>
-                  </div>
-                </label>
-              ))}
+                    }`}>
+                      {selectedTeachers.includes(teacher._id) && (
+                        <FiCheck className="text-white text-xs" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">{teacher.name}</p>
+                      <p className="text-sm text-gray-600">{teacher.email}</p>
+                    </div>
+                  </label>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4 col-span-2">
+                  No teachers available
+                </p>
+              )}
             </div>
-            {teachers.length === 0 && (
-              <p className="text-gray-500 text-center py-4">
-                No teachers available
-              </p>
-            )}
           </motion.div>
 
           {/* Description */}
@@ -632,12 +879,18 @@ const UpdateCourse = () => {
             className="bg-white rounded-2xl shadow-lg p-6"
           >
             <h2 className="text-xl font-bold text-gray-800 mb-3">
-              Course Description
+              Course Description *
             </h2>
             <div
               ref={editorRef}
-              className="bg-gray-100 rounded-xl min-h-75 p-3"
+              className="bg-gray-100 rounded-xl min-h-64 p-4 quill-editor"
             ></div>
+            <style jsx>{`
+              .quill-editor .ql-editor {
+                min-height: 200px;
+                font-size: 16px;
+              }
+            `}</style>
           </motion.div>
         </div>
 
@@ -654,15 +907,25 @@ const UpdateCourse = () => {
             </h2>
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center mb-4">
               {preview ? (
-                <div>
+                <div className="relative">
                   <img
                     src={preview}
                     alt="Preview"
                     className="w-full h-48 object-cover rounded-lg mb-4"
+                    onError={(e) => {
+                      e.target.src = "/default-course.jpg";
+                    }}
                   />
-                  <p className="text-sm text-gray-500 mb-2">
-                    Current thumbnail
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCover(null);
+                      setPreview(course?.thumbnail || null);
+                    }}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  >
+                    <FiX size={16} />
+                  </button>
                 </div>
               ) : (
                 <div className="py-8">
@@ -674,21 +937,26 @@ const UpdateCourse = () => {
                 </div>
               )}
 
-              <label className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition cursor-pointer">
+              <label className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition cursor-pointer">
                 <FiUpload className="mr-2" />
-                {preview ? "Change Image" : "Upload"}
+                {preview && preview !== course?.thumbnail ? "Change Image" : "Upload Image"}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
                   onChange={handleImageChange}
                   name="cover"
                   className="hidden"
                 />
               </label>
+              {course?.thumbnail && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Original image will be kept if no new image is uploaded
+                </p>
+              )}
             </div>
           </motion.div>
 
-          {/* Featured Course */}
+          {/* Course Options */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -698,34 +966,52 @@ const UpdateCourse = () => {
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
               <FiStar className="mr-2" /> Course Options
             </h2>
-            <label className="flex items-center cursor-pointer">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={featured}
-                  onChange={(e) => setFeatured(e.target.checked)}
-                  className="hidden"
-                />
-                <div
-                  className={`w-12 h-6 rounded-full transition ${
-                    featured ? "bg-green-500" : "bg-gray-300"
-                  }`}
-                ></div>
-                <div
-                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                    featured
-                      ? "transform translate-x-7"
-                      : "transform translate-x-1"
-                  }`}
-                ></div>
+            
+            {/* Featured Course */}
+            <div className="mb-4">
+              <label className="flex items-center cursor-pointer">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={featured}
+                    onChange={(e) => setFeatured(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div className={`block w-14 h-8 rounded-full transition ${
+                    featured ? "bg-amber-500" : "bg-gray-300"
+                  }`}></div>
+                  <div className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform ${
+                    featured ? "transform translate-x-6" : ""
+                  }`}></div>
+                </div>
+                <span className="ml-3 text-gray-700 font-medium">
+                  Featured Course
+                </span>
+              </label>
+              <p className="text-sm text-gray-500 mt-2">
+                Featured courses will be highlighted on the homepage
+              </p>
+            </div>
+
+            {/* Course Mode Indicator */}
+            <div className={`mt-4 p-4 rounded-xl ${
+              isUpcoming ? 'bg-purple-50 border border-purple-200' : 'bg-gray-50 border border-gray-200'
+            }`}>
+              <h3 className="font-medium text-gray-800 mb-2">Course Mode:</h3>
+              <div className={`inline-flex items-center px-3 py-1 rounded-full ${
+                isUpcoming ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
+              }`}>
+                <span className={`w-2 h-2 rounded-full mr-2 ${
+                  isUpcoming ? 'bg-purple-500' : 'bg-green-500'
+                }`}></span>
+                {isUpcoming ? "Coming Soon Course" : "Regular Course"}
               </div>
-              <span className="ml-3 text-gray-700 font-medium">
-                Featured Course
-              </span>
-            </label>
-            <p className="text-sm text-gray-500 mt-2">
-              Featured courses will be highlighted on the homepage
-            </p>
+              <p className="text-sm text-gray-600 mt-2">
+                {isUpcoming 
+                  ? "This course will show as 'Coming Soon' and dates are optional."
+                  : "This course requires all dates to be set."}
+              </p>
+            </div>
           </motion.div>
 
           {/* Course Info */}
@@ -740,15 +1026,30 @@ const UpdateCourse = () => {
             </h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
+                <span className="text-gray-600">Course ID:</span>
+                <span className="font-medium text-gray-800">{id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Current Status:</span>
+                <span className={`font-medium px-2 py-1 rounded ${
+                  isUpcoming ? 'bg-purple-100 text-purple-800' :
+                  status === 'published' ? 'bg-green-100 text-green-800' :
+                  status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {isUpcoming ? 'Coming Soon' : (status || 'N/A')}
+                </span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-600">Created:</span>
                 <span className="font-medium">
-                  {new Date(course?.createdAt).toLocaleDateString()}
+                  {course?.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Last Updated:</span>
                 <span className="font-medium">
-                  {new Date(course?.updatedAt).toLocaleDateString()}
+                  {course?.updatedAt ? new Date(course.updatedAt).toLocaleDateString() : 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -758,16 +1059,21 @@ const UpdateCourse = () => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Rating:</span>
+                <span className="text-gray-600">Students:</span>
                 <span className="font-medium">
-                  {course?.averageRating || 0} ⭐ ({course?.ratingCount || 0}{" "}
-                  reviews)
+                  {course?.studentCount || 0}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Features:</span>
+                <span className="text-gray-600">Rating:</span>
                 <span className="font-medium">
-                  {features.filter(f => f.trim()).length}
+                  {course?.averageRating?.toFixed(1) || 0} ⭐ ({course?.ratingCount || 0} reviews)
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Active Features:</span>
+                <span className="font-medium">
+                  {features.filter(f => f && f.trim()).length}
                 </span>
               </div>
             </div>
@@ -778,15 +1084,24 @@ const UpdateCourse = () => {
             type="submit"
             disabled={loading}
             whileTap={{ scale: 0.97 }}
-            className={`w-full flex justify-center items-center py-3 mb-8 bg-green-600 text-white rounded-xl hover:bg-green-700 transition shadow-md ${
+            className={`w-full flex justify-center items-center py-4 mb-8 ${
+              isUpcoming ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'
+            } text-white rounded-xl transition shadow-md ${
               loading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
             }`}
           >
             {loading ? (
-              "Updating Course..."
+              <div className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {isUpcoming ? "Updating Coming Soon Course..." : "Updating Course..."}
+              </div>
             ) : (
               <>
-                <FiSave className="mr-2" /> Update Course
+                <FiSave className="mr-2" /> 
+                {isUpcoming ? "Update Coming Soon Course" : "Update Course"}
               </>
             )}
           </motion.button>

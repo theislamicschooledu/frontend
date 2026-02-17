@@ -23,6 +23,8 @@ import {
   FiChevronUp,
   FiEdit3,
   FiCheck,
+  FiCalendar,
+  FiInfo
 } from "react-icons/fi";
 import { FaChalkboardTeacher } from "react-icons/fa";
 import { Link, useParams } from "react-router-dom";
@@ -41,9 +43,15 @@ const CourseDetailsTeacher = () => {
   const fetchCourseDetails = useCallback(async () => {
     try {
       setLoading(true);
-      const { data } = await api.get(`/courses/teacherCourses/${id}`);
+      const { data } = await api.get(`/courses/teacher/courses/${id}`); // API endpoint আপডেট
 
-      setCourse(data);
+      if (data) {
+        // ব্যাকএন্ড থেকে আসা ডেটা সেট করা
+        setCourse(data.course || data.data || data);
+      } else if (data.success) {
+        // যদি API success true ফরম্যাটে ডেটা দেয়
+        setCourse(data.course || data.data || data);
+      }
     } catch (err) {
       toast.error("Failed to load course details");
       console.error(err);
@@ -58,11 +66,11 @@ const CourseDetailsTeacher = () => {
       const { data } = await api.get(`/courses/lectures/course/${id}`);
 
       if (data.success) {
-        setLectures(data.lectures);
+        setLectures(data.lectures || data.data || []);
 
         // Initialize expanded state for all lectures
         const initialExpandedState = {};
-        data.lectures.forEach((lecture) => {
+        (data.lectures || data.data || []).forEach((lecture) => {
           initialExpandedState[lecture._id] = false;
         });
         setExpandedLectures(initialExpandedState);
@@ -109,7 +117,7 @@ const CourseDetailsTeacher = () => {
   const handleDeleteResource = async (lectureId, resourceId) => {
     try {
       const { data } = await api.delete(
-        `/lectures/${lectureId}/resources/${resourceId}`
+        `/courses/lectures/${lectureId}/resources/${resourceId}`
       );
       if (data.success) {
         toast.success("✅ Resource deleted successfully!");
@@ -132,20 +140,30 @@ const CourseDetailsTeacher = () => {
     }
   };
 
-  const getStatusBadge = (status, featured) => {
-    const baseClasses =
-      "px-3 py-1 rounded-full text-xs font-medium text-white inline-block";
+  const getStatusBadge = (status, featured, isUpcoming = false) => {
+    const baseClasses = "px-3 py-1 rounded-full text-xs font-medium text-white inline-block mr-2 mb-1";
 
     const badges = [];
 
+    // Featured badge
     if (featured) {
       badges.push(
-        <span key="featured" className={`${baseClasses} bg-amber-500 mr-2`}>
+        <span key="featured" className={`${baseClasses} bg-amber-500`}>
           Featured
         </span>
       );
     }
 
+    // Upcoming badge (if true)
+    if (isUpcoming) {
+      badges.push(
+        <span key="upcoming" className={`${baseClasses} bg-blue-500`}>
+          Upcoming
+        </span>
+      );
+    }
+
+    // Status badge
     switch (status) {
       case "published":
         badges.push(
@@ -176,14 +194,36 @@ const CourseDetailsTeacher = () => {
         );
     }
 
-    return <div className="flex items-center flex-wrap gap-1">{badges}</div>;
+    return <div className="flex flex-wrap items-center">{badges}</div>;
   };
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "Not Set";
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch (error) {
+      return "Invalid Date";
+    }
+  };
+
+  // Check if course is upcoming (ব্যাকএন্ডের isUpcoming field ব্যবহার করে)
+  const isUpcomingCourse = course?.isUpcoming === true;
 
   if (loading) {
     return (
       <main className="flex-1 overflow-y-auto p-6 bg-gray-100">
         <div className="flex justify-center items-center h-64">
-          <div className="text-gray-500">Loading course details...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
         </div>
       </main>
     );
@@ -224,6 +264,18 @@ const CourseDetailsTeacher = () => {
             Back to Courses
           </Link>
         </div>
+        <div className="flex gap-2 mt-4 md:mt-0">
+          {/* Teacher সবসময় edit করতে পারবে যদি status published না হয় অথবা upcoming হয় */}
+          {(course.status !== "published" || isUpcomingCourse) && (
+            <Link
+              to={`/teacher/courses/update/${course._id}`}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+            >
+              <FiEdit className="mr-2" />
+              Edit Course
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="mb-8">
@@ -248,11 +300,38 @@ const CourseDetailsTeacher = () => {
                   <FiBookOpen className="text-4xl text-gray-400" />
                 </div>
               )}
-              <div className="absolute top-4 right-4 flex gap-2">
-                {getStatusBadge(course.status, course.featured)}
+              <div className="absolute top-4 right-4">
+                {getStatusBadge(course.status, course.featured, course.isUpcoming)}
               </div>
             </div>
           </div>
+
+          {/* Upcoming Info Banner */}
+          {isUpcomingCourse && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-blue-50 border border-blue-200 rounded-2xl p-6"
+            >
+              <div className="flex items-start gap-3">
+                <FiInfo className="text-blue-500 text-xl mt-1 shrink-0" />
+                <div>
+                  <h3 className="font-bold text-blue-800 text-lg mb-2">
+                    Upcoming Course
+                  </h3>
+                  <p className="text-blue-700 mb-3">
+                    This course is marked as "Upcoming". Students will see an "Upcoming" badge and can express interest.
+                  </p>
+                  <Link
+                    to={`/teacher/courses/update/${course._id}`}
+                    className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-sm"
+                  >
+                    Add Dates & Publish
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Course Description */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -554,7 +633,7 @@ const CourseDetailsTeacher = () => {
                   <span className="text-gray-700">Students Enrolled</span>
                 </div>
                 <span className="font-bold text-gray-800">
-                  {course.enrolledStudents || 0}
+                  {course.studentCount || 0}
                 </span>
               </div>
 
@@ -579,7 +658,7 @@ const CourseDetailsTeacher = () => {
                 </div>
                 <div className="text-right">
                   <span className="font-bold text-gray-800">
-                    {course.averageRating || 0}
+                    {course.averageRating?.toFixed(1) || 0}
                   </span>
                   <span className="text-sm text-gray-600 ml-1">
                     ({course.ratingCount || 0} reviews)
@@ -607,7 +686,7 @@ const CourseDetailsTeacher = () => {
                   <span className="text-gray-700">Price</span>
                 </div>
                 <span className="font-bold text-gray-800">
-                  {course.price || 0} tk
+                  ${course.price || 0}
                 </span>
               </div>
             </div>
@@ -625,69 +704,76 @@ const CourseDetailsTeacher = () => {
                   {course.category?.name || "Uncategorized"}
                 </p>
               </div>
-              <div>
-                <span className="text-sm text-gray-600">Enrollment Start</span>
-                <p className="font-medium text-gray-800">
-                  {new Date(course.enrollmentStart).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Enrollment End</span>
-                <p className="font-medium text-gray-800">
-                  {new Date(course.enrollmentEnd).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Course Start At</span>
-                <p className="font-medium text-gray-800">
-                  {new Date(course.courseStart).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </p>
-              </div>
+              
+              {/* Dates Section with Upcoming Indicator */}
+              {isUpcomingCourse ? (
+                <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FiInfo className="text-blue-500" />
+                    <span className="text-sm font-medium text-blue-800">
+                      Upcoming Course
+                    </span>
+                  </div>
+                  {course.enrollmentStart || course.enrollmentEnd || course.courseStart ? (
+                    <>
+                      <p className="text-sm text-blue-700 mb-1">
+                        Tentative Dates:
+                      </p>
+                      {course.enrollmentStart && (
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Enrollment Start:</span> {formatDate(course.enrollmentStart)}
+                        </p>
+                      )}
+                      {course.enrollmentEnd && (
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Enrollment End:</span> {formatDate(course.enrollmentEnd)}
+                        </p>
+                      )}
+                      {course.courseStart && (
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Course Start:</span> {formatDate(course.courseStart)}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-blue-600">
+                      Dates not set. Course is marked as "Upcoming".
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <span className="text-sm text-gray-600">Enrollment Start</span>
+                    <p className="font-medium text-gray-800">
+                      {formatDate(course.enrollmentStart)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-600">Enrollment End</span>
+                    <p className="font-medium text-gray-800">
+                      {formatDate(course.enrollmentEnd)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-600">Course Start</span>
+                    <p className="font-medium text-gray-800">
+                      {formatDate(course.courseStart)}
+                    </p>
+                  </div>
+                </>
+              )}
+              
               <div>
                 <span className="text-sm text-gray-600">Created</span>
                 <p className="font-medium text-gray-800">
-                  {new Date(course.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
+                  {formatDate(course.createdAt)}
                 </p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Last Updated</span>
                 <p className="font-medium text-gray-800">
-                  {new Date(course.updatedAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
+                  {formatDate(course.updatedAt)}
                 </p>
               </div>
             </div>
@@ -706,9 +792,19 @@ const CourseDetailsTeacher = () => {
                 <FiPlus />
                 Add Lecture
               </Link>
+              
+              {isUpcomingCourse && (
+                <Link
+                  to={`/teacher/courses/update/${course._id}`}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+                >
+                  <FiCalendar />
+                  Add Dates & Publish
+                </Link>
+              )}
 
               <Link
-                to={`/teacher/${course._id}`}
+                to={`/course/${course._id}`}
                 target="_blank"
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition"
               >

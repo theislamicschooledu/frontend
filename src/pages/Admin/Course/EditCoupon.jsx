@@ -34,12 +34,15 @@ const EditCoupon = () => {
       try {
         setFetchLoading(true);
         const [courseRes, couponRes] = await Promise.all([
-          api.get(`/courses/${courseId}`),
+          api.get(`/courses/details/${courseId}`),
           api.get(`/coupons/${couponId}`)
         ]);
 
-        if (courseRes.data) {
-          setCourse(courseRes.data);
+        console.log(courseRes);
+        
+
+        if (courseRes.data.success) {
+          setCourse(courseRes.data.data);
         }
 
         if (couponRes.data.success) {

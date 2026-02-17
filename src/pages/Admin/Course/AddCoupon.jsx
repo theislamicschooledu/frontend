@@ -31,9 +31,10 @@ const AddCoupon = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const res = await api.get(`/courses/courseDetails/${courseId}`);
-        if (res.data) {
-          setCourse(res.data);
+        const res = await api.get(`/courses/details/${courseId}`);
+        console.log(res)
+        if (res.data.success) {
+          setCourse(res.data.data);
         }
       } catch (error) {
         console.error(error)
@@ -139,6 +140,9 @@ const AddCoupon = () => {
       };
     }
   };
+
+  console.log(course);
+  
 
   const discountPreview = calculateDiscount();
 

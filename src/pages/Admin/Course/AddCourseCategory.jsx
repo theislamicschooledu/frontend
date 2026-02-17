@@ -13,9 +13,10 @@ const AddCourseCategory = () => {
   const fetchCategory = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/courses/courseCategory");
+      const res = await api.get("/courses/category");
+
       if (res.data.success) {
-        setAllCategory(res.data.categories);
+        setAllCategory(res.data.data);
       } else {
         toast.error(res?.data?.message);
       }
@@ -35,7 +36,7 @@ const AddCourseCategory = () => {
     if (!category.trim()) return;
     setLoading(true);
     try {
-      const res = await api.post("/courses/courseCategory", { name: category });
+      const res = await api.post("/courses/category", { name: category });
       if (res.data.success) {
         toast.success(res.data.message);
         setCategory("");
@@ -53,7 +54,7 @@ const AddCourseCategory = () => {
   const handleDelete = async (id) => {
     setLoading(true);
     try {
-      const res = await api.delete(`/courses/courseCategory/${id}`);
+      const res = await api.delete(`/courses/category/${id}`);
       if (res.data.success) {
         toast.success(res.data.message);
         setCategory("");

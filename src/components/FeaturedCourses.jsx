@@ -12,9 +12,9 @@ const FeaturedCourses = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await api.get("/courses/featuredCourse");
+      const res = await api.get("/courses/featured");
       if (res.data.success) {
-        setCourses(res.data.courses || []);
+        setCourses(res.data.data || []);
       } else {
         setError("Failed to load courses");
         toast.error("Failed to load featured courses");

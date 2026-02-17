@@ -11,10 +11,10 @@ const Carousel = () => {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/courses/featuredCourse");      
+      const res = await api.get("/courses/featured");
       
       if (res.data.success) {
-        setCourses(res.data.courses);
+        setCourses(res.data.data);
         setLoading(false);
       }
     } catch (error) {
@@ -78,13 +78,13 @@ const Carousel = () => {
         return {
           transform: "translateX(-75%) scale(0.85) rotateY(-8deg)",
           zIndex: 20,
-          opacity: 0.8,
+          opacity: 1,
         };
       } else {
         return {
           transform: "translateX(75%) scale(0.85) rotateY(8deg)",
           zIndex: 20,
-          opacity: 0.8,
+          opacity: 1,
         };
       }
     } else if (Math.abs(relativePosition) === 2) {
@@ -92,13 +92,13 @@ const Carousel = () => {
         return {
           transform: "translateX(-110%) scale(0.75) rotateY(-12deg)",
           zIndex: 10,
-          opacity: 0.5,
+          opacity: 1,
         };
       } else {
         return {
           transform: "translateX(110%) scale(0.75) rotateY(12deg)",
           zIndex: 10,
-          opacity: 0.5,
+          opacity: 1,
         };
       }
     } else {
@@ -106,13 +106,13 @@ const Carousel = () => {
         return {
           transform: "translateX(-135%) scale(0.65) rotateY(-15deg)",
           zIndex: 5,
-          opacity: 0.3,
+          opacity: 1,
         };
       } else {
         return {
           transform: "translateX(135%) scale(0.65) rotateY(15deg)",
           zIndex: 5,
-          opacity: 0.3,
+          opacity: 1,
         };
       }
     }
@@ -142,9 +142,9 @@ const Carousel = () => {
     const gradients = [
       "from-blue-500 to-purple-600",
       "from-green-500 to-teal-600", 
+      "from-teal-500 to-blue-600",
       "from-orange-500 to-red-600",
       "from-purple-500 to-pink-600",
-      "from-teal-500 to-blue-600",
     ];
     return gradients[index % gradients.length];
   };

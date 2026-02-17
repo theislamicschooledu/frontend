@@ -23,12 +23,51 @@ import {
   FiChevronUp,
   FiEdit3,
   FiCheck,
+  FiCalendar,
+  FiInfo,
+  FiAlertCircle
 } from "react-icons/fi";
-import { FaChalkboardTeacher } from "react-icons/fa";
+import { FaChalkboardTeacher, FaGraduationCap } from "react-icons/fa";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../../utils/axios";
 import ConfirmModal from "../../../components/ConfirmModal";
+
+// Course Status Badge Component
+const CourseStatusBadge = ({ status, isUpcoming, featured }) => {
+  const getStatusConfig = (status) => {
+    switch (status) {
+      case 'coming_soon':
+        return { text: 'Coming Soon', bg: 'bg-purple-100', textColor: 'text-purple-700', icon: FiClock };
+      case 'upcoming':
+        return { text: 'Upcoming', bg: 'bg-blue-100', textColor: 'text-blue-700', icon: FiCalendar };
+      case 'enrollment_open':
+        return { text: 'Enrollment Open', bg: 'bg-green-100', textColor: 'text-green-700', icon: FiUsers };
+      case 'enrollment_closed':
+        return { text: 'Enrollment Closed', bg: 'bg-orange-100', textColor: 'text-orange-700', icon: FiXCircle };
+      case 'course_started':
+        return { text: 'Course Started', bg: 'bg-teal-100', textColor: 'text-teal-700', icon: FaGraduationCap };
+      case 'published':
+        return { text: 'Published', bg: 'bg-green-100', textColor: 'text-green-700', icon: FiCheckCircle };
+      case 'pending':
+        return { text: 'Pending', bg: 'bg-yellow-100', textColor: 'text-yellow-700', icon: FiClock };
+      case 'rejected':
+        return { text: 'Rejected', bg: 'bg-red-100', textColor: 'text-red-700', icon: FiXCircle };
+      default:
+        return { text: status || 'Unknown', bg: 'bg-gray-100', textColor: 'text-gray-700', icon: FiInfo };
+    }
+  };
+
+  const config = getStatusConfig(status);
+  const Icon = config.icon;
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${config.bg} ${config.textColor}`}>
+      <Icon size={14} />
+      {config.text}
+    </span>
+  );
+};
 
 const CourseDetailsAdmin = () => {
   const { id } = useParams();
@@ -40,13 +79,21 @@ const CourseDetailsAdmin = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalAction, setModalAction] = useState(null);
   const [expandedLectures, setExpandedLectures] = useState({});
+  const [currentStatus, setCurrentStatus] = useState(null);
 
   const fetchCourseDetails = useCallback(async () => {
     try {
       setLoading(true);
-      const { data } = await api.get(`/courses/${id}`);
-
-      setCourse(data);
+      // ফিক্সড: সঠিক API endpoint ব্যবহার করা হয়েছে
+      const { data } = await api.get(`/courses/details/${id}`);
+      
+      if (data.success) {
+        const courseData = data.data || data.course;
+        setCourse(courseData);
+        setCurrentStatus(courseData.currentStatus);
+      } else {
+        toast.error("Failed to load course details");
+      }
     } catch (err) {
       toast.error("Failed to load course details");
       console.error(err);
@@ -61,11 +108,12 @@ const CourseDetailsAdmin = () => {
       const { data } = await api.get(`/courses/lectures/course/${id}`);
 
       if (data.success) {
-        setLectures(data.lectures);
+        const lecturesData = data.data || data.lectures || [];
+        setLectures(lecturesData);
 
         // Initialize expanded state for all lectures
         const initialExpandedState = {};
-        data.lectures.forEach((lecture) => {
+        lecturesData.forEach((lecture) => {
           initialExpandedState[lecture._id] = false;
         });
         setExpandedLectures(initialExpandedState);
@@ -107,6 +155,8 @@ const CourseDetailsAdmin = () => {
         setLectures((prev) =>
           prev.filter((lecture) => lecture._id !== lectureId)
         );
+        // Update course lecture count
+        fetchCourseDetails();
       }
     } catch (error) {
       console.error(error);
@@ -117,7 +167,7 @@ const CourseDetailsAdmin = () => {
   const handleDeleteResource = async (lectureId, resourceId) => {
     try {
       const { data } = await api.delete(
-        `/lectures/${lectureId}/resources/${resourceId}`
+        `/courses/lectures/${lectureId}/resources/${resourceId}`
       );
       if (data.success) {
         toast.success("✅ Resource deleted successfully!");
@@ -143,56 +193,92 @@ const CourseDetailsAdmin = () => {
   const confirmAction = async () => {
     try {
       setLoading(true);
+      let updateData = {};
 
       switch (modalAction) {
         case "delete":
           await api.delete(`/courses/${id}`);
           toast.success("🗑️ Course deleted successfully");
           navigate("/admin/courses");
-          break;
+          return; // Return early to avoid fetching course details
 
         case "publish":
-          await api.put(`/admin/courseStatus/${id}`, {
+          updateData = {
             status: "published",
-          });
-          toast.success("✅ Course published successfully");
+            isUpcoming: false
+          };
+          break;
+
+        case "publish_as_upcoming":
+          updateData = {
+            status: "published",
+            isUpcoming: true
+          };
           break;
 
         case "unpublish":
-          await api.put(`/admin/courseStatus/${id}`, {
+          updateData = {
             status: "pending",
-          });
-          toast.success("🕒 Course unpublished successfully");
+          };
           break;
 
         case "feature":
-          await api.put(`/admin/courseFeature/${id}`, {
+          updateData = {
             featured: true,
-          });
-          toast.success("🌟 Course featured successfully");
+          };
           break;
 
         case "unfeature":
-          await api.put(`/admin/courseFeature/${id}`, {
+          updateData = {
             featured: false,
-          });
-          toast.success("⭐ Course unfeatured successfully");
+          };
           break;
 
         case "reject":
-          await api.put(`/admin/courseStatus/${id}`, {
+          updateData = {
             status: "rejected",
-          });
-          toast.success("❌ Course rejected successfully");
+          };
+          break;
+
+        case "mark_upcoming":
+          updateData = {
+            isUpcoming: true,
+            status: "published"
+          };
+          break;
+
+        case "remove_upcoming":
+          updateData = {
+            isUpcoming: false,
+            status: "published"
+          };
           break;
 
         default:
           break;
       }
 
+      if (Object.keys(updateData).length > 0) {
+        await api.put(`/courses/${id}`, updateData);
+        
+        const actionMessages = {
+          publish: "✅ Course published successfully",
+          publish_as_upcoming: "⏳ Course published as Coming Soon",
+          unpublish: "🕒 Course unpublished successfully",
+          feature: "🌟 Course featured successfully",
+          unfeature: "⭐ Course unfeatured successfully",
+          reject: "❌ Course rejected successfully",
+          mark_upcoming: "⏳ Course marked as Coming Soon",
+          remove_upcoming: "📅 Course removed from Coming Soon"
+        };
+        
+        toast.success(actionMessages[modalAction] || "✅ Action completed successfully");
+      }
+
       fetchCourseDetails();
     } catch (error) {
-      toast.error(error.message);
+      const errorMsg = error.response?.data?.message || error.message;
+      toast.error(`❌ ${errorMsg}`);
     } finally {
       setLoading(false);
       setModalOpen(false);
@@ -206,12 +292,17 @@ const CourseDetailsAdmin = () => {
         return {
           title: "Delete Course",
           message:
-            "Are you sure you want to delete this course? This action cannot be undone.",
+            "Are you sure you want to delete this course? This action cannot be undone. All lectures and resources will also be deleted.",
         };
       case "publish":
         return {
           title: "Publish Course",
-          message: "Publish this course and make it available to students?",
+          message: "Publish this course as a regular course? Students will be able to enroll.",
+        };
+      case "publish_as_upcoming":
+        return {
+          title: "Publish as Coming Soon",
+          message: "Publish this course as Coming Soon? Students will see it with a 'Coming Soon' badge.",
         };
       case "unpublish":
         return {
@@ -223,7 +314,7 @@ const CourseDetailsAdmin = () => {
         return {
           title: "Feature Course",
           message:
-            "Feature this course? It will be highlighted on the platform.",
+            "Feature this course? It will be highlighted on the homepage.",
         };
       case "unfeature":
         return {
@@ -235,63 +326,84 @@ const CourseDetailsAdmin = () => {
           title: "Reject Course",
           message: "Reject this course? It will be marked as rejected.",
         };
+      case "mark_upcoming":
+        return {
+          title: "Mark as Coming Soon",
+          message: "Mark this course as Coming Soon? It will show 'Coming Soon' badge on frontend.",
+        };
+      case "remove_upcoming":
+        return {
+          title: "Remove Coming Soon Status",
+          message: "Remove Coming Soon status? This will convert it to a regular course.",
+        };
       default:
         return { title: "", message: "" };
     }
   };
 
-  const getStatusBadge = (status, featured) => {
-    const baseClasses =
-      "px-3 py-1 rounded-full text-xs font-medium text-white inline-block";
+  const getStatusBadge = (status, featured, isUpcoming) => {
+    const baseClasses = "px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1 mr-2 mb-1";
 
     const badges = [];
 
+    // Featured badge
     if (featured) {
       badges.push(
-        <span key="featured" className={`${baseClasses} bg-amber-500 mr-2`}>
+        <span key="featured" className={`${baseClasses} bg-amber-100 text-amber-700`}>
+          <FiStar size={12} />
           Featured
         </span>
       );
     }
 
-    switch (status) {
-      case "published":
-        badges.push(
-          <span key="published" className={`${baseClasses} bg-green-500`}>
-            Published
-          </span>
-        );
-        break;
-      case "pending":
-        badges.push(
-          <span key="pending" className={`${baseClasses} bg-yellow-500`}>
-            Pending
-          </span>
-        );
-        break;
-      case "rejected":
-        badges.push(
-          <span key="rejected" className={`${baseClasses} bg-red-500`}>
-            Rejected
-          </span>
-        );
-        break;
-      default:
-        badges.push(
-          <span key="default" className={`${baseClasses} bg-gray-500`}>
-            {status || "Unknown"}
-          </span>
-        );
-    }
+    // Add CourseStatusBadge
+    badges.push(
+      <CourseStatusBadge 
+        key="status" 
+        status={status} 
+        isUpcoming={isUpcoming} 
+      />
+    );
 
-    return <div className="flex items-center flex-wrap gap-1">{badges}</div>;
+    return <div className="flex flex-wrap items-center">{badges}</div>;
   };
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "Not Set";
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch (error) {
+      return "Invalid Date";
+    }
+  };
+
+  // Format duration from weeks to readable format
+  const formatDuration = (weeks) => {
+    if (!weeks) return "Not specified";
+    return `${weeks} week${weeks > 1 ? "s" : ""}`;
+  };
+
+  // Check if course is coming soon
+  const isComingSoon = course?.currentStatus === 'coming_soon' || course?.isUpcoming === true;
 
   if (loading) {
     return (
       <main className="flex-1 overflow-y-auto p-6 bg-gray-100">
         <div className="flex justify-center items-center h-64">
-          <div className="text-gray-500">Loading course details...</div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <p className="text-gray-500 mt-4">Loading course details...</p>
+          </div>
         </div>
       </main>
     );
@@ -372,11 +484,63 @@ const CourseDetailsAdmin = () => {
                   <FiBookOpen className="text-4xl text-gray-400" />
                 </div>
               )}
-              <div className="absolute top-4 right-4 flex gap-2">
-                {getStatusBadge(course.status, course.featured)}
+              <div className="absolute top-4 right-4">
+                {getStatusBadge(course.status, course.featured, course.isUpcoming)}
               </div>
             </div>
           </div>
+
+          {/* Coming Soon Info Banner - আপডেট করা হয়েছে */}
+          {isComingSoon && (
+            <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6">
+              <div className="flex items-start gap-3">
+                <FiInfo className="text-purple-500 text-xl mt-1 shrink-0" />
+                <div>
+                  <h3 className="font-bold text-purple-800 text-lg mb-2">
+                    Coming Soon Course
+                  </h3>
+                  <p className="text-purple-700 mb-3">
+                    This course is marked as "Coming Soon". Students will see a "Coming Soon" badge and can express interest.
+                  </p>
+                  <div className="flex gap-2">
+                    {!course.enrollmentStart && !course.enrollmentEnd && !course.courseStart ? (
+                      <>
+                        <button
+                          onClick={() => openModal("remove_upcoming")}
+                          disabled
+                          className="px-4 py-2 bg-purple-400 text-white rounded-xl text-sm cursor-not-allowed"
+                          title="Add dates first to remove coming soon status"
+                        >
+                          Remove Coming Soon
+                        </button>
+                        <Link
+                          to={`/admin/courses/update/${course._id}`}
+                          className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-sm"
+                        >
+                          Add Dates
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => openModal("remove_upcoming")}
+                          className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition text-sm"
+                        >
+                          Remove Coming Soon
+                        </button>
+                        <button
+                          onClick={() => openModal("publish")}
+                          className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-sm"
+                        >
+                          Publish as Regular
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Course Description */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -386,7 +550,7 @@ const CourseDetailsAdmin = () => {
             <div
               className="prose prose-lg max-w-none text-gray-600"
               dangerouslySetInnerHTML={{
-                __html: course.description,
+                __html: course.description || "<p>No description available.</p>",
               }}
             />
           </div>
@@ -492,9 +656,9 @@ const CourseDetailsAdmin = () => {
                                 {lecture.resources?.length || 0} resources
                               </span>
                             </div>
-                            <span>
-                              {new Date(lecture.createdAt).toLocaleDateString()}
-                            </span>
+                            {lecture.duration && (
+                              <span>{lecture.duration} min</span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -547,69 +711,81 @@ const CourseDetailsAdmin = () => {
                                 <div className="flex items-center gap-3">
                                   <FiVideo className="text-gray-500" />
                                   <span className="text-sm text-gray-700">
-                                    Video URL
+                                    {lecture.videoUrl ? (
+                                      <a 
+                                        href={lecture.videoUrl} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:underline"
+                                      >
+                                        {lecture.videoUrl}
+                                      </a>
+                                    ) : (
+                                      "No video URL provided"
+                                    )}
                                   </span>
                                 </div>
-                                <a
-                                  href={lecture.videoUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
-                                >
-                                  <FiPlay size={14} />
-                                  Watch Video
-                                </a>
+                                {lecture.videoUrl && (
+                                  <a
+                                    href={lecture.videoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+                                  >
+                                    <FiPlay size={14} />
+                                    Watch Video
+                                  </a>
+                                )}
                               </div>
                             </div>
 
                             {/* Resources Section */}
-                            {lecture.resources &&
-                              lecture.resources.length > 0 && (
-                                <div>
-                                  <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
-                                    <FiFile className="text-blue-600" />
-                                    Resources ({lecture.resources.length})
-                                  </h4>
-                                  <div className="space-y-2">
-                                    {lecture.resources.map((resource) => (
-                                      <div
-                                        key={resource._id}
-                                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                                      >
-                                        <div className="flex items-center gap-3">
-                                          <FiFile className="text-gray-500" />
-                                          <span className="text-sm text-gray-700">
-                                            {resource.title}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <a
-                                            href={resource.fileUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
-                                          >
-                                            <FiDownload size={14} />
-                                            Download
-                                          </a>
-                                          <button
-                                            onClick={() =>
-                                              handleDeleteResource(
-                                                lecture._id,
-                                                resource._id
-                                              )
-                                            }
-                                            className="flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
-                                          >
-                                            <FiTrash2 size={14} />
-                                            Remove
-                                          </button>
-                                        </div>
+                            {lecture.resources && lecture.resources.length > 0 && (
+                              <div>
+                                <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
+                                  <FiFile className="text-blue-600" />
+                                  Resources ({lecture.resources.length})
+                                </h4>
+                                <div className="space-y-2">
+                                  {lecture.resources.map((resource) => (
+                                    <div
+                                      key={resource._id}
+                                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <FiFile className="text-gray-500" />
+                                        <span className="text-sm text-gray-700">
+                                          {resource.title}
+                                        </span>
                                       </div>
-                                    ))}
-                                  </div>
+                                      <div className="flex items-center gap-2">
+                                        <a
+                                          href={resource.fileUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+                                        >
+                                          <FiDownload size={14} />
+                                          Download
+                                        </a>
+                                        <button
+                                          onClick={() =>
+                                            handleDeleteResource(
+                                              lecture._id,
+                                              resource._id
+                                            )
+                                          }
+                                          className="flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
+                                        >
+                                          <FiTrash2 size={14} />
+                                          Remove
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
                                 </div>
-                              )}
+                              </div>
+                            )}
                           </div>
                         </motion.div>
                       )}
@@ -678,7 +854,7 @@ const CourseDetailsAdmin = () => {
                   <span className="text-gray-700">Students Enrolled</span>
                 </div>
                 <span className="font-bold text-gray-800">
-                  {course.enrolledStudents || 0}
+                  {course.studentCount || 0}
                 </span>
               </div>
 
@@ -703,7 +879,7 @@ const CourseDetailsAdmin = () => {
                 </div>
                 <div className="text-right">
                   <span className="font-bold text-gray-800">
-                    {course.averageRating || 0}
+                    {course.averageRating?.toFixed(1) || "0.0"}
                   </span>
                   <span className="text-sm text-gray-600 ml-1">
                     ({course.ratingCount || 0} reviews)
@@ -719,7 +895,7 @@ const CourseDetailsAdmin = () => {
                   <span className="text-gray-700">Duration</span>
                 </div>
                 <span className="font-bold text-gray-800">
-                  {course.duration || "N/A"} hours
+                  {formatDuration(course.duration)}
                 </span>
               </div>
 
@@ -731,7 +907,7 @@ const CourseDetailsAdmin = () => {
                   <span className="text-gray-700">Price</span>
                 </div>
                 <span className="font-bold text-gray-800">
-                  {course.price || 0} tk
+                  ৳{course.price || 0}
                 </span>
               </div>
             </div>
@@ -749,69 +925,76 @@ const CourseDetailsAdmin = () => {
                   {course.category?.name || "Uncategorized"}
                 </p>
               </div>
-              <div>
-                <span className="text-sm text-gray-600">Enrollment Start</span>
-                <p className="font-medium text-gray-800">
-                  {new Date(course.enrollmentStart).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Enrollment End</span>
-                <p className="font-medium text-gray-800">
-                  {new Date(course.enrollmentEnd).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Course Start At</span>
-                <p className="font-medium text-gray-800">
-                  {new Date(course.courseStart).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </p>
-              </div>
+              
+              {/* Dates Section with Coming Soon Indicator */}
+              {isComingSoon ? (
+                <div className="bg-purple-50 rounded-xl p-3 border border-purple-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FiInfo className="text-purple-500" />
+                    <span className="text-sm font-medium text-purple-800">
+                      Coming Soon Course
+                    </span>
+                  </div>
+                  {course.enrollmentStart || course.enrollmentEnd || course.courseStart ? (
+                    <>
+                      <p className="text-sm text-purple-700 mb-1">
+                        Tentative Dates (Optional):
+                      </p>
+                      {course.enrollmentStart && (
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Enrollment Start:</span> {formatDate(course.enrollmentStart)}
+                        </p>
+                      )}
+                      {course.enrollmentEnd && (
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Enrollment End:</span> {formatDate(course.enrollmentEnd)}
+                        </p>
+                      )}
+                      {course.courseStart && (
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Course Start:</span> {formatDate(course.courseStart)}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-purple-600">
+                      Dates not set. Course is marked as "Coming Soon".
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <span className="text-sm text-gray-600">Enrollment Start</span>
+                    <p className="font-medium text-gray-800">
+                      {formatDate(course.enrollmentStart)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-600">Enrollment End</span>
+                    <p className="font-medium text-gray-800">
+                      {formatDate(course.enrollmentEnd)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-600">Course Start</span>
+                    <p className="font-medium text-gray-800">
+                      {formatDate(course.courseStart)}
+                    </p>
+                  </div>
+                </>
+              )}
+              
               <div>
                 <span className="text-sm text-gray-600">Created</span>
                 <p className="font-medium text-gray-800">
-                  {new Date(course.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
+                  {formatDate(course.createdAt)}
                 </p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Last Updated</span>
                 <p className="font-medium text-gray-800">
-                  {new Date(course.updatedAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
+                  {formatDate(course.updatedAt)}
                 </p>
               </div>
             </div>
@@ -837,14 +1020,23 @@ const CourseDetailsAdmin = () => {
                 <FiEye size={16} />
                 View Coupons
               </Link>
-              {course.status === "pending" && (
+              
+              {/* Status-specific actions */}
+              {course.status === "pending" && !isComingSoon && (
                 <>
                   <button
                     onClick={() => openModal("publish")}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
                   >
                     <FiCheckCircle />
-                    Approve & Publish
+                    Publish as Regular
+                  </button>
+                  <button
+                    onClick={() => openModal("publish_as_upcoming")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
+                  >
+                    <FiCalendar />
+                    Publish as Coming Soon
                   </button>
                   <button
                     onClick={() => openModal("reject")}
@@ -856,7 +1048,7 @@ const CourseDetailsAdmin = () => {
                 </>
               )}
 
-              {course.status === "published" && (
+              {course.status === "published" && !isComingSoon && (
                 <>
                   <button
                     onClick={() => openModal("unpublish")}
@@ -864,6 +1056,13 @@ const CourseDetailsAdmin = () => {
                   >
                     <FiXCircle />
                     Unpublish
+                  </button>
+                  <button
+                    onClick={() => openModal("mark_upcoming")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
+                  >
+                    <FiCalendar />
+                    Mark as Coming Soon
                   </button>
                   {course.featured ? (
                     <button
@@ -886,13 +1085,47 @@ const CourseDetailsAdmin = () => {
               )}
 
               {course.status === "rejected" && (
-                <button
-                  onClick={() => openModal("publish")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
-                >
-                  <FiCheckCircle />
-                  Approve & Publish
-                </button>
+                <>
+                  <button
+                    onClick={() => openModal("publish")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
+                  >
+                    <FiCheckCircle />
+                    Publish as Regular
+                  </button>
+                  <button
+                    onClick={() => openModal("publish_as_upcoming")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
+                  >
+                    <FiCalendar />
+                    Publish as Coming Soon
+                  </button>
+                </>
+              )}
+
+              {isComingSoon && (
+                <>
+                  <button
+                    onClick={() => {
+                      if (!course.enrollmentStart || !course.enrollmentEnd || !course.courseStart) {
+                        toast.error("Please add all dates before converting to regular course");
+                        return;
+                      }
+                      openModal("publish");
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
+                  >
+                    <FiCheckCircle />
+                    Publish as Regular
+                  </button>
+                  <button
+                    onClick={() => openModal("remove_upcoming")}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition"
+                  >
+                    <FiXCircle />
+                    Remove Coming Soon
+                  </button>
+                </>
               )}
 
               <Link
@@ -915,8 +1148,10 @@ const CourseDetailsAdmin = () => {
         title={getModalText().title}
         message={getModalText().message}
         type={
-          modalAction === "delete" || modalAction === "reject" || modalAction === "deleteLecture"
+          modalAction === "delete" || modalAction === "reject"
             ? "danger"
+            : modalAction === "mark_upcoming" || modalAction === "publish_as_upcoming" || modalAction === "remove_upcoming"
+            ? "info"
             : "success"
         }
       />

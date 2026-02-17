@@ -18,12 +18,81 @@ import {
   FiAward,
   FiShare2,
   FiHeart,
+  FiInfo,
+  FiX,
 } from "react-icons/fi";
-import { FaChalkboardTeacher, FaRegClock, FaStarHalfAlt } from "react-icons/fa";
+import { FaChalkboardTeacher, FaRegClock, FaGraduationCap } from "react-icons/fa";
 import { IoIosTrendingUp } from "react-icons/io";
 import { MdWorkspacePremium } from "react-icons/md";
 import api from "../utils/axios";
 import PaymentModal from "../components/PaymentModal";
+import { useAuth } from "../hooks/useAuth";
+
+// Course Status Badge Component
+const CourseStatusBadge = ({ status, isUpcoming }) => {
+  const getStatusConfig = (status) => {
+    switch (status) {
+      case 'coming_soon':
+        return { 
+          text: 'Coming Soon', 
+          bg: 'bg-purple-100', 
+          textColor: 'text-purple-700', 
+          icon: FiClock,
+          gradient: 'from-purple-500 to-pink-500'
+        };
+      case 'upcoming':
+        return { 
+          text: 'Upcoming', 
+          bg: 'bg-blue-100', 
+          textColor: 'text-blue-700', 
+          icon: FiCalendar,
+          gradient: 'from-blue-500 to-cyan-500'
+        };
+      case 'enrollment_open':
+        return { 
+          text: 'Enrollment Open', 
+          bg: 'bg-green-100', 
+          textColor: 'text-green-700', 
+          icon: FiUsers,
+          gradient: 'from-green-500 to-emerald-500'
+        };
+      case 'enrollment_closed':
+        return { 
+          text: 'Enrollment Closed', 
+          bg: 'bg-orange-100', 
+          textColor: 'text-orange-700', 
+          icon: FiX,
+          gradient: 'from-orange-500 to-red-500'
+        };
+      case 'course_started':
+        return { 
+          text: 'Course Started', 
+          bg: 'bg-teal-100', 
+          textColor: 'text-teal-700', 
+          icon: FaGraduationCap,
+          gradient: 'from-teal-500 to-cyan-500'
+        };
+      default:
+        return { 
+          text: 'Published', 
+          bg: 'bg-gray-100', 
+          textColor: 'text-gray-700', 
+          icon: FiBookOpen,
+          gradient: 'from-gray-500 to-gray-600'
+        };
+    }
+  };
+
+  const config = getStatusConfig(status);
+  const Icon = config.icon;
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg ${config.bg} ${config.textColor}`}>
+      <Icon size={14} />
+      {config.text}
+    </span>
+  );
+};
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -39,18 +108,27 @@ const CourseDetails = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
+  const { user } = useAuth();
+
   const fetchCourseDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const courseRes = await api.get(`/courses/courseDetails/${id}`);
+      // ফিক্সড: সঠিক API endpoint ব্যবহার করা হয়েছে
+      const courseRes = await api.get(`/courses/details/${id}`);
 
       if (courseRes.data.success) {
-        const courseData = courseRes.data.course;
-        console.log(courseData);
+        const courseData = courseRes.data.data || courseRes.data.course;
 
         setCourse(courseData);
         setLectures(courseData.lectures || []);
         setTeachers(courseData.teachers || []);
+        
+        // লেকচার এক্সপান্ডেড স্টেট সেটআপ
+        const expanded = {};
+        (courseData.lectures || []).forEach(lec => {
+          expanded[lec._id] = false;
+        });
+        setExpandedLectures(expanded);
       }
     } catch (error) {
       toast.error(
@@ -62,16 +140,23 @@ const CourseDetails = () => {
   }, [id]);
 
   const fetchReviews = useCallback(async () => {
-    const res = await api.get(`/courses/${id}/reviews`);
-    setReviews(res.data.data.reviews);
+    try {
+      // ফিক্সড: রিভিউ API endpoint
+      const res = await api.get(`/reviews/course/${id}`);
+      if (res.data.success) {
+        setReviews(res.data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch reviews:", error);
+    }
   }, [id]);
 
   const fetchEnrollment = useCallback(async () => {
     try {
-      const res = await api.get("/enrollment/me");
-      const data = res.data;
-
-      const findCourse = data.find((d) => d.course._id === id);
+      const res = await api.get("/enrollments/my-enrollments");
+      const data = res.data.data || res.data;
+      
+      const findCourse = data.find((d) => d.course?._id === id);
       if (findCourse && findCourse.paymentStatus === "completed") {
         setEnrolled(true);
       } else {
@@ -85,9 +170,9 @@ const CourseDetails = () => {
 
   useEffect(() => {
     fetchCourseDetails();
-    fetchEnrollment();
     fetchReviews();
-  }, [fetchCourseDetails, fetchEnrollment, fetchReviews]);
+    if (user) fetchEnrollment();
+  }, [fetchCourseDetails, fetchEnrollment, fetchReviews, user]);
 
   const toggleLecture = (lectureId) => {
     setExpandedLectures((prev) => ({
@@ -112,21 +197,49 @@ const CourseDetails = () => {
     return `${hours} hours left`;
   };
 
-  const formatDuration = (hours) => {
-    if (!hours) return "Not specified";
-    if (hours < 1) return `${Math.round(hours * 60)} minutes`;
-    return `${hours} hour${hours > 1 ? "s" : ""}`;
+  const formatDuration = (weeks) => {
+    if (!weeks) return "Not specified";
+    if (weeks < 1) return `${Math.round(weeks * 7)} days`;
+    return `${weeks} week${weeks > 1 ? "s" : ""}`;
   };
 
   const handleEnrollClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!user) {
+      toast.error("Please login to enroll");
+      navigate("/login", { state: { from: `/course/${id}` } });
+      return;
+    }
+
+    // Check if enrollment is open
+    if (course.currentStatus !== 'enrollment_open') {
+      toast(
+        course.currentStatus === 'coming_soon' 
+          ? "This course is coming soon! Enrollment will open when dates are announced."
+          : course.currentStatus === 'enrollment_closed'
+          ? "Enrollment for this course is closed."
+          : course.currentStatus === 'course_started'
+          ? "This course has already started. You can enroll in the next batch."
+          : "Enrollment is not available at this time."
+      );
+      return;
+    }
+
     setShowPaymentModal(true);
   };
 
   const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!user) {
+      toast.error("Please login to add to wishlist");
+      navigate("/login", { state: { from: `/course/${id}` } });
+      return;
+    }
+
     try {
       const res = await api.post(`/wishlist/toggle/${id}`);
       if (res.data.success) {
@@ -160,9 +273,26 @@ const CourseDetails = () => {
             size={16}
           />
         ))}
-        <span className="ml-2 text-sm font-medium">{rating.toFixed(1)}</span>
+        <span className="ml-2 text-sm font-medium">
+          {rating?.toFixed(1) || "0.0"}
+        </span>
       </div>
     );
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return "Not Set";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch (error) {
+      return "Invalid Date";
+    }
   };
 
   if (loading) {
@@ -194,6 +324,9 @@ const CourseDetails = () => {
       </div>
     );
   }
+
+  const canEnroll = course.currentStatus === 'enrollment_open';
+  const isComingSoon = course.currentStatus === 'coming_soon';
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50">
@@ -231,29 +364,16 @@ const CourseDetails = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {/* ফিক্সড: স্ট্যাটাস ব্যাজ */}
+                    <CourseStatusBadge status={course.currentStatus} />
+                    
                     {course.featured && (
                       <span className="bg-amber-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1">
                         <IoIosTrendingUp className="text-xs sm:text-sm" />
                         <span className="hidden sm:inline">Featured</span>
+                        <span className="sm:hidden">Feat.</span>
                       </span>
                     )}
-                    <span
-                      className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                        course.status === "published"
-                          ? "bg-green-500"
-                          : course.status === "pending"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                      }`}
-                    >
-                      <span className="hidden sm:inline">
-                        {course.status?.charAt(0).toUpperCase() +
-                          course.status?.slice(1)}
-                      </span>
-                      <span className="sm:hidden">
-                        {course.status?.charAt(0).toUpperCase()}
-                      </span>
-                    </span>
                   </div>
                 </div>
 
@@ -273,7 +393,7 @@ const CourseDetails = () => {
                   <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-2 rounded-xl text-xs sm:text-sm">
                     <FiStar className="text-amber-300 text-sm sm:text-base" />
                     <span className="font-semibold">
-                      {course.averageRating || "0.0"}
+                      {course.averageRating?.toFixed(1) || "0.0"}
                     </span>
                     <span className="hidden sm:inline">
                       ({course.ratingCount || 0} reviews)
@@ -298,13 +418,32 @@ const CourseDetails = () => {
               </motion.div>
             </div>
 
-            {/* Enrollment Card - Mobile: Full width, Desktop: Sidebar */}
+            {/* Enrollment Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="lg:sticky lg:top-24 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl p-4 sm:p-6 text-gray-800"
+              className={`lg:sticky lg:top-24 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl p-4 sm:p-6 text-gray-800 ${
+                isComingSoon ? "border-2 border-blue-200" : ""
+              }`}
             >
+              {/* Coming Soon Banner */}
+              {isComingSoon && (
+                <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl p-3">
+                  <div className="flex items-center gap-2">
+                    <FiInfo className="text-blue-500 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-blue-800 text-sm sm:text-base">
+                        Coming Soon
+                      </h4>
+                      <p className="text-blue-600 text-xs sm:text-sm">
+                        This course will be available soon
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="relative rounded-lg sm:rounded-xl overflow-hidden mb-3 sm:mb-4">
                 {course.thumbnail ? (
                   <>
@@ -312,6 +451,9 @@ const CourseDetails = () => {
                       src={course.thumbnail}
                       alt={course.title}
                       className="w-full h-32 sm:h-40 object-cover"
+                      onError={(e) => {
+                        e.target.src = "/default-course.jpg";
+                      }}
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
                     <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
@@ -323,7 +465,7 @@ const CourseDetails = () => {
                             : "bg-white/20 text-white hover:bg-white/30"
                         }`}
                       >
-                        <FiHeart className="text-sm sm:text-base" />
+                        <FiHeart className={`text-sm sm:text-base ${wishlisted ? "fill-current" : ""}`} />
                       </button>
                     </div>
                   </>
@@ -340,19 +482,17 @@ const CourseDetails = () => {
                     ৳{course.price || 0}
                   </span>
                 </div>
-                {course.price > 0 && (
-                  <span className="text-xs sm:text-sm text-gray-500 line-through">
-                    ৳{Math.round(course.price * 1.2)}
-                  </span>
-                )}
               </div>
 
-              <div className="bg-linear-to-r from-amber-500 to-orange-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-center mb-3 sm:mb-4">
-                <div className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
-                  <FaRegClock className="text-xs sm:text-sm" />
-                  {getTimeRemaining(course.enrollmentEnd)}
+              {/* Time Remaining - শুধুমাত্র enrollment_open থাকলে দেখাবে */}
+              {canEnroll && course.enrollmentEnd && (
+                <div className="bg-linear-to-r from-amber-500 to-orange-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-center mb-3 sm:mb-4">
+                  <div className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
+                    <FaRegClock className="text-xs sm:text-sm" />
+                    {getTimeRemaining(course.enrollmentEnd)}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-2 sm:space-y-3">
                 {enrolled ? (
@@ -372,9 +512,20 @@ const CourseDetails = () => {
                   <div className="space-y-2 sm:space-y-3">
                     <button
                       onClick={handleEnrollClick}
-                      className="w-full bg-linear-to-r from-blue-500 to-purple-500 text-white py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105 duration-200 text-sm sm:text-base"
+                      className={`w-full py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105 duration-200 text-sm sm:text-base ${
+                        !canEnroll
+                          ? "bg-gray-400 cursor-not-allowed text-white"
+                          : "bg-linear-to-r from-blue-500 to-purple-500 text-white"
+                      }`}
+                      disabled={!canEnroll}
                     >
-                      Enroll Now
+                      {isComingSoon 
+                        ? "Coming Soon" 
+                        : course.currentStatus === 'enrollment_closed'
+                        ? "Enrollment Closed"
+                        : course.currentStatus === 'course_started'
+                        ? "Course Started"
+                        : "Enroll Now"}
                     </button>
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <button
@@ -481,35 +632,67 @@ const CourseDetails = () => {
                         <div
                           className="text-gray-600 leading-relaxed text-sm sm:text-base lg:text-lg prose prose-sm sm:prose-lg max-w-none"
                           dangerouslySetInnerHTML={{
-                            __html: course.description,
+                            __html: course.description || "<p>No description available.</p>",
                           }}
                         />
                       </div>
 
-                      <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8">
-                        <h4 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                          <FiAward className="text-blue-600 text-base sm:text-xl" />
-                          What You'll Learn
-                        </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                          {course.features?.map((item, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl shadow-sm"
-                            >
-                              <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-green-500 rounded-full flex items-center justify-center shrink-0">
-                                <FiCheck className="text-white text-xs sm:text-sm" />
-                              </div>
-                              <span className="text-gray-700 font-medium text-sm sm:text-base">
-                                {item}
-                              </span>
-                            </motion.div>
-                          ))}
+                      {/* Features Section */}
+                      {course.features && course.features.length > 0 && (
+                        <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8">
+                          <h4 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                            <FiAward className="text-blue-600 text-base sm:text-xl" />
+                            What You'll Learn
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            {course.features.map((item, index) => (
+                              <motion.div
+                                key={index}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl shadow-sm"
+                              >
+                                <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-green-500 rounded-full flex items-center justify-center shrink-0">
+                                  <FiCheck className="text-white text-xs sm:text-sm" />
+                                </div>
+                                <span className="text-gray-700 font-medium text-sm sm:text-base">
+                                  {item}
+                                </span>
+                              </motion.div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
+
+                      {/* Coming Soon Notice */}
+                      {isComingSoon && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-blue-50 border border-blue-200 rounded-xl sm:rounded-2xl p-4 sm:p-6"
+                        >
+                          <div className="flex items-start gap-3">
+                            <FiInfo className="text-blue-500 text-xl mt-1 shrink-0" />
+                            <div>
+                              <h4 className="font-bold text-blue-800 text-lg sm:text-xl mb-2">
+                                Coming Soon
+                              </h4>
+                              <p className="text-blue-700 mb-3 text-sm sm:text-base">
+                                This course is currently in preparation.
+                                Enrollment will open once all content is ready
+                                and dates are announced.
+                              </p>
+                              <div className="flex items-center gap-2 text-sm text-blue-600">
+                                <span className="font-medium">Status:</span>
+                                <span className="bg-blue-100 px-3 py-1 rounded-full">
+                                  In Development
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
                     </motion.div>
                   )}
 
@@ -542,6 +725,9 @@ const CourseDetails = () => {
                                     }
                                     alt={teacher.name}
                                     className="w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-xl sm:rounded-2xl object-cover border-2 sm:border-4 border-white shadow-lg"
+                                    onError={(e) => {
+                                      e.target.src = `https://ui-avatars.com/api/?name=${teacher.name}&background=random`;
+                                    }}
                                   />
                                   <div className="absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 bg-blue-500 text-white p-1 sm:p-2 rounded-full">
                                     <FaChalkboardTeacher className="text-sm sm:text-base lg:text-lg" />
@@ -589,7 +775,7 @@ const CourseDetails = () => {
                         <div className="flex items-center gap-3 sm:gap-4">
                           <div className="text-center">
                             <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800">
-                              {course.averageRating || "0.0"}
+                              {course.averageRating?.toFixed(1) || "0.0"}
                             </div>
                             <div className="flex justify-center mt-1 sm:mt-2">
                               {renderStars(course.averageRating || 0)}
@@ -620,6 +806,9 @@ const CourseDetails = () => {
                                     }
                                     alt={review.user?.name}
                                     className="w-10 h-10 sm:w-12 sm:h-12 rounded-full"
+                                    onError={(e) => {
+                                      e.target.src = `https://ui-avatars.com/api/?name=${review.user?.name}&background=random`;
+                                    }}
                                   />
                                   <div>
                                     <h4 className="font-semibold text-gray-800 text-sm sm:text-base">
@@ -628,9 +817,11 @@ const CourseDetails = () => {
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
                                       {renderStars(review.rating)}
                                       <span className="text-xs sm:text-sm text-gray-500">
-                                        {new Date(
-                                          review.createdAt
-                                        ).toLocaleDateString()}
+                                        {review.createdAt
+                                          ? new Date(
+                                              review.createdAt
+                                            ).toLocaleDateString()
+                                          : ""}
                                       </span>
                                     </div>
                                   </div>
@@ -660,14 +851,6 @@ const CourseDetails = () => {
                           </div>
                         )}
                       </div>
-
-                      {reviews.length > 0 && enrolled && (
-                        <div className="mt-6 sm:mt-8 text-center">
-                          <button className="px-4 sm:px-6 py-2 sm:py-3 border border-blue-600 sm:border-2 text-blue-600 rounded-lg sm:rounded-xl font-semibold hover:bg-blue-50 transition-colors text-sm sm:text-base">
-                            Load More Reviews
-                          </button>
-                        </div>
-                      )}
                     </motion.div>
                   )}
 
@@ -720,6 +903,11 @@ const CourseDetails = () => {
                                     <h4 className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg truncate sm:whitespace-normal">
                                       {lecture.title}
                                     </h4>
+                                    {lecture.duration && (
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Duration: {lecture.duration} min
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2 sm:gap-3">
@@ -744,6 +932,27 @@ const CourseDetails = () => {
                                         {lecture.description ||
                                           "No description available."}
                                       </p>
+                                      {lecture.resources && lecture.resources.length > 0 && (
+                                        <div className="mt-3">
+                                          <h5 className="font-semibold text-gray-700 mb-2 text-sm">
+                                            Resources:
+                                          </h5>
+                                          <div className="flex flex-wrap gap-2">
+                                            {lecture.resources.map((resource, idx) => (
+                                              <a
+                                                key={idx}
+                                                href={resource.fileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-xs text-gray-700 hover:bg-blue-100 transition-colors"
+                                              >
+                                                <FiDownload size={14} />
+                                                {resource.title}
+                                              </a>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   </motion.div>
                                 )}
@@ -754,7 +963,9 @@ const CourseDetails = () => {
                           <div className="text-center py-8 sm:py-12 bg-linear-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl">
                             <FiBook className="text-4xl sm:text-6xl text-gray-300 mx-auto mb-3 sm:mb-4" />
                             <p className="text-gray-500 text-sm sm:text-base">
-                              No lectures added yet
+                              {isComingSoon
+                                ? "Course content is being prepared. Check back soon!"
+                                : "No lectures added yet"}
                             </p>
                           </div>
                         )}
@@ -766,7 +977,7 @@ const CourseDetails = () => {
             </div>
           </div>
 
-          {/* Sidebar - Mobile: Hidden, Desktop: Visible */}
+          {/* Sidebar */}
           <div className="hidden lg:block space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -803,52 +1014,51 @@ const CourseDetails = () => {
               </div>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 sticky top-96"
-            >
-              <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <FiCalendar className="text-purple-500" />
-                Course Timeline
-              </h3>
-              <div className="space-y-4">
-                {[
-                  {
-                    label: "Enrollment Starts",
-                    date: course.enrollmentStart,
-                    color: "text-green-600",
-                  },
-                  {
-                    label: "Enrollment Ends",
-                    date: course.enrollmentEnd,
-                    color: "text-amber-600",
-                  },
-                  {
-                    label: "Course Starts",
-                    date: course.courseStart,
-                    color: "text-blue-600",
-                  },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center p-3 bg-gray-50 rounded-xl"
-                  >
-                    <span className="text-gray-600 font-medium">
-                      {item.label}
-                    </span>
-                    <span className={`font-semibold ${item.color}`}>
-                      {new Date(item.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            {/* Course Timeline */}
+            {!isComingSoon && (course.enrollmentStart || course.enrollmentEnd || course.courseStart) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 sticky top-96"
+              >
+                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                  <FiCalendar className="text-purple-500" />
+                  Course Timeline
+                </h3>
+                <div className="space-y-4">
+                  {[
+                    {
+                      label: "Enrollment Starts",
+                      date: course.enrollmentStart,
+                      color: "text-green-600",
+                    },
+                    {
+                      label: "Enrollment Ends",
+                      date: course.enrollmentEnd,
+                      color: "text-amber-600",
+                    },
+                    {
+                      label: "Course Starts",
+                      date: course.courseStart,
+                      color: "text-blue-600",
+                    },
+                  ].map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 bg-gray-50 rounded-xl"
+                    >
+                      <span className="text-gray-600 font-medium">
+                        {item.label}
+                      </span>
+                      <span className={`font-semibold ${item.color}`}>
+                        {formatDate(item.date)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
