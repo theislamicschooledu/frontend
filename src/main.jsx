@@ -63,6 +63,7 @@ import TeacherDashboard from "./pages/Teacher/TeacherDashboard";
 import CoursesTeacher from "./pages/Teacher/Course/CoursesTeacher";
 import CourseDetailsTeacher from "./pages/Teacher/Course/CourseDetailsTeacher";
 import AboutUs from "./pages/AboutUs";
+import ManualEnrollmentForm from "./pages/ManualEnrollmentForm";
 
 const router = createBrowserRouter([
   {
@@ -97,6 +98,8 @@ const router = createBrowserRouter([
           { path: "qa/:id", element: <Question /> },
           { path: "qa/update/:id", element: <UpdateQuestion /> },
           // Payment
+          { path: "/courses/:courseId/enroll/manual", element: <ManualEnrollmentForm />},
+          
           { path: "/payment/success", element: <PaymentSuccess /> },
           { path: "/payment/cancel", element: <PaymentCancel /> },
           { path: "/my-courses", element: <MyCourses /> },

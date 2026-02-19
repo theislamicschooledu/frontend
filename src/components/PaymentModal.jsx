@@ -1,21 +1,26 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiX, 
-  FiLoader, 
-  FiCheck, 
-  FiAlertCircle, 
-  FiLock, 
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FiX,
+  FiLoader,
+  FiCheck,
+  FiAlertCircle,
+  FiLock,
   FiTag,
   FiPlus,
-} from 'react-icons/fi';
-import api from '../utils/axios';
+  FiBook,
+  FiArrowRight,
+  FiInfo,
+} from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import api from "../utils/axios";
 
 const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
-  const [error, setError] = useState('');
-  const [couponCode, setCouponCode] = useState('');
+  const [error, setError] = useState("");
+  const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [showCouponInput, setShowCouponInput] = useState(false);
 
@@ -23,30 +28,38 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
     if (appliedCoupon) {
       return appliedCoupon.discountedPrice;
     }
-    return course.price;
+    return course?.price || 0;
   };
 
+  // কুপন এপ্লাই হ্যান্ডলার
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
-      setError('Please enter a coupon code');
+      setError("Please enter a coupon code");
       return;
     }
 
     try {
       setApplyingCoupon(true);
-      setError('');
+      setError("");
 
-      const { data } = await api.post('/payments/validate-coupon', {
+      console.log("Applying coupon:", couponCode, "for course:", course._id);
+
+      const { data } = await api.post("/coupons/validate", {
         couponCode: couponCode.trim(),
-        courseId: course._id
+        courseId: course._id,
       });
+
+      console.log("Coupon validation response:", data);
 
       if (data.success) {
         setAppliedCoupon(data.coupon);
-        setError('');
+        setError("");
+      } else {
+        setError(data.message || "Invalid coupon code");
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Invalid coupon code');
+      console.error("Coupon error:", error.response?.data);
+      setError(error.response?.data?.message || "Invalid coupon code");
       setAppliedCoupon(null);
     } finally {
       setApplyingCoupon(false);
@@ -55,32 +68,22 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
 
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
-    setCouponCode('');
+    setCouponCode("");
     setShowCouponInput(false);
-    setError('');
+    setError("");
   };
 
-  const handleEnroll = async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const { data } = await api.post('/payments/initiate', {
-        courseId: course._id,
-        couponCode: appliedCoupon ? couponCode : undefined
-      });
-
-      if (data.success) {
-        // Redirect to UddoktaPay payment page
-        window.location.href = data.payment_url;
-      } else {
-        setError(data.message || 'Payment initiation failed');
-      }
-    } catch (error) {
-      setError(error.response?.data?.message || 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
+  const handleProceedToManualPayment = () => {
+    // ম্যানুয়াল পেমেন্ট পেজে নেভিগেট করুন, কুপনের তথ্য সহ
+    navigate(`/courses/${course._id}/enroll/manual`, {
+      state: {
+        course,
+        appliedCoupon: appliedCoupon,
+        couponCode: appliedCoupon ? couponCode : null,
+        finalAmount: calculateFinalAmount(),
+      },
+    });
+    onClose(); // মডাল বন্ধ করুন
   };
 
   return (
@@ -105,8 +108,12 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
                   <FiLock className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">Enroll in Course</h3>
-                  <p className="text-sm text-gray-600">Secure payment via UddoktaPay</p>
+                  <h3 className="text-xl font-bold text-gray-800">
+                    Enroll in Course
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    ম্যানুয়াল পেমেন্ট - বিকাশ/নগদ/রকেট
+                  </p>
                 </div>
               </div>
               <button
@@ -120,7 +127,7 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
             {/* Course Info */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center gap-4 mb-4">
-                {course.thumbnail ? (
+                {course?.thumbnail ? (
                   <img
                     src={course.thumbnail}
                     alt={course.title}
@@ -133,10 +140,10 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
                 )}
                 <div className="flex-1">
                   <h4 className="font-semibold text-gray-800 line-clamp-2">
-                    {course.title}
+                    {course?.title}
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {course.category?.name || 'Uncategorized'}
+                    {course?.category?.name || "Uncategorized"}
                   </p>
                 </div>
               </div>
@@ -159,7 +166,9 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
                       type="text"
                       placeholder="Enter coupon code"
                       value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setCouponCode(e.target.value.toUpperCase())
+                      }
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
                     />
                     <button
@@ -167,7 +176,11 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
                       disabled={applyingCoupon}
                       className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 text-sm"
                     >
-                      {applyingCoupon ? '...' : 'Apply'}
+                      {applyingCoupon ? (
+                        <FiLoader className="animate-spin" />
+                      ) : (
+                        "Apply"
+                      )}
                     </button>
                   </div>
                 )}
@@ -181,10 +194,9 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
                           {appliedCoupon.code} Applied
                         </p>
                         <p className="text-xs text-green-600">
-                          {appliedCoupon.discountType === 'percentage' 
-                            ? `${appliedCoupon.discountValue}% off` 
-                            : `৳${appliedCoupon.discountValue} off`
-                          }
+                          {appliedCoupon.discountType === "percentage"
+                            ? `${appliedCoupon.discountValue}% off`
+                            : `৳${appliedCoupon.discountValue} off`}
                         </p>
                       </div>
                     </div>
@@ -202,7 +214,9 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Course Price</span>
-                  <span className="font-semibold text-gray-800">৳{course.price}</span>
+                  <span className="font-semibold text-gray-800">
+                    ৳{course?.price}
+                  </span>
                 </div>
 
                 {appliedCoupon && (
@@ -229,61 +243,62 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
               </div>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <FiAlertCircle className="text-red-500 shrink-0" />
-                  <p className="text-red-700 text-sm">{error}</p>
+            {/* Payment Info */}
+            <div className="p-6 border-b border-gray-200 bg-blue-50">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                  <FiInfo className="text-blue-600" />
                 </div>
-              </div>
-            )}
-
-            {/* Features */}
-            <div className="p-6 border-b border-gray-200">
-              <h5 className="font-semibold text-gray-800 mb-3">What you'll get:</h5>
-              <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-3">
-                  <FiCheck className="text-green-500 shrink-0" />
-                  <span>Full lifetime access</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <FiCheck className="text-green-500 shrink-0" />
-                  <span>Certificate of completion</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <FiCheck className="text-green-500 shrink-0" />
-                  <span>Access on mobile and TV</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <FiCheck className="text-green-500 shrink-0" />
-                  <span>30-day money-back guarantee</span>
+                <div>
+                  <h5 className="font-semibold text-gray-800 mb-2">
+                    ম্যানুয়াল পেমেন্ট প্রক্রিয়া:
+                  </h5>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex items-center gap-2">
+                      <FiCheck className="text-green-500 shrink-0" />
+                      <span>
+                        ১. আপনার পছন্দের মোবাইল ব্যাংকিং (বিকাশ/নগদ/রকেট) এ
+                        পেমেন্ট করুন
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <FiCheck className="text-green-500 shrink-0" />
+                      <span>২. পরবর্তী পেজে গিয়ে পেমেন্টের তথ্য দিন</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <FiCheck className="text-green-500 shrink-0" />
+                      <span>
+                        ৩. অ্যাডমিন অ্যাপ্রুভ করার পর কোর্স এক্সেস পাবেন
+                      </span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Error Message */}
+            {error && (
+              <div className="px-6 py-3">
+                <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
+                  <FiAlertCircle />
+                  <span className="text-sm">{error}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Action Button */}
             <div className="p-6">
               <button
-                onClick={handleEnroll}
-                disabled={loading}
-                className="w-full bg-linear-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                onClick={handleProceedToManualPayment}
+                disabled={!course}
+                className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? (
-                  <>
-                    <FiLoader className="animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <FiLock />
-                    Pay ৳{calculateFinalAmount()}
-                  </>
-                )}
+                <span>পেমেন্ট তথ্য দিন</span>
+                <FiArrowRight />
               </button>
-              
+
               <p className="text-center text-xs text-gray-500 mt-4">
-                Secure payment processed by UddoktaPay
+                পেমেন্ট করার পর নিচের ফর্ম পূরণ করুন
               </p>
             </div>
           </motion.div>
