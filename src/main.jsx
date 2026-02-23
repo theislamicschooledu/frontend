@@ -85,6 +85,7 @@ const router = createBrowserRouter([
       { path: "/blogs", element: <Blogs /> },
       { path: "/blogs/:id", element: <Blog /> },
       { path: "/qa", element: <QnA /> },
+      { path: "qa/:id", element: <Question /> },
       { path: "/about", element: <AboutUs /> },
       { path: "/forget-password", element: <ForgotPassword /> },
       { path: "/reset-password/:token", element: <ResetPassword /> },
@@ -95,7 +96,6 @@ const router = createBrowserRouter([
           { path: "/profile", element: <Profile /> },
           { path: "/change-password", element: <ChangePassword /> },
           { path: "qa/ask-question", element: <AskQuestion /> },
-          { path: "qa/:id", element: <Question /> },
           { path: "qa/update/:id", element: <UpdateQuestion /> },
           // Payment
           { path: "/courses/:courseId/enroll/manual", element: <ManualEnrollmentForm />},
