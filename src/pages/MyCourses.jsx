@@ -28,8 +28,6 @@ const MyCourses = () => {
     try {
       // এনরোলমেন্ট API কল - নতুন এন্ডপয়েন্ট
       const { data } = await api.get("/enrollments/my-enrollments");
-
-      console.log(data)
       
       if (data.success) {
         setEnrollments(data.data);

@@ -5,7 +5,6 @@ import {
   FiCalendar,
   FiUser,
   FiRefreshCw,
-  FiSettings,
   FiMenu,
   FiX,
 } from "react-icons/fi";

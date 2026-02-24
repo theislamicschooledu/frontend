@@ -60,17 +60,17 @@ const LearningPage = () => {
     setLoading(true);
     try {
       const [courseRes, lecturesRes, enrollmentRes] = await Promise.all([
-        api.get(`/courses/courseDetails/${courseId}`),
-        api.get(`/courses/${courseId}/lectures`),
-        api.get(`/enrollment/course/${courseId}`),
+        api.get(`/courses/details/${courseId}`),
+        api.get(`/courses/${courseId}/my-lectures`),
+        api.get(`/enrollments/course/${courseId}`),
       ]);
 
       if (courseRes.data?.success) {
-        setCourse(courseRes.data.course);
+        setCourse(courseRes.data.data);
       }
 
       if (lecturesRes.data) {
-        const lecturesData = lecturesRes.data.lectures || lecturesRes.data;
+        const lecturesData = lecturesRes.data.data.lectures || lecturesRes.data;
         setLectures(lecturesData);
 
         if (lecturesData.length > 0) {
@@ -132,7 +132,7 @@ const LearningPage = () => {
     setMarkingComplete(true);
     try {
       const { data } = await api.post(
-        `/enrollment/${enrollment._id}/complete-lecture`,
+        `/enrollments/${enrollment._id}/complete-lecture`,
         { lectureId }
       );
 
@@ -163,7 +163,7 @@ const LearningPage = () => {
           setTimeout(() => {
             setCurrentLecture(nextLecture);
             setVideoError(false);
-            toast.info(`Moving to next lecture: ${nextLecture.title}`);
+            toast.success(`Moving to next lecture: ${nextLecture.title}`);
           }, 1500);
         }
       } else {
@@ -184,7 +184,7 @@ const LearningPage = () => {
 
     try {
       const { data } = await api.post(
-        `/enrollment/${enrollment._id}/incomplete-lecture`,
+        `/enrollments/${enrollment._id}/incomplete-lecture`,
         { lectureId }
       );
 

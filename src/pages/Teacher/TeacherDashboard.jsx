@@ -38,8 +38,6 @@ const TeacherDashboard = () => {
     const fetchCourses = async () => {
       const res = await api.get("/courses/teacher/my-courses");
 
-      console.log(res)
-
       setTotalCourses(res.data.count);
       const sliceCourse = res.data.data.slice(0, 5);
       setCourses(sliceCourse);

@@ -42,14 +42,10 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
       setApplyingCoupon(true);
       setError("");
 
-      console.log("Applying coupon:", couponCode, "for course:", course._id);
-
       const { data } = await api.post("/coupons/validate", {
         couponCode: couponCode.trim(),
         courseId: course._id,
       });
-
-      console.log("Coupon validation response:", data);
 
       if (data.success) {
         setAppliedCoupon(data.coupon);

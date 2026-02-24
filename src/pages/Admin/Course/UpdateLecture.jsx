@@ -39,8 +39,6 @@ const UpdateLecture = () => {
           api.get(`/courses/details/${courseId}`),
           api.get(`/courses/lectures/${lectureId}`),
         ]);
-
-        console.log(lectureRes.data);
         
 
         if (courseRes.data.success) {

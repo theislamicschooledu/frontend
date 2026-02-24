@@ -32,7 +32,7 @@ const AddCoupon = () => {
     const fetchCourse = async () => {
       try {
         const res = await api.get(`/courses/details/${courseId}`);
-        console.log(res)
+
         if (res.data.success) {
           setCourse(res.data.data);
         }
@@ -140,8 +140,6 @@ const AddCoupon = () => {
       };
     }
   };
-
-  console.log(course);
   
 
   const discountPreview = calculateDiscount();

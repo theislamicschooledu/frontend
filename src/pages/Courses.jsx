@@ -293,7 +293,6 @@ const Courses = () => {
         ))}
       </div>
 
-      {/* Header - উপরের অংশের জায়গা কমানো হয়েছে */}
       <motion.section
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -349,7 +348,6 @@ const Courses = () => {
             </motion.p>
           </div>
 
-          {/* Search bar - সাইজ কমানো হয়েছে */}
           <motion.div
             className="bg-white rounded-2xl shadow-xl w-full max-w-xl mx-auto border border-green-200/30"
             initial={{ opacity: 0, y: 15 }}
@@ -369,7 +367,6 @@ const Courses = () => {
         </div>
       </motion.section>
 
-      {/* Filters Section - জায়গা কমানো হয়েছে */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10">
         <motion.div
           className="rounded-2xl shadow-xl p-4 mb-6 border border-gray-100 backdrop-blur-sm bg-white/95"

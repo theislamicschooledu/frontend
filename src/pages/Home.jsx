@@ -14,10 +14,10 @@ import {
 import PopularBlogs from "../components/PopularBlogs";
 import PopularQuestion from "../components/PopularQuestion";
 import FeaturedCourses from "../components/FeaturedCourses";
-import Carousel from "../components/Carousel";
 import Instructors from "../components/Instructors";
 import DirectorVoice from "../components/DirectorVoice";
 import Heading from "../components/Heading";
+import HeroSection from "../components/HeroSection";
 
 const Home = () => {
   const bounceAnimation = {
@@ -55,9 +55,8 @@ const Home = () => {
           </motion.div>
         ))}
       </div>
-      <section id="home" className="overflow-hidden">
-        <Carousel />
-      </section>
+     
+     <HeroSection />
 
       {/* Courses Section with Enhanced Animations */}
       <section className="relative pt-8 bg-linear-to-b from-blue-50 to-white px-6 z-10">

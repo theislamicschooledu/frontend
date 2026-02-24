@@ -64,6 +64,7 @@ import CoursesTeacher from "./pages/Teacher/Course/CoursesTeacher";
 import CourseDetailsTeacher from "./pages/Teacher/Course/CourseDetailsTeacher";
 import AboutUs from "./pages/AboutUs";
 import ManualEnrollmentForm from "./pages/ManualEnrollmentForm";
+import AdminEnrollments from "./pages/Admin/Course/AdminEnrollments";
 
 const router = createBrowserRouter([
   {
@@ -149,6 +150,8 @@ const router = createBrowserRouter([
               { path: "questions", element: <QnaAdmin /> },
               { path: "questions/category", element: <AddQuestionCategory /> },
               { path: "questions/:id", element: <QuestionDetailsAdmin /> },
+              // Enrollment
+              { path: "enrollment", element: <AdminEnrollments />}
             ],
           },
         ],

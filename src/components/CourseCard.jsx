@@ -138,7 +138,7 @@ const CourseCard = ({ course, index }) => {
   const lectureCount = lectures?.length || 0;
   const reviewCount = ratingCount || 0;
   const showEnrollmentBadge = !isComingSoon && enrollmentEnd && currentStatus !== 'course_started' && currentStatus !== 'enrollment_closed';
-
+  
   const formatDate = (date) => {
     if (!date) return 'TBD';
     return new Date(date).toLocaleDateString('en-US', {

@@ -38,9 +38,6 @@ const EditCoupon = () => {
           api.get(`/coupons/${couponId}`)
         ]);
 
-        console.log(courseRes);
-        
-
         if (courseRes.data.success) {
           setCourse(courseRes.data.data);
         }

@@ -414,13 +414,6 @@ const UpdateCourse = () => {
         formData.append("thumbnail", cover);
       }
 
-      // Log FormData for debugging (development only)
-      if (process.env.NODE_ENV === 'development') {
-        for (let pair of formData.entries()) {
-          console.log(pair[0] + ': ' + pair[1]);
-        }
-      }
-
       const { data } = await api.put(`/courses/${id}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",

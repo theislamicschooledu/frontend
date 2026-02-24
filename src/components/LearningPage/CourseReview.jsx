@@ -9,10 +9,8 @@ import {
   FiTrash2,
   FiSend,
   FiX,
-  FiCheck,
   FiMessageSquare,
   FiCalendar,
-  FiUser,
   FiChevronDown,
   FiChevronUp
 } from "react-icons/fi";
