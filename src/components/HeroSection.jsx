@@ -60,7 +60,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="font-hind relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-blue-900 via-blue-800 to-indigo-900 pt-16">
+    <section className="font-hind relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-blue-900 via-blue-800 to-indigo-900 md:pt-16">
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Mosque Silhouette Pattern */}
@@ -94,7 +94,7 @@ const HeroSection = () => {
         ></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 py-12 z-10">
+      <div className="relative max-w-7xl mx-auto px-6 md:py-12 py-2 z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <motion.div
