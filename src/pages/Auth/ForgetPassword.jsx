@@ -19,10 +19,15 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const response = await forgotPassword(email);
-    if (response.success) {
+    if (response?.success) {
       setStep(2);
     } else {
-      toast.error(error);
+      toast.error(
+        response?.message ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to send reset link",
+      );
     }
   };
 
