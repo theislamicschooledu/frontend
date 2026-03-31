@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { Link, useParams } from "react-router";
@@ -9,6 +9,7 @@ import {
   FiBookmark,
   FiCalendar,
   FiClock,
+  FiEye,
   FiMessageSquare,
   FiShare2,
   FiUser,
@@ -18,23 +19,46 @@ const Question = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [question, setQuestion] = useState(null);
+  const hasIncrementedView = useRef(false);
 
-  const fetchQuestionDetails = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await api.get(`/qna/${id}`);
+  useEffect(() => {
+    const fetchQuestion = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/qna/${id}`);
 
-      setQuestion(res.data.question);
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
+        if (res.data.success) {
+          setQuestion(res.data.question);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching question:", error);
+        toast.error("Failed to load question");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const incrementView = async () => {
+      if (hasIncrementedView.current) return;
+      hasIncrementedView.current = true;
+
+      try {
+        await api.patch(`/qna/publishQuestion/${id}/view`);
+      } catch (error) {
+        console.error("Error incrementing question view:", error);
+      }
+    };
+
+    if (id) {
+      fetchQuestion();
+      incrementView();
     }
   }, [id]);
 
   useEffect(() => {
-    fetchQuestionDetails();
-  }, [fetchQuestionDetails]);
+    hasIncrementedView.current = false;
+  }, [id]);
 
   const calculateReadTime = (content) => {
     const wordsPerMinute = 200;
@@ -65,7 +89,7 @@ const Question = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
+    <div className="font-hind min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
       {/* Header */}
       <div className="pt-24 bg-linear-to-r from-green-600 to-emerald-500 text-white py-12 px-6">
         <div className="max-w-6xl mx-auto">
@@ -108,6 +132,10 @@ const Question = () => {
               <div className="flex items-center">
                 <FiClock className="mr-2" />
                 <span>{calculateReadTime(question.description)} min read</span>
+              </div>
+              <div className="flex items-center">
+                <FiEye className="mr-2" />
+                <span>{question.views/2 || 0} views</span>
               </div>
             </div>
           </motion.div>

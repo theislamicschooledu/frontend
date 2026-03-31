@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import {
   FiUser,
@@ -10,7 +11,8 @@ import {
   FiArrowUpRight,
   FiInbox,
   FiLoader,
-  FiHelpCircle
+  FiHelpCircle,
+  FiEye,
 } from "react-icons/fi";
 import { Link } from "react-router";
 import api from "../utils/axios";
@@ -22,15 +24,21 @@ const QnA = () => {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [sortBy, setSortBy] = useState("latest");
 
-  const fetchQuestions = async () => {
+  const fetchQuestions = async (selectedSort = sortBy) => {
     try {
-      const res = await api.get("/qna/publishQuestion");
+      const res = await api.get("/qna/publishQuestion", {
+        params: {
+          sort: selectedSort,
+        },
+      });
+
       if (res.data.success) {
         setQuestions(res.data.questions);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error?.response?.data?.message || error.message);
     }
   };
 
@@ -47,16 +55,16 @@ const QnA = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        await Promise.all([fetchQuestions(), fetchCategories()]);
+        await Promise.all([fetchQuestions(sortBy), fetchCategories()]);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchData();
-  }, []);
+  }, [sortBy]);
 
   const categoryCounts = questions?.reduce((acc, post) => {
     const catId = post.category?._id;
@@ -91,7 +99,7 @@ const QnA = () => {
           <div className="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-green-500 border-r-green-500 rounded-full"></div>
         </motion.div>
         <div className="mt-6 text-center">
-          <motion.h3 
+          <motion.h3
             className="text-xl font-semibold text-gray-700 mb-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -99,7 +107,7 @@ const QnA = () => {
           >
             Loading Questions
           </motion.h3>
-          <motion.p 
+          <motion.p
             className="text-gray-500"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -107,7 +115,7 @@ const QnA = () => {
           >
             Fetching questions from our scholars...
           </motion.p>
-          <motion.div 
+          <motion.div
             className="flex justify-center space-x-1 mt-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -118,10 +126,10 @@ const QnA = () => {
                 key={i}
                 className="w-2 h-2 bg-green-500 rounded-full"
                 animate={{ y: [0, -8, 0] }}
-                transition={{ 
-                  duration: 0.6, 
-                  repeat: Infinity, 
-                  delay: i * 0.2 
+                transition={{
+                  duration: 0.6,
+                  repeat: Infinity,
+                  delay: i * 0.2,
                 }}
               />
             ))}
@@ -152,8 +160,8 @@ const QnA = () => {
             </motion.div>
           </div>
         </div>
-        
-        <motion.h2 
+
+        <motion.h2
           className="text-2xl font-bold text-gray-800 mb-3"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -161,18 +169,18 @@ const QnA = () => {
         >
           No Questions Found
         </motion.h2>
-        
-        <motion.p 
+
+        <motion.p
           className="text-gray-600 mb-6"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          {searchTerm || selectedCategory 
+          {searchTerm || selectedCategory
             ? "No questions match your search criteria. Try different keywords or categories."
             : "There are no published questions available at the moment. Be the first to ask!"}
         </motion.p>
-        
+
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -191,14 +199,15 @@ const QnA = () => {
                 Clear Filters
               </button>
               <p className="text-sm text-gray-500">
-                Showing results for: 
+                Showing results for:
                 {searchTerm && ` Search: "${searchTerm}"`}
-                {selectedCategory && categories.find(c => c._id === selectedCategory)?.name && 
-                  ` Category: "${categories.find(c => c._id === selectedCategory)?.name}"`}
+                {selectedCategory &&
+                  categories.find((c) => c._id === selectedCategory)?.name &&
+                  ` Category: "${categories.find((c) => c._id === selectedCategory)?.name}"`}
               </p>
             </>
           )}
-          
+
           <Link
             to={"/qa/ask-question"}
             className="block w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3 rounded-xl font-medium hover:from-green-700 hover:to-emerald-600 transition-all duration-300"
@@ -212,11 +221,11 @@ const QnA = () => {
   );
 
   if (loading) return <LoadingSpinner />;
-  
+
   if (!loading && questions.length === 0) return <NoDataComponent />;
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
+    <div className="font-hind min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
       {/* Header */}
       <div className="pt-24 flex flex-col md:flex-row justify-between items-center bg-linear-to-r from-green-600 to-emerald-500 text-white py-6 px-6">
         <motion.h1
@@ -255,15 +264,32 @@ const QnA = () => {
             {/* Main Content */}
             <div className="lg:w-2/3">
               <div className="flex justify-between items-center mb-10">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    Recent Questions
-                  </h2>
-                  {filteredQuestion?.length > 0 && (
-                    <p className="text-gray-500 text-sm mt-1">
-                      {filteredQuestion.length} {filteredQuestion.length === 1 ? 'question' : 'questions'} found
-                    </p>
-                  )}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800">
+                      {sortBy === "most-read"
+                        ? "Most Read Questions"
+                        : "Recent Questions"}
+                    </h2>
+                    {filteredQuestion?.length > 0 && (
+                      <p className="text-gray-500 text-sm mt-1">
+                        {filteredQuestion.length}{" "}
+                        {filteredQuestion.length === 1
+                          ? "question"
+                          : "questions"}{" "}
+                        found
+                      </p>
+                    )}
+                  </div>
+
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+                  >
+                    <option value="latest">সর্বশেষ</option>
+                    <option value="most-read">সর্বাধিক পাঠিত</option>
+                  </select>
                 </div>
                 <Link
                   to={"/qa/ask-question"}
@@ -317,17 +343,28 @@ const QnA = () => {
                         className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100"
                       >
                         <div className="p-6">
-                          <div className="flex justify-between items-start mb-3">
+                          <div className="flex justify-between items-start mb-3 gap-3">
                             <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full">
                               {qna.category?.name || "N/A"}
                             </span>
-                            <div className="flex items-center text-sm text-gray-500">
-                              <FiCalendar className="mr-1" />
-                              {new Date(qna.createdAt).toLocaleString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
+
+                            <div className="flex flex-col items-end text-sm text-gray-500">
+                              <div className="flex items-center">
+                                <FiCalendar className="mr-1" />
+                                {new Date(qna.createdAt).toLocaleString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  },
+                                )}
+                              </div>
+
+                              <div className="flex items-center mt-1">
+                                <FiEye className="mr-1" />
+                                {qna.views/2 || 0} views
+                              </div>
                             </div>
                           </div>
 
@@ -343,7 +380,9 @@ const QnA = () => {
                               <div
                                 className="prose prose-lg max-w-none mb-6"
                                 dangerouslySetInnerHTML={{
-                                  __html: qna.answers[0]?.text?.slice(0, 120) || "No answer yet"
+                                  __html:
+                                    qna.answers[0]?.text?.slice(0, 120) ||
+                                    "No answer yet",
                                 }}
                               />
                             </p>
@@ -357,7 +396,8 @@ const QnA = () => {
                                   <>
                                     Answered by{" "}
                                     <span className="text-green-500 font-medium">
-                                      {qna.answers[0]?.answeredBy?.name || "Scholar"}
+                                      {qna.answers[0]?.answeredBy?.name ||
+                                        "Scholar"}
                                     </span>
                                   </>
                                 ) : (
@@ -441,7 +481,10 @@ const QnA = () => {
                 <p className="text-green-100 mb-4">
                   Can't find what you're looking for? Ask our scholars.
                 </p>
-                <Link to={'/qa/ask-question'} className="bg-white text-green-600 px-5 py-2.5 rounded-xl font-medium hover:bg-green-50 transition">
+                <Link
+                  to={"/qa/ask-question"}
+                  className="bg-white text-green-600 px-5 py-2.5 rounded-xl font-medium hover:bg-green-50 transition"
+                >
                   Ask Now
                 </Link>
               </motion.div>

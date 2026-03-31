@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import {
@@ -8,6 +8,7 @@ import {
   FiArrowLeft,
   FiShare2,
   FiBookmark,
+  FiEye,
 } from "react-icons/fi";
 import { useParams, Link } from "react-router";
 import toast from "react-hot-toast";
@@ -17,23 +18,46 @@ const Blog = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [blog, setBlog] = useState(null);
+  const hasIncrementedView = useRef(false);
 
-  const fetchBlogDetails = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await api.get(`/blogs/publishedBlog/${id}`);
-      
-      setBlog(res.data.blogs);
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/blogs/publishedBlog/${id}`);
+
+        if (response.data.success) {
+          setBlog(response.data.blogs);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching blog:", error);
+        toast.error("Failed to load blog");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const incrementView = async () => {
+      if (hasIncrementedView.current) return;
+      hasIncrementedView.current = true;
+
+      try {
+        await api.patch(`/blogs/publishedBlog/${id}/view`);
+      } catch (error) {
+        console.error("Error incrementing blog view:", error);
+      }
+    };
+
+    if (id) {
+      fetchBlog();
+      incrementView();
     }
   }, [id]);
 
   useEffect(() => {
-    fetchBlogDetails();
-  }, [fetchBlogDetails]);
+    hasIncrementedView.current = false;
+  }, [id]);
 
   const calculateReadTime = (content) => {
     const wordsPerMinute = 200;
@@ -64,7 +88,7 @@ const Blog = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
+    <div className="font-hind min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
       {/* Header */}
       <div className="pt-24 bg-linear-to-r from-green-600 to-emerald-500 text-white py-12 px-6">
         <div className="max-w-6xl mx-auto">
@@ -93,6 +117,10 @@ const Blog = () => {
               <div className="flex gap-2 items-center">
                 <FiUser className="mr-2" />
                 <span>{blog.author?.name || "Unknown Author"}</span>
+              </div>
+              <div className="flex items-center">
+                <FiEye className="mr-2" />
+                <span>{blog.views/2 || 0} views</span>
               </div>
               <div className="flex items-center">
                 <FiCalendar className="mr-2" />

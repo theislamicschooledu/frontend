@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import {
   FiUser,
@@ -7,7 +8,8 @@ import {
   FiCalendar,
   FiArrowUpRight,
   FiInbox,
-  FiLoader
+  FiLoader,
+  FiEye,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
@@ -19,13 +21,18 @@ const Blogs = () => {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [sortBy, setSortBy] = useState("latest");
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = async (selectedSort = sortBy) => {
     try {
-      const res = await api.get("/blogs/publishedBlog");
+      const res = await api.get("/blogs/publishedBlog", {
+        params: {
+          sort: selectedSort,
+        },
+      });
       setBlogPosts(res.data.blogs);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error?.response?.data?.message || error.message);
     }
   };
 
@@ -42,16 +49,16 @@ const Blogs = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        await Promise.all([fetchBlogs(), fetchBlogCategory()]);
+        await Promise.all([fetchBlogs(sortBy), fetchBlogCategory()]);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchData();
-  }, []);
+  }, [sortBy]);
 
   const categoryCounts = blogPosts.reduce((acc, post) => {
     const catId = post.category?._id;
@@ -86,7 +93,7 @@ const Blogs = () => {
           <div className="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-green-500 border-r-green-500 rounded-full"></div>
         </motion.div>
         <div className="mt-6 text-center">
-          <motion.h3 
+          <motion.h3
             className="text-xl font-semibold text-gray-700 mb-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -94,7 +101,7 @@ const Blogs = () => {
           >
             Loading Articles
           </motion.h3>
-          <motion.p 
+          <motion.p
             className="text-gray-500"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -102,7 +109,7 @@ const Blogs = () => {
           >
             Please wait while we fetch the latest content...
           </motion.p>
-          <motion.div 
+          <motion.div
             className="flex justify-center space-x-1 mt-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -113,10 +120,10 @@ const Blogs = () => {
                 key={i}
                 className="w-2 h-2 bg-green-500 rounded-full"
                 animate={{ y: [0, -8, 0] }}
-                transition={{ 
-                  duration: 0.6, 
-                  repeat: Infinity, 
-                  delay: i * 0.2 
+                transition={{
+                  duration: 0.6,
+                  repeat: Infinity,
+                  delay: i * 0.2,
                 }}
               />
             ))}
@@ -147,8 +154,8 @@ const Blogs = () => {
             </motion.div>
           </div>
         </div>
-        
-        <motion.h2 
+
+        <motion.h2
           className="text-2xl font-bold text-gray-800 mb-3"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -156,18 +163,18 @@ const Blogs = () => {
         >
           No Articles Found
         </motion.h2>
-        
-        <motion.p 
+
+        <motion.p
           className="text-gray-600 mb-6"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          {searchTerm || selectedCategory 
+          {searchTerm || selectedCategory
             ? "No articles match your search criteria. Try different keywords or categories."
             : "There are no published articles available at the moment. Please check back later."}
         </motion.p>
-        
+
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -186,10 +193,11 @@ const Blogs = () => {
                 Clear Filters
               </button>
               <p className="text-sm text-gray-500">
-                Showing results for: 
+                Showing results for:
                 {searchTerm && ` Search: "${searchTerm}"`}
-                {selectedCategory && categories.find(c => c._id === selectedCategory)?.name && 
-                  ` Category: "${categories.find(c => c._id === selectedCategory)?.name}"`}
+                {selectedCategory &&
+                  categories.find((c) => c._id === selectedCategory)?.name &&
+                  ` Category: "${categories.find((c) => c._id === selectedCategory)?.name}"`}
               </p>
             </>
           )}
@@ -199,11 +207,11 @@ const Blogs = () => {
   );
 
   if (loading) return <LoadingSpinner />;
-  
+
   if (!loading && blogPosts.length === 0) return <NoDataComponent />;
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
+    <div className="font-hind min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
       {/* Header */}
       <div className="pt-24 flex flex-col md:flex-row justify-between items-center bg-linear-to-r from-green-600 to-emerald-500 text-white py-6 px-6">
         <motion.h1
@@ -213,7 +221,7 @@ const Blogs = () => {
           transition={{ duration: 0.6 }}
         >
           Islamic Parenting Blog
-        </motion.h1> 
+        </motion.h1>
 
         {/* Search */}
         <motion.div
@@ -242,12 +250,26 @@ const Blogs = () => {
             {/* Main Content */}
             <div className="lg:w-2/3">
               <div className="flex justify-between items-center mb-10">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Latest Articles
-                </h2>
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {sortBy === "most-read"
+                      ? "Most Read Articles"
+                      : "Latest Articles"}
+                  </h2>
+
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+                  >
+                    <option value="latest">সর্বশেষ</option>
+                    <option value="most-read">সর্বাধিক পাঠিত</option>
+                  </select>
+                </div>
                 {filteredBlogs.length > 0 && (
                   <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                    {filteredBlogs.length} {filteredBlogs.length === 1 ? 'article' : 'articles'} found
+                    {filteredBlogs.length}{" "}
+                    {filteredBlogs.length === 1 ? "article" : "articles"} found
                   </span>
                 )}
               </div>
@@ -259,7 +281,8 @@ const Blogs = () => {
                     No Matching Articles
                   </h3>
                   <p className="text-gray-500 mb-6">
-                    Try adjusting your search or filter to find what you're looking for.
+                    Try adjusting your search or filter to find what you're
+                    looking for.
                   </p>
                   <button
                     onClick={() => {
@@ -297,18 +320,25 @@ const Blogs = () => {
                       {/* Content Section */}
                       <div className="p-6 flex flex-col justify-between flex-1">
                         <div>
-                          <div className="flex items-center text-sm text-gray-500 mb-3">
-                            <FiCalendar className="mr-1" />
-                            <span className="mr-4">
-                              {new Date(post.createdAt).toLocaleString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                }
-                              )}
-                            </span>
+                          <div className="flex flex-wrap items-center text-sm text-gray-500 mb-3 gap-3">
+                            <div className="flex items-center">
+                              <FiCalendar className="mr-1" />
+                              <span>
+                                {new Date(post.createdAt).toLocaleString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  },
+                                )}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center">
+                              <FiEye className="mr-1" />
+                              <span>{post.views/2 || 0} views</span>
+                            </div>
                           </div>
 
                           <h3 className="text-xl font-bold text-gray-800 mb-2 hover:text-green-600 transition">
