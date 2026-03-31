@@ -157,7 +157,7 @@ const NavBar = () => {
             </>
           ) : (
             <NavLink
-              to={"/signup"}
+              to={"/login"}
               className={`px-4 py-2 rounded-full shadow hover:opacity-90 transition text-sm lg:text-base font-semibold ${
                 scrolled
                   ? "bg-white text-blue-600 hover:bg-blue-50"
@@ -252,7 +252,7 @@ const NavBar = () => {
               </div>
             ) : (
               <NavLink
-                to={"/signup"}
+                to={"/login"}
                 onClick={handleLinkClick}
                 className={`block w-full px-4 py-3 rounded-lg text-center font-semibold transition ${
                   scrolled
