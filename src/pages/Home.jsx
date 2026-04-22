@@ -55,8 +55,8 @@ const Home = () => {
           </motion.div>
         ))}
       </div>
-     
-     <HeroSection />
+
+      <HeroSection />
 
       {/* Courses Section with Enhanced Animations */}
       <section className="relative pt-8 bg-linear-to-b from-blue-50 to-white px-6 z-10">
@@ -96,7 +96,7 @@ const Home = () => {
 
       <Heading text1={"আমাদের উস্তাদগণ"} text2={"আমাদের দক্ষ উস্তাদগণ"} />
 
-      <Instructors />
+      <Instructors limit={3} />
 
       {/* Enhanced Blogs Section */}
       <section

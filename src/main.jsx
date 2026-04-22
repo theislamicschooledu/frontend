@@ -65,6 +65,7 @@ import CourseDetailsTeacher from "./pages/Teacher/Course/CourseDetailsTeacher";
 import AboutUs from "./pages/AboutUs";
 import ManualEnrollmentForm from "./pages/ManualEnrollmentForm";
 import AdminEnrollments from "./pages/Admin/Course/AdminEnrollments";
+import InstructorsPage from "./pages/InstructorsPage";
 
 const router = createBrowserRouter([
   {
@@ -88,6 +89,7 @@ const router = createBrowserRouter([
       { path: "/qa", element: <QnA /> },
       { path: "qa/:id", element: <Question /> },
       { path: "/about", element: <AboutUs /> },
+      { path: "/instructors", element: <InstructorsPage /> },
       { path: "/forget-password", element: <ForgotPassword /> },
       { path: "/reset-password/:token", element: <ResetPassword /> },
 

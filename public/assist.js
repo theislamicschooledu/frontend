@@ -11,6 +11,7 @@ import {
 export const Nav_Item = [
   { path: "/", label: "হোম" },
   { path: "/courses", label: "কোর্স সমুহ" },
+  { path: "/instructors", label: "উস্তাদগণ" },
   { path: "/about", label: "আমাদের সম্পর্কে" },
   { path: "/blogs", label: "ব্লগ সমুহ" },
   { path: "/qa", label: "প্রশ্নোত্তর" },
