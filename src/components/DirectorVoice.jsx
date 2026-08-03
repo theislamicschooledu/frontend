@@ -1,141 +1,339 @@
 import React, { useEffect, useState } from "react";
 // eslint-disable-next-line no-unused-vars
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  FiBookOpen,
+  FiFeather,
+  FiHeart,
+  FiMessageCircle,
+  FiStar,
+  FiUser,
+} from "react-icons/fi";
+import { HiSparkles } from "react-icons/hi2";
 import TypingAnimation from "./TypingAnimation";
-import { FiBook, FiUser } from "react-icons/fi";
 import api from "../utils/axios";
+
+const DIRECTOR_NAME = "মোঃ মুজাহিদুল ইসলাম";
+
+// কম ডেকোরেশন - শুধু ৪টি আইকন
+const DECORATIONS = [
+  {
+    id: 1,
+    left: "5%",
+    top: "20%",
+    size: 24,
+    duration: 6,
+    delay: 0,
+    rotate: 8,
+    icon: "star",
+  },
+  {
+    id: 2,
+    left: "88%",
+    top: "25%",
+    size: 20,
+    duration: 7,
+    delay: 0.6,
+    rotate: -10,
+    icon: "heart",
+  },
+  {
+    id: 3,
+    left: "12%",
+    top: "75%",
+    size: 22,
+    duration: 5.5,
+    delay: 1.2,
+    rotate: -8,
+    icon: "book",
+  },
+  {
+    id: 4,
+    left: "85%",
+    top: "72%",
+    size: 18,
+    duration: 6.5,
+    delay: 0.9,
+    rotate: 10,
+    icon: "star",
+  },
+];
+
+const ICONS = {
+  star: HiSparkles,
+  book: FiBookOpen,
+  heart: FiHeart,
+};
+
+const DirectorVoiceSkeleton = () => (
+  <section
+    id="director-message"
+    className="relative overflow-hidden bg-[#faf8f5] px-4 py-16 font-hind sm:px-6 lg:py-24"
+    aria-label="পরিচালকের বাণী লোড হচ্ছে"
+  >
+    <div className="mx-auto max-w-7xl animate-pulse">
+      <div className="mx-auto mb-12 h-9 w-52 rounded-full bg-[#e8e4f2]" />
+      <div className="grid items-center gap-10 lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="mx-auto h-72 w-64 rounded-3xl bg-[#e8e4f2] sm:h-96 sm:w-80" />
+        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg sm:p-10">
+          <div className="mb-5 h-7 w-3/5 rounded-full bg-[#e8e4f2]" />
+          <div className="space-y-3">
+            <div className="h-4 rounded-full bg-[#f0eef5]" />
+            <div className="h-4 rounded-full bg-[#f0eef5]" />
+            <div className="h-4 w-11/12 rounded-full bg-[#f0eef5]" />
+            <div className="h-4 w-4/5 rounded-full bg-[#f0eef5]" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
 
 const DirectorVoice = () => {
   const [directorVoice, setDirectorVoice] = useState(null);
-  const director = "মোঃ মুজাহিদুল ইসলাম"
-  const fetchVoice = async () => {
-    try {
-      const res = await api.get("/documentation");
-      
-      setDirectorVoice(res?.data?.data?.principalVoice);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [status, setStatus] = useState("loading");
+  const [imageFailed, setImageFailed] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchVoice = async () => {
+      try {
+        setStatus("loading");
+
+        const response = await api.get("/documentation", {
+          signal: controller.signal,
+        });
+
+        const voice = response?.data?.data?.principalVoice;
+
+        if (!voice) {
+          setStatus("empty");
+          return;
+        }
+
+        setDirectorVoice(voice);
+        setStatus("success");
+      } catch (error) {
+        if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
+          return;
+        }
+
+        console.error("Unable to load director voice:", error);
+        setStatus("error");
+      }
+    };
+
     fetchVoice();
+
+    return () => controller.abort();
   }, []);
 
-  if(!directorVoice) {
-    return (
-      <section id="director-message"
-      className="relative font-hind pt-16 bg-linear-to-b from-white via-blue-50/40 to-blue-100/60 overflow-hidden"
-    >
-      <p className="text-xl"></p>
-    </section>
-    )
+  if (status === "loading") {
+    return <DirectorVoiceSkeleton />;
   }
+
+  if (status === "error" || status === "empty" || !directorVoice) {
+    return (
+      <section
+        id="director-message"
+        className="relative overflow-hidden bg-[#faf8f5] px-4 py-16 font-hind sm:px-6 lg:py-24"
+      >
+        <div className="mx-auto max-w-3xl rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-lg">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#f3edf9] text-[#7b5bb2]">
+            <FiMessageCircle size={30} />
+          </div>
+          <h2 className="text-2xl font-bold text-[#49366f]">
+            পরিচালকের বাণী পাওয়া যায়নি
+          </h2>
+          <p className="mt-2 text-sm text-gray-600 sm:text-base">
+            তথ্যটি আপডেট হওয়ার পর এখানে পরিচালকের বার্তা দেখা যাবে।
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  const directorTitle = directorVoice?.title || "প্রতিষ্ঠাতা ও পরিচালক";
 
   return (
     <section
       id="director-message"
-      className="relative font-hind pb-16 pt-16 px-6 bg-linear-to-b from-white via-blue-50/40 to-blue-100/60 overflow-hidden"
+      className="relative overflow-hidden bg-[#faf8f5] px-4 py-16 font-hind sm:px-6 lg:py-24"
     >
-      {/* Floating Background Icons */}
-      <div className="absolute inset-0 pointer-events-none opacity-10">
-        {[...Array(10)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-green-300 drop-shadow-xl"
-            style={{
-              left: `${5 + i * 10}%`,
-              top: `${20 + Math.random() * 50}%`,
-            }}
-            animate={{
-              y: [0, -25, 0],
-              rotate: [0, 180, 360],
-            }}
-            transition={{
-              duration: 10 + Math.random() * 6,
-              repeat: Infinity,
-              delay: Math.random() * 3,
-            }}
-          >
-            <FiBook size={40} />
-          </motion.div>
-        ))}
+      {/* সিম্পল ব্যাকগ্রাউন্ড ব্লব */}
+      <div
+        aria-hidden="true"
+        className="absolute -right-32 top-20 h-64 w-64 rounded-full bg-[#7b5bb2]/5 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute -left-32 bottom-20 h-64 w-64 rounded-full bg-[#fa7478]/5 blur-3xl"
+      />
+
+      {/* ফ্লোটিং আইকন - কম এবং সাবটেল */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 hidden overflow-hidden sm:block"
+      >
+        {DECORATIONS.map((item) => {
+          const Icon = ICONS[item.icon];
+          return (
+            <motion.div
+              key={item.id}
+              className="absolute flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white/60 text-[#7b5bb2] shadow-sm backdrop-blur-sm"
+              style={{
+                left: item.left,
+                top: item.top,
+              }}
+              animate={
+                reduceMotion
+                  ? undefined
+                  : {
+                      y: [0, -10, 0],
+                      rotate: [0, item.rotate, 0],
+                    }
+              }
+              transition={{
+                duration: item.duration,
+                delay: item.delay,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <Icon size={item.size} />
+            </motion.div>
+          );
+        })}
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* Title */}
+      <div className="relative z-10 mx-auto max-w-7xl">
+        {/* সেকশন হেডিং - সিম্পল */}
         <motion.div
-          className="text-center mb-14"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
+          className="mx-auto mb-12 max-w-2xl text-center lg:mb-16"
+          initial={reduceMotion ? false : { opacity: 0, y: 15 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true, amount: 0.3 }}
         >
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-3 tracking-tight">
+          <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full bg-[#f3edf9] px-4 py-1.5 text-sm font-semibold text-[#7b5bb2]">
+            <HiSparkles className="text-[#7b5bb2]" />
             পরিচালকের বাণী
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight text-[#2d1b4e] sm:text-4xl lg:text-5xl">
+            আমাদের প্রেরণা
           </h2>
-          <div className="w-28 h-1 bg-green-600 mx-auto rounded-full"></div>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-gray-600 sm:text-base">
+            ইসলামী মূল্যবোধ ও সুন্দর চরিত্রের মাধ্যমে শিশুদের উজ্জ্বল ভবিষ্যৎ
+            গড়ে তোলাই আমাদের অঙ্গীকার।
+          </p>
         </motion.div>
 
-        {/* Main Layout */}
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
-          {/* Director Image */}
+        <div className="grid items-center gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
+          {/* পরিচালকের ছবি */}
           <motion.div
-            className="lg:w-1/3 flex justify-center"
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+            className="flex justify-center"
+            initial={reduceMotion ? false : { opacity: 0, x: -30 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true, amount: 0.25 }}
           >
-            <div className="relative">
-              <div className="w-60 h-60 md:w-72 md:h-72 rounded-full bg-linear-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden">
-                <img src={directorVoice?.photo} alt={directorVoice?.title} className="w-full" />
-              </div>
+            <div className="relative w-full max-w-sm">
+              {/* ডেকোরেটিভ ব্যাকগ্রাউন্ড */}
+              <div
+                aria-hidden="true"
+                className="absolute -inset-4 -z-10 rounded-3xl bg-linear-to-br from-[#7b5bb2]/10 to-[#fa7478]/10"
+              />
 
-              {/* Floating Name Box */}
-              <motion.div
-                className="absolute -bottom-5 -right-6 bg-white/70 backdrop-blur-lg p-5 rounded-2xl shadow-lg border border-white/40"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity }}
-              >
-                <div className="text-center">
-                  <h3 className="font-bold text-green-700">{director}</h3>
-                  <p className="text-sm text-gray-600">{directorVoice?.title}</p>
+              <div className="relative overflow-hidden rounded-3xl border-4 border-white bg-white shadow-xl">
+                <div className="relative aspect-4/5 overflow-hidden bg-[#f7efe3]">
+                  {directorVoice?.photo && !imageFailed ? (
+                    <motion.img
+                      src={directorVoice.photo}
+                      alt={`${DIRECTOR_NAME}, ${directorTitle}`}
+                      className="h-full w-full object-cover object-top"
+                      onError={() => setImageFailed(true)}
+                      initial={reduceMotion ? false : { scale: 1.05 }}
+                      whileInView={reduceMotion ? undefined : { scale: 1 }}
+                      transition={{ duration: 0.8 }}
+                      viewport={{ once: true }}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-[#f3edf9] to-[#faf8f5] text-[#7b5bb2]">
+                      <FiUser size={80} />
+                    </div>
+                  )}
+
+                  {/* ওভারলে - হালকা */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/40 to-transparent" />
+
+                  {/* নামের ব্যাজ */}
+                  <div className="absolute inset-x-5 bottom-5 text-white">
+                    <p className="text-xl font-bold">{DIRECTOR_NAME}</p>
+                    <p className="mt-0.5 text-sm font-medium text-white/80">
+                      {directorTitle}
+                    </p>
+                  </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
 
-          {/* Message Box */}
+          {/* মেসেজ কার্ড - স্ক্রলেবল টেক্সট এরিয়া */}
           <motion.div
-            className="lg:w-2/3"
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
+            initial={reduceMotion ? false : { opacity: 0, x: 30 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
-            <div className="p-6 md:p-10 rounded-3xl bg-white/60 backdrop-blur-lg shadow-xl border border-white/40 transition-all">
-              <div className="text-gray-700 text-lg leading-relaxed text-justify">
-                <TypingAnimation
-                  text={directorVoice?.text}
-                  speed={20}
-                  delay={800}
-                  className={"text-base md:text-lg"}
-                />
+            <div className="relative rounded-3xl border border-gray-200 bg-white p-6 shadow-lg sm:p-8 lg:p-10">
+              {/* আইকন */}
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#7b5bb2] text-white shadow-md">
+                <FiFeather size={22} />
               </div>
 
-              {/* Signature */}
+              {/* স্ক্রলেবল টেক্সট এরিয়া */}
+              <div className="relative">
+                <span
+                  aria-hidden="true"
+                  className="absolute -left-1 -top-6 select-none font-serif text-6xl leading-none text-[#7b5bb2]/10"
+                >
+                  “
+                </span>
+
+                {/* এখানে নির্দিষ্ট উচ্চতা দিয়ে স্ক্রল যোগ করা হয়েছে */}
+                <div className="max-h-60 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#7b5bb2]/30 scrollbar-track-transparent hover:scrollbar-thumb-[#7b5bb2]/50">
+                  <div className="text-justify text-base font-medium leading-7 text-gray-700 sm:text-lg sm:leading-8">
+                    <TypingAnimation
+                      text={directorVoice?.text || ""}
+                      speed={20}
+                      delay={550}
+                      className="text-base leading-7 sm:text-lg sm:leading-8"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ফুটার */}
               <motion.div
-                className="mt-10 pt-6 border-t border-gray-300/60 text-right"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ duration: 1, delay: 2 }}
+                className="mt-6 flex flex-col gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:items-center sm:justify-between"
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.8 }}
                 viewport={{ once: true }}
               >
-                <p className="text-gray-800 font-semibold text-lg">
-                  মুজাহিদুল ইসলাম
-                </p>
-                <p className="text-gray-500 text-sm">প্রতিষ্ঠাতা ও পরিচালক</p>
+                <div>
+                  <p className="text-base font-bold text-[#2d1b4e]">
+                    {DIRECTOR_NAME}
+                  </p>
+                  <p className="text-sm text-gray-500">{directorTitle}</p>
+                </div>
+
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#f3edf9] px-4 py-1.5 text-xs font-semibold text-[#7b5bb2]">
+                  <FiHeart className="text-[#fa7478]" />
+                  শিশুদের ভবিষ্যতের জন্য
+                </div>
               </motion.div>
             </div>
           </motion.div>

@@ -26,7 +26,6 @@ const FeaturedCourses = () => {
           error.message ||
           "Failed to load courses"
       );
-      // Toast শুধু গুরুতর এরর এর জন্য দেখাতে পারেন, অথবা বাদ দিতে পারেন
       if (!error?.response?.status || error.response.status >= 500) {
         toast.error(
           error?.response?.data?.message ||

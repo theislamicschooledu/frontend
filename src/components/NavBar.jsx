@@ -6,6 +6,41 @@ import { useAuth } from "../hooks/useAuth.js";
 import toast from "react-hot-toast";
 import logoWhite from "./../../public/Logo-white.png";
 import logoBlue from "./../../public/Logo-blue.png";
+import { MdOutlineLocalPhone } from "react-icons/md";
+import { CiLogin } from "react-icons/ci";
+import { HiSparkles } from "react-icons/hi2";
+
+// Each nav link gets its own hover color — cycles through this palette
+const HOVER_COLORS = [
+  { text: "hover:text-pink-500", bg: "hover:bg-pink-50", dot: "bg-pink-400" },
+  { text: "hover:text-sky-500", bg: "hover:bg-sky-50", dot: "bg-sky-400" },
+  {
+    text: "hover:text-emerald-500",
+    bg: "hover:bg-emerald-50",
+    dot: "bg-emerald-400",
+  },
+  {
+    text: "hover:text-amber-500",
+    bg: "hover:bg-amber-50",
+    dot: "bg-amber-400",
+  },
+  {
+    text: "hover:text-violet-500",
+    bg: "hover:bg-violet-50",
+    dot: "bg-violet-400",
+  },
+  { text: "hover:text-rose-500", bg: "hover:bg-rose-50", dot: "bg-rose-400" },
+];
+
+// Scrolled variant needs lighter colors so they stay visible on the gradient bar
+const HOVER_COLORS_SCROLLED = [
+  { text: "hover:text-yellow-200", dot: "bg-yellow-200" },
+  { text: "hover:text-cyan-200", dot: "bg-cyan-200" },
+  { text: "hover:text-lime-200", dot: "bg-lime-200" },
+  { text: "hover:text-orange-200", dot: "bg-orange-200" },
+  { text: "hover:text-fuchsia-200", dot: "bg-fuchsia-200" },
+  { text: "hover:text-rose-200", dot: "bg-rose-200" },
+];
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,8 +53,23 @@ const NavBar = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    window.addEventListener("scroll", handleScroll);
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Desktop breakpoint এ গেলে mobile menu স্বয়ংক্রিয়ভাবে বন্ধ হবে
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Mobile menu hide on link click
@@ -28,7 +78,7 @@ const NavBar = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success("Logged out successfully");
+      toast.success("Logged out — see you soon! 👋");
       navigate("/login");
     } catch (error) {
       toast.error(error);
@@ -36,237 +86,324 @@ const NavBar = () => {
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-linear-to-r from-indigo-600 to-blue-600 shadow-lg"
-          : "bg-white/70 backdrop-blur-md backdrop-saturate-150 shadow-sm"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-        <NavLink
-          to={"/"}
-          className="flex items-center space-x-2 transition-transform hover:scale-105"
-          onClick={handleLinkClick}
-        >
-          {scrolled ? (
-            <>
-              <img
-                src={logoWhite}
-                alt="Website Logo"
-                className="h-6 w-auto md:h-8 lg:h-10 object-contain transition-all duration-300"
-              />
-              <div className="flex flex-col gap-0">
-                <p className="text-xl font-bold text-white">
-                  THE ISLAMIC SCHOOL
-                </p>
-                <span className="text-xs text-gray-300 leading-2 tracking-widest">
-                  Learn - Light - Lead with Islam
-                </span>
-              </div>
-            </>
-          ) : (
-            <>
-              <img
-                src={logoBlue}
-                alt="Website Logo"
-                className="h-6 w-auto md:h-8 lg:h-10 object-contain transition-all duration-300"
-              />
-              <div className="flex flex-col gap-0">
-                <p className="text-xl font-bold text-blue-900">
-                  THE ISLAMIC SCHOOL
-                </p>
-                <span className="text-xs text-blue-600 leading-2 tracking-widest">
-                  Learn - Light - Lead with Islam
-                </span>
-              </div>
-            </>
-          )}
-        </NavLink>
+    <>
+      <nav
+        aria-label="Main navigation"
+        className={`fixed inset-x-0 top-0 z-100 isolate w-full touch-pan-y transition-all duration-500 ${
+          scrolled
+            ? "bg-linear-to-r from-violet-600 via-indigo-600 to-sky-600 shadow-lg shadow-indigo-300/30"
+            : "bg-white/95 backdrop-blur-md backdrop-saturate-150 shadow-sm"
+        }`}
+      >
+        {/* Top strip */}
+        <div className="relative h-7 overflow-hidden bg-linear-to-r from-teal-500 to-emerald-500">
+          {/* Fun floating star sprinkles */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <HiSparkles className="absolute left-[8%] top-1 text-yellow-200 text-lg animate-[float_3s_ease-in-out_infinite]" />
+            <HiSparkles className="absolute left-[42%] top-1.5 text-white text-sm animate-[float_4s_ease-in-out_infinite_0.5s]" />
+            <HiSparkles className="absolute right-[15%] top-1 text-yellow-200 text-lg animate-[float_3.5s_ease-in-out_infinite_1s]" />
+          </div>
+          <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6">
+            <p className="flex items-center gap-2">
+              <MdOutlineLocalPhone className="text-white animate-[wiggle_2s_ease-in-out_infinite]" />
+              <span className="text-xs font-medium text-white sm:text-sm">
+                Call us
+              </span>
+            </p>
+            <Link to={"/login"} className="flex items-center gap-2 group">
+              <CiLogin className="text-white text-lg group-hover:translate-x-1 transition-transform" />
+              <span className="text-xs font-medium text-white sm:text-sm">
+                Student Login
+              </span>
+            </Link>
+          </div>
+        </div>
 
-        {/* Desktop Menu */}
-        <div className="hidden lg:flex space-x-4 lg:space-x-6 font-medium items-center">
-          {Nav_Item.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              className={({ isActive }) =>
-                `px-3 py-2 rounded-full transition text-sm lg:text-base ${
-                  isActive
-                    ? "bg-blue-500 text-white shadow-md"
-                    : scrolled
-                    ? "text-white hover:bg-blue-500/50 hover:text-white"
-                    : "text-gray-700 hover:bg-blue-100/50 hover:text-blue-600"
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
+        <div className="mx-auto grid h-14 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 sm:h-16 sm:px-6 lg:h-17 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-4">
+          {/* Logo */}
+          <NavLink
+            to={"/"}
+            className="flex min-w-0 items-center gap-2 transition-transform duration-300 hover:-rotate-2 hover:scale-[1.03]"
+            onClick={handleLinkClick}
+          >
+            {scrolled ? (
+              <>
+                <img
+                  src={logoWhite}
+                  alt="Website Logo"
+                  className="h-7 w-auto object-contain drop-shadow-sm animate-[bounce-slow_3s_ease-in-out_infinite] sm:h-8 lg:h-9"
+                />
+                <div className="flex flex-col gap-0">
+                  <p className="truncate whitespace-nowrap text-sm font-extrabold tracking-wide text-white min-[390px]:text-base sm:text-lg md:text-xl">
+                    THE ISLAMIC SCHOOL
+                  </p>
+                  <span className="hidden text-[10px] font-medium leading-tight tracking-widest text-sky-100 sm:block md:text-[11px]">
+                    Learn - Light - Lead with Islam
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <img
+                  src={logoBlue}
+                  alt="Website Logo"
+                  className="h-7 w-auto object-contain drop-shadow-sm animate-[bounce-slow_3s_ease-in-out_infinite] sm:h-8 lg:h-9"
+                />
+                <div className="flex flex-col gap-0">
+                  <p className="truncate whitespace-nowrap text-sm font-extrabold tracking-wide text-indigo-900 min-[390px]:text-base sm:text-lg md:text-xl">
+                    THE ISLAMIC SCHOOL
+                  </p>
+                  <span className="hidden text-[10px] font-medium leading-tight tracking-widest text-emerald-600 sm:block md:text-[11px]">
+                    Learn - Light - Lead with Islam
+                  </span>
+                </div>
+              </>
+            )}
+          </NavLink>
 
-          {user ? (
-            <>
-              {user.role !== "admin" && (
+          {/* Desktop Nav Links — centered */}
+          <div className="hidden lg:flex justify-center items-center gap-1">
+            {Nav_Item.map((link, i) => {
+              const palette = scrolled
+                ? HOVER_COLORS_SCROLLED[i % HOVER_COLORS_SCROLLED.length]
+                : HOVER_COLORS[i % HOVER_COLORS.length];
+              return (
                 <NavLink
-                  to={"/my-courses"}
+                  key={link.path}
+                  to={link.path}
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-full transition text-sm lg:text-base ${
+                    `group relative px-4 py-2 rounded-full font-semibold text-sm lg:text-base transition-all duration-300 ${
                       isActive
-                        ? "bg-blue-500 text-white shadow-md"
+                        ? scrolled
+                          ? "bg-white/15 text-white"
+                          : "bg-indigo-50 text-indigo-700"
                         : scrolled
-                        ? "text-white hover:bg-blue-500/50 hover:text-white"
-                        : "text-gray-700 hover:bg-blue-100/50 hover:text-blue-600"
+                          ? `text-white/90 ${palette.text}`
+                          : `text-gray-600 ${palette.text} ${palette.bg}`
                     }`
                   }
                 >
-                  আমার কোর্সসমুহ
+                  {link.label}
+                  {/* animated underline dot */}
+                  <span
+                    className={`absolute left-1/2 -bottom-0.5 h-1 w-1 -translate-x-1/2 rounded-full opacity-0 scale-0 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 ${palette.dot}`}
+                  />
                 </NavLink>
-              )}
-              {user.role !== "student" && (
-                <Link
-                  to={`/${user.role}`}
-                  className={`px-3 py-2 rounded-full transition font-semibold text-sm lg:text-base ${
-                    scrolled
-                      ? "text-white hover:bg-blue-500/50"
-                      : "text-gray-800 hover:bg-blue-100/50 hover:text-blue-600"
-                  }`}
-                >
-                  ড্যাশবোর্ড
-                </Link>
-              )}
-              <Link
-                to={"/profile"}
-                className={`p-2 rounded-full transition ${
-                  scrolled
-                    ? "text-white hover:bg-blue-500/50"
-                    : "text-gray-800 hover:bg-blue-100/50 hover:text-blue-600"
-                }`}
-              >
-                <FiUser className="text-xl lg:text-2xl" />
-              </Link>
-              <button
-                onClick={handleLogout}
-                className={`px-4 py-2 rounded-full font-medium transition text-sm lg:text-base ${
-                  scrolled
-                    ? "bg-white text-blue-600 hover:bg-blue-50 hover:shadow-md"
-                    : "bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:opacity-90 hover:shadow-lg"
-                }`}
-              >
-                লগ আউট
-              </button>
-            </>
-          ) : (
-            <NavLink
-              to={"/login"}
-              className={`px-4 py-2 rounded-full shadow hover:opacity-90 transition text-sm lg:text-base font-semibold ${
-                scrolled
-                  ? "bg-white text-blue-600 hover:bg-blue-50"
-                  : "bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
-              }`}
-            >
-              Join Now
-            </NavLink>
-          )}
-        </div>
+              );
+            })}
+          </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`lg:hidden p-2 rounded-lg transition ${
-            scrolled
-              ? "text-white hover:bg-blue-500/50"
-              : "text-gray-700 hover:bg-blue-100/50"
-          }`}
-        >
-          {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div
-          className={`lg:hidden px-4 py-4 space-y-2 font-medium transition-all duration-300 ${
-            scrolled
-              ? "bg-linear-to-r from-indigo-600 to-blue-600 text-white"
-              : "bg-white/95 backdrop-blur-md border-t border-gray-200"
-          }`}
-        >
-          {Nav_Item.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              onClick={handleLinkClick}
-              className={({ isActive }) =>
-                `block px-4 py-3 rounded-lg transition text-base font-medium ${
-                  isActive
-                    ? "bg-blue-500 text-white shadow-md"
-                    : scrolled
-                    ? "hover:bg-blue-500/50 hover:text-white"
-                    : "hover:bg-blue-100/70 hover:text-blue-600"
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-
-          <div className="border-t border-gray-300/50 pt-3 mt-2">
+          {/* Right actions */}
+          <div className="hidden lg:flex items-center justify-end gap-2">
             {user ? (
-              <div className="space-y-2">
-                <Link
-                  to={`/${user.role}`}
-                  onClick={handleLinkClick}
-                  className={`block px-4 py-3 rounded-lg transition font-semibold ${
-                    scrolled
-                      ? "hover:bg-blue-500/50"
-                      : "hover:bg-blue-100/70 hover:text-blue-600"
-                  }`}
-                >
-                  ড্যাশবোর্ড
-                </Link>
+              <>
+                {user.role !== "admin" && (
+                  <NavLink
+                    to={"/my-courses"}
+                    className={({ isActive }) =>
+                      `px-3 py-2 rounded-full transition text-sm lg:text-base font-medium whitespace-nowrap ${
+                        isActive
+                          ? scrolled
+                            ? "bg-white/15 text-white"
+                            : "bg-indigo-50 text-indigo-700"
+                          : scrolled
+                            ? "text-white/90 hover:bg-white/15"
+                            : "text-gray-600 hover:bg-indigo-50 hover:text-indigo-700"
+                      }`
+                    }
+                  >
+                    My Courses
+                  </NavLink>
+                )}
+                {user.role !== "student" && (
+                  <Link
+                    to={`/${user.role}`}
+                    className={`px-3 py-2 rounded-full transition font-medium text-sm lg:text-base whitespace-nowrap ${
+                      scrolled
+                        ? "text-white/90 hover:bg-white/15"
+                        : "text-gray-600 hover:bg-indigo-50 hover:text-indigo-700"
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                )}
                 <Link
                   to={"/profile"}
-                  onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-semibold ${
+                  className={`p-2.5 rounded-full transition-all duration-300 hover:scale-110 ${
                     scrolled
-                      ? "hover:bg-blue-500/50"
-                      : "hover:bg-blue-100/70 hover:text-blue-600"
+                      ? "bg-white/15 text-white hover:bg-white/25"
+                      : "bg-gray-100 text-gray-600 hover:bg-indigo-100 hover:text-indigo-700"
                   }`}
                 >
-                  <FiUser className="text-xl" />
-                  <span>প্রোফাইল</span>
+                  <FiUser className="text-lg lg:text-xl" />
                 </Link>
                 <button
-                  onClick={() => {
-                    handleLinkClick();
-                    handleLogout();
-                  }}
-                  className={`w-full px-4 py-3 rounded-lg font-semibold transition ${
+                  onClick={handleLogout}
+                  className={`px-4 py-2 rounded-full font-semibold transition-all duration-300 text-sm lg:text-base hover:shadow-md active:scale-95 ${
                     scrolled
-                      ? "bg-white text-blue-600 hover:bg-blue-50"
-                      : "bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
+                      ? "bg-white text-indigo-600 hover:bg-sky-50"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700"
                   }`}
                 >
-                  লগ আউট
+                  Log Out
                 </button>
-              </div>
+              </>
             ) : (
               <NavLink
                 to={"/login"}
-                onClick={handleLinkClick}
-                className={`block w-full px-4 py-3 rounded-lg text-center font-semibold transition ${
+                className={`px-5 py-2 rounded-full shadow-sm transition-all duration-300 text-sm lg:text-base font-semibold hover:scale-105 hover:shadow-md active:scale-95 ${
                   scrolled
-                    ? "bg-white text-blue-600 hover:bg-blue-50"
-                    : "bg-linear-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
+                    ? "bg-white text-indigo-600 hover:bg-sky-50"
+                    : "bg-linear-to-r from-indigo-600 to-sky-500 text-white hover:shadow-indigo-200"
                 }`}
               >
                 Join Now
               </NavLink>
             )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            type="button"
+            aria-label={
+              isOpen ? "Close navigation menu" : "Open navigation menu"
+            }
+            aria-expanded={isOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setIsOpen((open) => !open)}
+            className={`lg:hidden justify-self-end p-2.5 rounded-full transition-all duration-300 active:scale-90 ${
+              scrolled
+                ? "bg-white/15 text-white hover:bg-white/25"
+                : "bg-gray-100 text-gray-600 hover:bg-indigo-100"
+            }`}
+          >
+            {isOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+          </button>
         </div>
-      )}
-    </nav>
+
+        {/* Mobile Menu */}
+        <div
+          id="mobile-navigation"
+          className={`absolute inset-x-0 top-full overflow-y-auto overscroll-y-auto touch-pan-y [-webkit-overflow-scrolling:touch] lg:hidden transition-[max-height,opacity,visibility] duration-300 ease-in-out ${
+            isOpen
+              ? "visible pointer-events-auto max-h-[calc(100dvh-84px)] opacity-100 sm:max-h-[calc(100dvh-92px)]"
+              : "invisible pointer-events-none max-h-0 opacity-0"
+          }`}
+        >
+          <div
+            className={`px-4 py-4 space-y-1 font-medium ${
+              scrolled
+                ? "bg-linear-to-b from-indigo-700 to-sky-700 text-white"
+                : "bg-white/95 backdrop-blur-md border-t border-gray-200"
+            }`}
+          >
+            {Nav_Item.map((link, i) => {
+              const palette = scrolled
+                ? HOVER_COLORS_SCROLLED[i % HOVER_COLORS_SCROLLED.length]
+                : HOVER_COLORS[i % HOVER_COLORS.length];
+              return (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  onClick={handleLinkClick}
+                  className={({ isActive }) =>
+                    `block px-4 py-3 rounded-xl transition-all duration-300 text-base ${
+                      isActive
+                        ? scrolled
+                          ? "bg-white/15 text-white font-semibold"
+                          : "bg-indigo-50 text-indigo-700 font-semibold"
+                        : scrolled
+                          ? `${palette.text} hover:bg-white/10`
+                          : `${palette.text} ${palette.bg}`
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              );
+            })}
+
+            <div className="border-t border-white/20 pt-3 mt-2">
+              {user ? (
+                <div className="space-y-1">
+                  <Link
+                    to={`/${user.role}`}
+                    onClick={handleLinkClick}
+                    className={`block px-4 py-3 rounded-xl transition font-semibold ${
+                      scrolled
+                        ? "hover:bg-white/10"
+                        : "hover:bg-indigo-50 hover:text-indigo-700"
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to={"/profile"}
+                    onClick={handleLinkClick}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition font-semibold ${
+                      scrolled
+                        ? "hover:bg-white/10"
+                        : "hover:bg-indigo-50 hover:text-indigo-700"
+                    }`}
+                  >
+                    <FiUser className="text-xl" />
+                    <span>Profile</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLinkClick();
+                      handleLogout();
+                    }}
+                    className={`w-full px-4 py-3 rounded-xl font-semibold transition active:scale-95 ${
+                      scrolled
+                        ? "bg-white text-indigo-600 hover:bg-sky-50"
+                        : "bg-indigo-600 text-white hover:bg-indigo-700"
+                    }`}
+                  >
+                    Log Out
+                  </button>
+                </div>
+              ) : (
+                <NavLink
+                  to={"/login"}
+                  onClick={handleLinkClick}
+                  className={`block w-full px-4 py-3 rounded-xl text-center font-semibold transition active:scale-95 ${
+                    scrolled
+                      ? "bg-white text-indigo-600 hover:bg-sky-50"
+                      : "bg-linear-to-r from-indigo-600 to-sky-500 text-white hover:shadow-md"
+                  }`}
+                >
+                  Join Now
+                </NavLink>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-12deg); }
+          75% { transform: rotate(12deg); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+          50% { transform: translateY(-6px) rotate(15deg); opacity: 1; }
+        }
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation: none !important; transition-duration: 0.01ms !important; }
+        }
+      `}</style>
+      </nav>
+      <div
+        aria-hidden="true"
+        className="h-21 shrink-0 sm:h-23 lg:h-24"
+      />
+    </>
   );
 };
 
