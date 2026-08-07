@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 const HomeAbout = ({
-  youtubeUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  youtubeUrl = "https://www.youtube.com/watch?v=1KviEqtohqQ&pp=ygUPaXNsYW1pYyBuYXNoZWVk0gcJCaMLAYcqIYzv",
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 

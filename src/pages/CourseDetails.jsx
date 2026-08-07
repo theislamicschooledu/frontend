@@ -21,64 +21,77 @@ import {
   FiInfo,
   FiX,
 } from "react-icons/fi";
-import { FaChalkboardTeacher, FaRegClock, FaGraduationCap } from "react-icons/fa";
+import {
+  FaChalkboardTeacher,
+  FaRegClock,
+  FaGraduationCap,
+} from "react-icons/fa";
 import { IoIosTrendingUp } from "react-icons/io";
 import { MdWorkspacePremium } from "react-icons/md";
 import api from "../utils/axios";
 import PaymentModal from "../components/PaymentModal";
 import { useAuth } from "../hooks/useAuth";
 
+const floatingDecorations = [
+  { left: "4%", top: "12%", size: 18, delay: 0.2, duration: 6.2 },
+  { left: "12%", top: "72%", size: 13, delay: 1.1, duration: 7.1 },
+  { left: "32%", top: "28%", size: 15, delay: 0.5, duration: 6.8 },
+  { left: "57%", top: "82%", size: 17, delay: 1.5, duration: 7.4 },
+  { left: "77%", top: "19%", size: 14, delay: 0.8, duration: 6.5 },
+  { left: "92%", top: "63%", size: 20, delay: 1.8, duration: 7.2 },
+];
+
 // Course Status Badge Component
-const CourseStatusBadge = ({ status, isUpcoming }) => {
-  const getStatusConfig = (status) => {
-    switch (status) {
-      case 'coming_soon':
-        return { 
-          text: 'Coming Soon', 
-          bg: 'bg-purple-100', 
-          textColor: 'text-purple-700', 
+const CourseStatusBadge = ({ status }) => {
+  const getStatusConfig = (currentStatus) => {
+    switch (currentStatus) {
+      case "coming_soon":
+        return {
+          text: "Coming Soon",
+          bg: "bg-[#f1ebff]",
+          textColor: "text-[#7654c8]",
+          border: "border-[#d9ccff]",
           icon: FiClock,
-          gradient: 'from-purple-500 to-pink-500'
         };
-      case 'upcoming':
-        return { 
-          text: 'Upcoming', 
-          bg: 'bg-blue-100', 
-          textColor: 'text-blue-700', 
+      case "upcoming":
+        return {
+          text: "Upcoming",
+          bg: "bg-[#e9f5ff]",
+          textColor: "text-[#2574a9]",
+          border: "border-[#c7e5fb]",
           icon: FiCalendar,
-          gradient: 'from-blue-500 to-cyan-500'
         };
-      case 'enrollment_open':
-        return { 
-          text: 'Enrollment Open', 
-          bg: 'bg-green-100', 
-          textColor: 'text-green-700', 
+      case "enrollment_open":
+        return {
+          text: "Enrollment Open",
+          bg: "bg-[#e5f8f2]",
+          textColor: "text-[#08736e]",
+          border: "border-[#bde9dd]",
           icon: FiUsers,
-          gradient: 'from-green-500 to-emerald-500'
         };
-      case 'enrollment_closed':
-        return { 
-          text: 'Enrollment Closed', 
-          bg: 'bg-orange-100', 
-          textColor: 'text-orange-700', 
+      case "enrollment_closed":
+        return {
+          text: "Enrollment Closed",
+          bg: "bg-[#fff0e9]",
+          textColor: "text-[#d95635]",
+          border: "border-[#ffd1c2]",
           icon: FiX,
-          gradient: 'from-orange-500 to-red-500'
         };
-      case 'course_started':
-        return { 
-          text: 'Course Started', 
-          bg: 'bg-teal-100', 
-          textColor: 'text-teal-700', 
+      case "course_started":
+        return {
+          text: "Course Started",
+          bg: "bg-[#e6f7f6]",
+          textColor: "text-[#08736e]",
+          border: "border-[#bce8e3]",
           icon: FaGraduationCap,
-          gradient: 'from-teal-500 to-cyan-500'
         };
       default:
-        return { 
-          text: 'Published', 
-          bg: 'bg-gray-100', 
-          textColor: 'text-gray-700', 
+        return {
+          text: "Published",
+          bg: "bg-slate-100",
+          textColor: "text-slate-600",
+          border: "border-slate-200",
           icon: FiBookOpen,
-          gradient: 'from-gray-500 to-gray-600'
         };
     }
   };
@@ -87,8 +100,10 @@ const CourseStatusBadge = ({ status, isUpcoming }) => {
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg ${config.bg} ${config.textColor}`}>
-      <Icon size={14} />
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-black shadow-sm ${config.bg} ${config.textColor} ${config.border}`}
+    >
+      <Icon size={13} />
       {config.text}
     </span>
   );
@@ -122,17 +137,17 @@ const CourseDetails = () => {
         setCourse(courseData);
         setLectures(courseData.lectures || []);
         setTeachers(courseData.teachers || []);
-        
+
         // লেকচার এক্সপান্ডেড স্টেট সেটআপ
         const expanded = {};
-        (courseData.lectures || []).forEach(lec => {
+        (courseData.lectures || []).forEach((lec) => {
           expanded[lec._id] = false;
         });
         setExpandedLectures(expanded);
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to load course details"
+        error.response?.data?.message || "Failed to load course details",
       );
     } finally {
       setLoading(false);
@@ -155,7 +170,7 @@ const CourseDetails = () => {
     try {
       const res = await api.get("/enrollments/my-enrollments");
       const data = res.data.data || res.data;
-      
+
       const findCourse = data.find((d) => d.course?._id === id);
       if (findCourse && findCourse.paymentStatus === "completed") {
         setEnrolled(true);
@@ -214,15 +229,15 @@ const CourseDetails = () => {
     }
 
     // Check if enrollment is open
-    if (course.currentStatus !== 'enrollment_open') {
+    if (course.currentStatus !== "enrollment_open") {
       toast(
-        course.currentStatus === 'coming_soon' 
+        course.currentStatus === "coming_soon"
           ? "This course is coming soon! Enrollment will open when dates are announced."
-          : course.currentStatus === 'enrollment_closed'
-          ? "Enrollment for this course is closed."
-          : course.currentStatus === 'course_started'
-          ? "This course has already started. You can enroll in the next batch."
-          : "Enrollment is not available at this time."
+          : course.currentStatus === "enrollment_closed"
+            ? "Enrollment for this course is closed."
+            : course.currentStatus === "course_started"
+              ? "This course has already started. You can enroll in the next batch."
+              : "Enrollment is not available at this time.",
       );
       return;
     }
@@ -233,7 +248,7 @@ const CourseDetails = () => {
   const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!user) {
       toast.error("Please login to add to wishlist");
       navigate("/login", { state: { from: `/course/${id}` } });
@@ -245,7 +260,7 @@ const CourseDetails = () => {
       if (res.data.success) {
         setWishlisted(res.data.isInWishlist);
         toast.success(
-          res.data.isInWishlist ? "Added to wishlist" : "Removed from wishlist"
+          res.data.isInWishlist ? "Added to wishlist" : "Removed from wishlist",
         );
       }
     } catch (error) {
@@ -265,15 +280,15 @@ const CourseDetails = () => {
             key={i}
             className={`${
               i < fullStars
-                ? "text-yellow-400 fill-current"
+                ? "text-[#f6b91a] fill-current"
                 : hasHalfStar && i === fullStars
-                ? "text-yellow-400 fill-current opacity-75"
-                : "text-gray-300"
+                  ? "text-[#f6b91a] fill-current opacity-75"
+                  : "text-slate-300"
             }`}
             size={16}
           />
         ))}
-        <span className="ml-2 text-sm font-medium">
+        <span className="ml-2 text-sm font-bold text-[#073b46]">
           {rating?.toFixed(1) || "0.0"}
         </span>
       </div>
@@ -290,778 +305,995 @@ const CourseDetails = () => {
         day: "numeric",
         year: "numeric",
       });
-    } catch (error) {
+    } catch {
       return "Invalid Date";
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading course details...</p>
-        </div>
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fff9e7] font-hind">
+        <div className="absolute -left-24 top-16 h-80 w-80 rounded-full bg-[#bcebe6]/55 blur-3xl" />
+        <div className="absolute -right-24 bottom-12 h-80 w-80 rounded-full bg-[#ffd7cb]/60 blur-3xl" />
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative z-10 mx-5 rounded-4xl border-4 border-white bg-white/90 px-10 py-11 text-center shadow-[0_24px_70px_rgba(7,59,70,0.12)] backdrop-blur-sm"
+        >
+          <div className="relative mx-auto mb-5 h-20 w-20">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 rounded-full border-4 border-[#ffd36e] border-t-[#ff6542]"
+            />
+            <div className="absolute inset-3 grid place-items-center rounded-full bg-[#fff4c9] text-[#073b46]">
+              <FiBookOpen size={24} />
+            </div>
+          </div>
+          <h2 className="text-2xl font-black text-[#073b46]">
+            Loading course details...
+          </h2>
+          <p className="mt-2 text-sm font-medium text-slate-500">
+            Your learning journey is being prepared.
+          </p>
+        </motion.div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <FiBookOpen className="text-6xl text-gray-300 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-gray-600 mb-2">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fff9e7] px-4 font-hind">
+        <div className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-[#bcebe6]/50 blur-3xl" />
+        <div className="absolute -right-20 bottom-16 h-80 w-80 rounded-full bg-[#ffd7cb]/60 blur-3xl" />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="relative z-10 w-full max-w-md rounded-4xl border-4 border-white bg-white p-8 text-center shadow-[0_24px_70px_rgba(7,59,70,0.12)]"
+        >
+          <div className="mx-auto mb-5 grid h-20 w-20 place-items-center rounded-3xl bg-[#fff0e9] text-[#ff6542]">
+            <FiBookOpen size={34} />
+          </div>
+          <h3 className="text-2xl font-black text-[#073b46]">
             Course not found
           </h3>
+          <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+            The course may have been removed or is currently unavailable.
+          </p>
           <button
             onClick={() => navigate("/courses")}
-            className="px-6 py-3 bg-linear-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:shadow-lg transition-all"
+            className="mt-6 rounded-2xl bg-[#073b46] px-6 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#0b505d]"
           >
             Browse Courses
           </button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
-  const canEnroll = course.currentStatus === 'enrollment_open';
-  const isComingSoon = course.currentStatus === 'coming_soon';
+  const canEnroll = course.currentStatus === "enrollment_open";
+  const isComingSoon = course.currentStatus === "coming_soon";
+
+  const tabs = [
+    {
+      id: "overview",
+      label: "Overview",
+      icon: FiBook,
+      mobileLabel: "Overview",
+    },
+    {
+      id: "curriculum",
+      label: "Curriculum",
+      icon: FiPlay,
+      mobileLabel: "Lessons",
+    },
+    {
+      id: "instructors",
+      label: "Instructors",
+      icon: FaChalkboardTeacher,
+      mobileLabel: "Teachers",
+    },
+    {
+      id: "reviews",
+      label: "Reviews",
+      icon: FiStar,
+      mobileLabel: "Reviews",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50">
-      {/* Course Header */}
-      <div className="pt-16 sm:pt-20 bg-linear-to-br from-blue-600 to-purple-600 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `radial-gradient(circle at 25px 25px, white 2%, transparent 0%), radial-gradient(circle at 75px 75px, white 2%, transparent 0%)`,
-              backgroundSize: "100px 100px",
+    <main className="relative min-h-screen overflow-x-hidden bg-linear-to-b from-[#fff9e7] via-[#eef9ff] to-[#f2fbf6] font-hind text-slate-800">
+      {/* Page background decorations */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      >
+        {floatingDecorations.map((item, index) => (
+          <motion.div
+            key={index}
+            className="absolute text-[#ffd36e]/45"
+            style={{ left: item.left, top: item.top }}
+            animate={{
+              y: [0, -13, 0],
+              rotate: [0, 14, -8, 0],
+              scale: [1, 1.1, 1],
             }}
-          ></div>
-        </div>
+            transition={{
+              duration: item.duration,
+              repeat: Infinity,
+              delay: item.delay,
+              ease: "easeInOut",
+            }}
+          >
+            <FiStar size={item.size} />
+          </motion.div>
+        ))}
+      </div>
 
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8 lg:py-12 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-            {/* Course Info */}
-            <div className="lg:col-span-2">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-3 mb-4 sm:mb-6">
-                  <div className="flex items-center gap-2 text-blue-200 text-xs sm:text-sm">
-                    <button
-                      onClick={() => navigate("/courses")}
-                      className="hover:text-white transition-colors"
-                    >
-                      Courses
-                    </button>
-                    <span>›</span>
-                    <span>{course.category?.name || "Uncategorized"}</span>
-                  </div>
+      {/* Course header */}
+      <section className="relative isolate z-10 overflow-hidden bg-[#fff4c9] pb-9 pt-10 sm:pb-11 sm:pt-12 lg:pb-12 lg:pt-14">
+        <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#ff6542]/12" />
+        <div className="absolute -right-24 top-8 h-80 w-80 rounded-full bg-[#62d6c7]/24" />
+        <div className="absolute -bottom-20 left-[42%] h-52 w-52 rounded-full bg-[#8b6fe8]/10" />
 
-                  <div className="flex items-center gap-2">
-                    {/* ফিক্সড: স্ট্যাটাস ব্যাজ */}
-                    <CourseStatusBadge status={course.currentStatus} />
-                    
-                    {course.featured && (
-                      <span className="bg-amber-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1">
-                        <IoIosTrendingUp className="text-xs sm:text-sm" />
-                        <span className="hidden sm:inline">Featured</span>
-                        <span className="sm:hidden">Feat.</span>
-                      </span>
-                    )}
-                  </div>
+        <motion.div
+          aria-hidden="true"
+          animate={{ y: [0, -9, 0], rotate: [0, 7, 0] }}
+          transition={{ duration: 5.4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute left-[5%] top-16 hidden h-12 w-12 place-items-center rounded-2xl border-4 border-white bg-[#ff6542] text-white shadow-lg lg:grid"
+        >
+          <FiBookOpen size={23} />
+        </motion.div>
+
+        <motion.div
+          aria-hidden="true"
+          animate={{ y: [0, 10, 0], rotate: [0, -8, 0] }}
+          transition={{ duration: 6.1, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute right-[4%] top-20 hidden h-11 w-11 place-items-center rounded-full border-4 border-white bg-[#8b6fe8] text-white shadow-lg lg:grid"
+        >
+          <FiStar size={21} />
+        </motion.div>
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 items-start gap-7 lg:grid-cols-12 lg:gap-9">
+            {/* Course information */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-8 lg:pt-3"
+            >
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#073b46]/10 bg-white/70 px-3.5 py-2 text-xs font-bold text-[#073b46] shadow-sm backdrop-blur-sm">
+                  <button
+                    onClick={() => navigate("/courses")}
+                    className="transition hover:text-[#ff6542]"
+                  >
+                    Courses
+                  </button>
+                  <span className="text-[#ff6542]">/</span>
+                  <span className="max-w-44 truncate text-slate-500 sm:max-w-64">
+                    {course.category?.name || "Uncategorized"}
+                  </span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
-                  {course.title}
-                </h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  <CourseStatusBadge status={course.currentStatus} />
+                  {course.featured && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#ffd36e] bg-[#fff7d8] px-3 py-1.5 text-xs font-black text-[#9a6500] shadow-sm">
+                      <IoIosTrendingUp size={14} />
+                      Featured
+                    </span>
+                  )}
+                </div>
+              </div>
 
-                <p className="text-sm sm:text-base lg:text-lg text-blue-100 mb-6 sm:mb-8 leading-relaxed max-w-3xl">
-                  {course.description
-                    ?.replace(/<[^>]*>/g, "")
-                    .substring(0, window.innerWidth < 640 ? 100 : 200)}
-                  {course.description?.length >
-                    (window.innerWidth < 640 ? 100 : 200) && "..."}
-                </p>
+              <h1 className="max-w-4xl text-3xl font-black leading-[1.12] tracking-tight text-[#073b46] sm:text-4xl lg:text-5xl">
+                {course.title}
+              </h1>
 
-                <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4 text-blue-100">
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-2 rounded-xl text-xs sm:text-sm">
-                    <FiStar className="text-amber-300 text-sm sm:text-base" />
-                    <span className="font-semibold">
+              <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-slate-600 sm:text-base lg:text-lg">
+                {course.description
+                  ?.replace(/<[^>]*>/g, "")
+                  .substring(0, window.innerWidth < 640 ? 100 : 200)}
+                {course.description?.length >
+                  (window.innerWidth < 640 ? 100 : 200) && "..."}
+              </p>
+
+              <div className="mt-5 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:gap-3">
+                <div className="flex items-center gap-2 rounded-2xl border-2 border-white bg-white/72 px-3 py-2.5 text-xs font-bold text-[#073b46] shadow-sm backdrop-blur-sm sm:text-sm">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#fff4d2] text-[#e5a300]">
+                    <FiStar size={16} className="fill-current" />
+                  </span>
+                  <div>
+                    <span className="font-black">
                       {course.averageRating?.toFixed(1) || "0.0"}
                     </span>
-                    <span className="hidden sm:inline">
-                      ({course.ratingCount || 0} reviews)
-                    </span>
-                    <span className="sm:hidden">
+                    <span className="ml-1 text-slate-500">
                       ({course.ratingCount || 0})
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-2 rounded-xl text-xs sm:text-sm">
-                    <FiUsers className="text-amber-300 text-sm sm:text-base" />
-                    <span>{course.studentCount || 0} students</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-2 rounded-xl text-xs sm:text-sm">
-                    <FiClock className="text-amber-300 text-sm sm:text-base" />
-                    <span>{formatDuration(course.duration)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-2 rounded-xl text-xs sm:text-sm">
-                    <FiBook className="text-amber-300 text-sm sm:text-base" />
-                    <span>{lectures.length} lectures</span>
-                  </div>
                 </div>
-              </motion.div>
-            </div>
 
-            {/* Enrollment Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className={`lg:sticky lg:top-24 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl p-4 sm:p-6 text-gray-800 ${
-                isComingSoon ? "border-2 border-blue-200" : ""
+                <div className="flex items-center gap-2 rounded-2xl border-2 border-white bg-white/72 px-3 py-2.5 text-xs font-bold text-[#073b46] shadow-sm backdrop-blur-sm sm:text-sm">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#e5f8f2] text-[#08736e]">
+                    <FiUsers size={16} />
+                  </span>
+                  <span>{course.studentCount || 0} students</span>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-2xl border-2 border-white bg-white/72 px-3 py-2.5 text-xs font-bold text-[#073b46] shadow-sm backdrop-blur-sm sm:text-sm">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#f1ebff] text-[#7654c8]">
+                    <FiClock size={16} />
+                  </span>
+                  <span>{formatDuration(course.duration)}</span>
+                </div>
+
+                <div className="flex items-center gap-2 rounded-2xl border-2 border-white bg-white/72 px-3 py-2.5 text-xs font-bold text-[#073b46] shadow-sm backdrop-blur-sm sm:text-sm">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#fff0e9] text-[#ff6542]">
+                    <FiBook size={16} />
+                  </span>
+                  <span>{lectures.length} lectures</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Enrollment card */}
+            <motion.aside
+              initial={{ opacity: 0, y: 24, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{
+                duration: 0.65,
+                delay: 0.12,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className={`rounded-4xl border-4 bg-white p-3 shadow-[0_24px_65px_rgba(7,59,70,0.14)] lg:col-span-4 ${
+                isComingSoon ? "border-[#d8ccff]" : "border-white"
               }`}
             >
-              {/* Coming Soon Banner */}
-              {isComingSoon && (
-                <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl p-3">
-                  <div className="flex items-center gap-2">
-                    <FiInfo className="text-blue-500 shrink-0" />
-                    <div>
-                      <h4 className="font-bold text-blue-800 text-sm sm:text-base">
-                        Coming Soon
-                      </h4>
-                      <p className="text-blue-600 text-xs sm:text-sm">
-                        This course will be available soon
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="relative rounded-lg sm:rounded-xl overflow-hidden mb-3 sm:mb-4">
+              <div className="relative overflow-hidden rounded-3xl bg-[#eef9ff]">
                 {course.thumbnail ? (
                   <>
                     <img
                       src={course.thumbnail}
                       alt={course.title}
-                      className="w-full h-32 sm:h-40 object-cover"
+                      className="h-40 w-full object-cover sm:h-48 lg:h-44"
                       onError={(e) => {
                         e.target.src = "/default-course.jpg";
                       }}
                     />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
-                    <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
-                      <button
-                        onClick={toggleWishlist}
-                        className={`p-1 sm:p-2 rounded-full backdrop-blur-sm transition-all ${
-                          wishlisted
-                            ? "bg-red-500 text-white"
-                            : "bg-white/20 text-white hover:bg-white/30"
-                        }`}
-                      >
-                        <FiHeart className={`text-sm sm:text-base ${wishlisted ? "fill-current" : ""}`} />
-                      </button>
-                    </div>
+                    <div className="absolute inset-0 bg-linear-to-t from-[#073b46]/50 via-transparent to-transparent" />
                   </>
                 ) : (
-                  <div className="w-full h-32 sm:h-40 bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                    <FiBookOpen className="text-3xl sm:text-4xl text-white" />
+                  <div className="flex h-40 w-full items-center justify-center bg-linear-to-br from-[#62d6c7] to-[#8b6fe8] sm:h-48 lg:h-44">
+                    <FiBookOpen className="text-5xl text-white" />
                   </div>
                 )}
-              </div>
 
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="flex items-center">
-                  <span className="text-2xl sm:text-3xl font-bold text-gray-800">
-                    ৳{course.price || 0}
-                  </span>
+                <button
+                  onClick={toggleWishlist}
+                  className={`absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-2xl border-2 border-white/80 backdrop-blur-md transition hover:scale-105 ${
+                    wishlisted
+                      ? "bg-[#ff6542] text-white"
+                      : "bg-white/85 text-[#073b46] hover:text-[#ff6542]"
+                  }`}
+                  aria-label="Toggle wishlist"
+                >
+                  <FiHeart className={wishlisted ? "fill-current" : ""} />
+                </button>
+
+                <div className="absolute bottom-3 left-3">
+                  <CourseStatusBadge status={course.currentStatus} />
                 </div>
               </div>
 
-              {/* Time Remaining - শুধুমাত্র enrollment_open থাকলে দেখাবে */}
-              {canEnroll && course.enrollmentEnd && (
-                <div className="bg-linear-to-r from-amber-500 to-orange-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-center mb-3 sm:mb-4">
-                  <div className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
-                    <FaRegClock className="text-xs sm:text-sm" />
-                    {getTimeRemaining(course.enrollmentEnd)}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-2 sm:space-y-3">
-                {enrolled ? (
-                  <div className="space-y-2 sm:space-y-3">
-                    <button
-                      className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
-                      onClick={() => navigate(`/learn/${course._id}`)}
-                    >
-                      <FiPlay className="text-sm sm:text-base" />
-                      Continue Learning
-                    </button>
-                    <button className="w-full border border-blue-600 sm:border-2 text-blue-600 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:bg-blue-50 transition-colors text-sm sm:text-base">
-                      Share Course
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2 sm:space-y-3">
-                    <button
-                      onClick={handleEnrollClick}
-                      className={`w-full py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105 duration-200 text-sm sm:text-base ${
-                        !canEnroll
-                          ? "bg-gray-400 cursor-not-allowed text-white"
-                          : "bg-linear-to-r from-blue-500 to-purple-500 text-white"
-                      }`}
-                      disabled={!canEnroll}
-                    >
-                      {isComingSoon 
-                        ? "Coming Soon" 
-                        : course.currentStatus === 'enrollment_closed'
-                        ? "Enrollment Closed"
-                        : course.currentStatus === 'course_started'
-                        ? "Course Started"
-                        : "Enroll Now"}
-                    </button>
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <button
-                        onClick={toggleWishlist}
-                        className={`border py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-colors flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm ${
-                          wishlisted
-                            ? "border-red-500 text-red-500 bg-red-500/10"
-                            : "border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600"
-                        }`}
-                      >
-                        <FiHeart
-                          className={`${
-                            wishlisted ? "fill-current" : ""
-                          } text-sm sm:text-base`}
-                        />
-                        {wishlisted ? "Wishlisted" : "Wishlist"}
-                      </button>
-                      <button className="border border-gray-300 text-gray-700 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold hover:border-blue-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                        <FiShare2 className="text-sm sm:text-base" />
-                        Share
-                      </button>
+              <div className="p-2.5 pt-4 sm:p-3 sm:pt-4">
+                {isComingSoon && (
+                  <div className="mb-3 flex items-start gap-2.5 rounded-2xl border border-[#d8ccff] bg-[#f5f1ff] p-3">
+                    <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white text-[#7654c8]">
+                      <FiInfo size={16} />
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-black text-[#6544b4]">
+                        Coming Soon
+                      </h4>
+                      <p className="mt-0.5 text-xs font-medium leading-5 text-[#7654c8]">
+                        This course will be available soon.
+                      </p>
                     </div>
                   </div>
                 )}
-              </div>
 
-              <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 rounded-lg sm:rounded-xl text-center">
-                <p className="text-xs sm:text-sm text-blue-700 font-medium">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Course Fee
+                    </p>
+                    <p className="mt-1 text-3xl font-black text-[#073b46]">
+                      ৳{course.price || 0}
+                    </p>
+                  </div>
+
+                  {canEnroll && course.enrollmentEnd && (
+                    <div className="rounded-2xl bg-[#fff0e9] px-3 py-2 text-right text-xs font-black text-[#d95635]">
+                      <span className="flex items-center gap-1.5">
+                        <FaRegClock />
+                        {getTimeRemaining(course.enrollmentEnd)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 space-y-2.5">
+                  {enrolled ? (
+                    <>
+                      <button
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#08736e] px-4 py-3 text-sm font-black text-white shadow-[0_12px_28px_rgba(8,115,110,0.24)] transition hover:-translate-y-0.5 hover:bg-[#096660]"
+                        onClick={() => navigate(`/learn/${course._id}`)}
+                      >
+                        <FiPlay />
+                        Continue Learning
+                      </button>
+                      <button className="w-full rounded-2xl border-2 border-[#073b46]/12 bg-[#f8fbfa] px-4 py-3 text-sm font-black text-[#073b46] transition hover:border-[#62d6c7] hover:bg-[#eef9f7]">
+                        Share Course
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleEnrollClick}
+                        className={`w-full rounded-2xl px-4 py-3 text-sm font-black text-white shadow-lg transition ${
+                          !canEnroll
+                            ? "cursor-not-allowed bg-slate-400"
+                            : "bg-[#ff6542] shadow-[0_12px_28px_rgba(255,101,66,0.24)] hover:-translate-y-0.5 hover:bg-[#ed5837]"
+                        }`}
+                        disabled={!canEnroll}
+                      >
+                        {isComingSoon
+                          ? "Coming Soon"
+                          : course.currentStatus === "enrollment_closed"
+                            ? "Enrollment Closed"
+                            : course.currentStatus === "course_started"
+                              ? "Course Started"
+                              : "Enroll Now"}
+                      </button>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <button
+                          onClick={toggleWishlist}
+                          className={`flex items-center justify-center gap-1.5 rounded-2xl border-2 px-3 py-2.5 text-xs font-black transition sm:text-sm ${
+                            wishlisted
+                              ? "border-[#ffb7a6] bg-[#fff0e9] text-[#d95635]"
+                              : "border-[#073b46]/10 bg-[#f8fbfa] text-[#073b46] hover:border-[#ffb7a6] hover:text-[#d95635]"
+                          }`}
+                        >
+                          <FiHeart
+                            className={wishlisted ? "fill-current" : ""}
+                          />
+                          {wishlisted ? "Wishlisted" : "Wishlist"}
+                        </button>
+                        <button className="flex items-center justify-center gap-1.5 rounded-2xl border-2 border-[#073b46]/10 bg-[#f8fbfa] px-3 py-2.5 text-xs font-black text-[#073b46] transition hover:border-[#bce8e3] hover:text-[#08736e] sm:text-sm">
+                          <FiShare2 />
+                          Share
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="mt-3 rounded-2xl bg-[#fff8dc] px-3 py-2.5 text-center text-xs font-black text-[#8b6410]">
                   🎯 30-Day Money-Back Guarantee
-                </p>
+                </div>
               </div>
-            </motion.div>
+            </motion.aside>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Course Content */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8 lg:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg sm:shadow-xl p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-100">
-              <div className="flex flex-wrap gap-1 sm:gap-2 border-b border-gray-200 pb-3 sm:pb-4 overflow-x-auto scrollbar-hide">
-                {[
-                  {
-                    id: "overview",
-                    label: "Overview",
-                    icon: FiBook,
-                    mobileLabel: "Overview",
-                  },
-                  {
-                    id: "curriculum",
-                    label: "Curriculum",
-                    icon: FiPlay,
-                    mobileLabel: "Curriculum",
-                  },
-                  {
-                    id: "instructors",
-                    label: "Instructors",
-                    icon: FaChalkboardTeacher,
-                    mobileLabel: "Teachers",
-                  },
-                  {
-                    id: "reviews",
-                    label: "Reviews",
-                    icon: FiStar,
-                    mobileLabel: "Reviews",
-                  },
-                ].map((tab) => {
-                  const IconComponent = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
-                        activeTab === tab.id
-                          ? "bg-linear-to-r from-blue-500 to-purple-500 text-white shadow-md sm:shadow-lg shadow-blue-500/25"
-                          : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-                      }`}
-                    >
-                      <IconComponent className="text-sm sm:text-base" />
-                      <span className="hidden sm:inline">{tab.label}</span>
-                      <span className="sm:hidden text-xs">
-                        {tab.mobileLabel}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="pt-4 sm:pt-6">
-                <AnimatePresence mode="wait">
-                  {activeTab === "overview" && (
-                    <motion.div
-                      key="overview"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="space-y-6 sm:space-y-8"
-                    >
-                      <div>
-                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
-                          About This Course
-                        </h3>
-                        <div
-                          className="text-gray-600 leading-relaxed text-sm sm:text-base lg:text-lg prose prose-sm sm:prose-lg max-w-none"
-                          dangerouslySetInnerHTML={{
-                            __html: course.description || "<p>No description available.</p>",
-                          }}
-                        />
-                      </div>
-
-                      {/* Features Section */}
-                      {course.features && course.features.length > 0 && (
-                        <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8">
-                          <h4 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                            <FiAward className="text-blue-600 text-base sm:text-xl" />
-                            What You'll Learn
-                          </h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            {course.features.map((item, index) => (
-                              <motion.div
-                                key={index}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl shadow-sm"
-                              >
-                                <div className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-green-500 rounded-full flex items-center justify-center shrink-0">
-                                  <FiCheck className="text-white text-xs sm:text-sm" />
-                                </div>
-                                <span className="text-gray-700 font-medium text-sm sm:text-base">
-                                  {item}
-                                </span>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Coming Soon Notice */}
-                      {isComingSoon && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="bg-blue-50 border border-blue-200 rounded-xl sm:rounded-2xl p-4 sm:p-6"
+      {/* Course content */}
+      <section className="relative z-10 py-8 sm:py-10 lg:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 items-start gap-7 lg:grid-cols-12 lg:gap-8">
+            <div className="lg:col-span-8">
+              <div className="overflow-hidden rounded-4xl border-4 border-white bg-white shadow-[0_20px_60px_rgba(7,59,70,0.09)]">
+                {/* Tabs */}
+                <div className="border-b border-slate-100 bg-[#fbfdfc] p-2.5 sm:p-3">
+                  <div className="grid grid-cols-4 gap-1.5 overflow-x-auto sm:flex sm:gap-2">
+                    {tabs.map((tab) => {
+                      const IconComponent = tab.icon;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`flex min-w-0 items-center justify-center gap-1.5 rounded-2xl px-2 py-2.5 text-[11px] font-black transition-all duration-300 sm:min-w-32 sm:px-4 sm:text-sm ${
+                            activeTab === tab.id
+                              ? "bg-[#073b46] text-white shadow-[0_10px_24px_rgba(7,59,70,0.18)]"
+                              : "text-slate-500 hover:bg-[#eef9f7] hover:text-[#08736e]"
+                          }`}
                         >
-                          <div className="flex items-start gap-3">
-                            <FiInfo className="text-blue-500 text-xl mt-1 shrink-0" />
+                          <IconComponent className="shrink-0 text-sm sm:text-base" />
+                          <span className="hidden sm:inline">{tab.label}</span>
+                          <span className="truncate sm:hidden">
+                            {tab.mobileLabel}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="p-5 sm:p-7 lg:p-8">
+                  <AnimatePresence mode="wait">
+                    {activeTab === "overview" && (
+                      <motion.div
+                        key="overview"
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -14 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-7"
+                      >
+                        <div>
+                          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e5f8f2] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#08736e]">
+                            <FiBookOpen />
+                            Course Overview
+                          </div>
+                          <h2 className="text-2xl font-black text-[#073b46] sm:text-3xl">
+                            About This Course
+                          </h2>
+                          <div
+                            className="prose prose-sm mt-4 max-w-none leading-7 text-slate-600 sm:prose-base prose-headings:font-black prose-headings:text-[#073b46] prose-a:text-[#08736e] prose-strong:text-[#073b46]"
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                course.description ||
+                                "<p>No description available.</p>",
+                            }}
+                          />
+                        </div>
+
+                        {/* Features Section */}
+                        {course.features && course.features.length > 0 && (
+                          <div className="relative overflow-hidden rounded-3xl border border-[#d9eee8] bg-[#f2fbf8] p-5 sm:p-6">
+                            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#62d6c7]/16" />
+                            <div className="absolute -bottom-14 -left-10 h-32 w-32 rounded-full bg-[#ffd36e]/20" />
+
+                            <div className="relative">
+                              <h3 className="flex items-center gap-2 text-xl font-black text-[#073b46] sm:text-2xl">
+                                <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#08736e] text-white shadow-md">
+                                  <FiAward />
+                                </span>
+                                What You&apos;ll Learn
+                              </h3>
+
+                              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                {course.features.map((item, index) => (
+                                  <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, x: -14 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.06 }}
+                                    className="flex items-start gap-3 rounded-2xl border-2 border-white bg-white p-3.5 shadow-sm"
+                                  >
+                                    <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#ff6542] text-white">
+                                      <FiCheck size={14} />
+                                    </span>
+                                    <span className="text-sm font-bold leading-6 text-slate-700 sm:text-base">
+                                      {item}
+                                    </span>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Coming Soon Notice */}
+                        {isComingSoon && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-start gap-3 rounded-3xl border-2 border-[#d8ccff] bg-[#f5f1ff] p-5"
+                          >
+                            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-[#7654c8] shadow-sm">
+                              <FiInfo size={20} />
+                            </span>
                             <div>
-                              <h4 className="font-bold text-blue-800 text-lg sm:text-xl mb-2">
+                              <h4 className="text-lg font-black text-[#6544b4] sm:text-xl">
                                 Coming Soon
                               </h4>
-                              <p className="text-blue-700 mb-3 text-sm sm:text-base">
+                              <p className="mt-1 text-sm font-medium leading-6 text-[#7654c8] sm:text-base">
                                 This course is currently in preparation.
                                 Enrollment will open once all content is ready
                                 and dates are announced.
                               </p>
-                              <div className="flex items-center gap-2 text-sm text-blue-600">
-                                <span className="font-medium">Status:</span>
-                                <span className="bg-blue-100 px-3 py-1 rounded-full">
-                                  In Development
-                                </span>
+                              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black text-[#6544b4]">
+                                <span>Status:</span>
+                                <span>In Development</span>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  )}
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    )}
 
-                  {activeTab === "instructors" && (
-                    <motion.div
-                      key="instructors"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                    >
-                      <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
-                        Meet Your Instructors
-                      </h3>
-                      <div className="space-y-4 sm:space-y-6">
-                        {teachers.length > 0 ? (
-                          teachers.map((teacher, index) => (
-                            <motion.div
-                              key={teacher._id}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="bg-linear-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6"
-                            >
-                              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-                                <div className="relative">
-                                  <img
-                                    src={
-                                      teacher.avatar ||
-                                      `https://ui-avatars.com/api/?name=${teacher.name}&background=random`
-                                    }
-                                    alt={teacher.name}
-                                    className="w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-xl sm:rounded-2xl object-cover border-2 sm:border-4 border-white shadow-lg"
-                                    onError={(e) => {
-                                      e.target.src = `https://ui-avatars.com/api/?name=${teacher.name}&background=random`;
-                                    }}
-                                  />
-                                  <div className="absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 bg-blue-500 text-white p-1 sm:p-2 rounded-full">
-                                    <FaChalkboardTeacher className="text-sm sm:text-base lg:text-lg" />
+                    {activeTab === "instructors" && (
+                      <motion.div
+                        key="instructors"
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -14 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="mb-5">
+                          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#f1ebff] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#7654c8]">
+                            <FaChalkboardTeacher />
+                            Course Mentors
+                          </div>
+                          <h2 className="text-2xl font-black text-[#073b46] sm:text-3xl">
+                            Meet Your Instructors
+                          </h2>
+                        </div>
+
+                        <div className="space-y-4">
+                          {teachers.length > 0 ? (
+                            teachers.map((teacher, index) => (
+                              <motion.div
+                                key={teacher._id}
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.07 }}
+                                className="relative overflow-hidden rounded-3xl border border-[#dfeeea] bg-linear-to-r from-[#f2fbf8] to-[#f7f3ff] p-4 sm:p-5"
+                              >
+                                <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#8b6fe8]/10" />
+                                <div className="relative flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
+                                  <div className="relative shrink-0">
+                                    <img
+                                      src={
+                                        teacher.avatar ||
+                                        `https://ui-avatars.com/api/?name=${teacher.name}&background=random`
+                                      }
+                                      alt={teacher.name}
+                                      className="h-24 w-24 rounded-3xl border-4 border-white object-cover shadow-lg sm:h-28 sm:w-28"
+                                      onError={(e) => {
+                                        e.target.src = `https://ui-avatars.com/api/?name=${teacher.name}&background=random`;
+                                      }}
+                                    />
+                                    <span className="absolute -bottom-2 -right-2 grid h-9 w-9 place-items-center rounded-2xl border-2 border-white bg-[#8b6fe8] text-white shadow-md">
+                                      <FaChalkboardTeacher size={15} />
+                                    </span>
+                                  </div>
+
+                                  <div className="text-center sm:text-left">
+                                    <h3 className="text-xl font-black text-[#073b46] sm:text-2xl">
+                                      {teacher.name}
+                                    </h3>
+                                    <p className="mt-1 text-sm font-black text-[#7654c8] sm:text-base">
+                                      {teacher.expertise || "Expert Instructor"}
+                                    </p>
+                                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600 sm:text-base">
+                                      {teacher.bio ||
+                                        "Experienced instructor with passion for teaching."}
+                                    </p>
                                   </div>
                                 </div>
-
-                                <div className="flex-1 text-center sm:text-left">
-                                  <h4 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-2">
-                                    {teacher.name}
-                                  </h4>
-                                  <p className="text-blue-600 font-medium mb-2 sm:mb-3 text-sm sm:text-base">
-                                    {teacher.expertise || "Expert Instructor"}
-                                  </p>
-                                  <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
-                                    {teacher.bio ||
-                                      "Experienced instructor with passion for teaching."}
-                                  </p>
-                                </div>
+                              </motion.div>
+                            ))
+                          ) : (
+                            <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 py-12 text-center">
+                              <div className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-white text-slate-300 shadow-sm">
+                                <FaChalkboardTeacher size={30} />
                               </div>
-                            </motion.div>
-                          ))
-                        ) : (
-                          <div className="text-center py-8 sm:py-12">
-                            <FaChalkboardTeacher className="text-4xl sm:text-6xl text-gray-300 mx-auto mb-3 sm:mb-4" />
-                            <p className="text-gray-500 text-sm sm:text-base">
-                              No instructors assigned yet
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
+                              <p className="mt-4 text-sm font-bold text-slate-500 sm:text-base">
+                                No instructors assigned yet
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
 
-                  {activeTab === "reviews" && (
-                    <motion.div
-                      key="reviews"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
-                          Student Reviews
-                        </h3>
-                        <div className="flex items-center gap-3 sm:gap-4">
-                          <div className="text-center">
-                            <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800">
+                    {activeTab === "reviews" && (
+                      <motion.div
+                        key="reviews"
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -14 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="mb-6 flex flex-col gap-4 rounded-3xl bg-[#fff8dc] p-5 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#8b6410] shadow-sm">
+                              <FiStar className="fill-current" />
+                              Learner Feedback
+                            </div>
+                            <h2 className="text-2xl font-black text-[#073b46] sm:text-3xl">
+                              Student Reviews
+                            </h2>
+                          </div>
+
+                          <div className="flex items-center gap-4 rounded-2xl bg-white px-4 py-3 shadow-sm">
+                            <div className="text-4xl font-black text-[#073b46]">
                               {course.averageRating?.toFixed(1) || "0.0"}
                             </div>
-                            <div className="flex justify-center mt-1 sm:mt-2">
+                            <div>
                               {renderStars(course.averageRating || 0)}
-                            </div>
-                            <div className="text-xs sm:text-sm text-gray-500 mt-1">
-                              {course.ratingCount || 0} reviews
+                              <p className="mt-1 text-xs font-bold text-slate-400">
+                                {course.ratingCount || 0} reviews
+                              </p>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="space-y-4 sm:space-y-6">
-                        {reviews.length > 0 ? (
-                          reviews.map((review, index) => (
-                            <motion.div
-                              key={review._id || index}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 hover:shadow-md sm:hover:shadow-lg transition-shadow"
-                            >
-                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                                <div className="flex items-center gap-3 sm:gap-4">
-                                  <img
-                                    src={
-                                      review.user?.avatar ||
-                                      `https://ui-avatars.com/api/?name=${review.user?.name}&background=random`
-                                    }
-                                    alt={review.user?.name}
-                                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full"
-                                    onError={(e) => {
-                                      e.target.src = `https://ui-avatars.com/api/?name=${review.user?.name}&background=random`;
-                                    }}
-                                  />
-                                  <div>
-                                    <h4 className="font-semibold text-gray-800 text-sm sm:text-base">
-                                      {review.user?.name || "Anonymous"}
-                                    </h4>
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
-                                      {renderStars(review.rating)}
-                                      <span className="text-xs sm:text-sm text-gray-500">
-                                        {review.createdAt
-                                          ? new Date(
-                                              review.createdAt
-                                            ).toLocaleDateString()
-                                          : ""}
-                                      </span>
+                        <div className="space-y-4">
+                          {reviews.length > 0 ? (
+                            reviews.map((review, index) => (
+                              <motion.div
+                                key={review._id || index}
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.06 }}
+                                className="rounded-3xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#bce8e3] hover:shadow-lg sm:p-5"
+                              >
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <img
+                                      src={
+                                        review.user?.avatar ||
+                                        `https://ui-avatars.com/api/?name=${review.user?.name}&background=random`
+                                      }
+                                      alt={review.user?.name}
+                                      className="h-12 w-12 rounded-2xl object-cover ring-4 ring-[#eef9f7]"
+                                      onError={(e) => {
+                                        e.target.src = `https://ui-avatars.com/api/?name=${review.user?.name}&background=random`;
+                                      }}
+                                    />
+                                    <div>
+                                      <h3 className="font-black text-[#073b46]">
+                                        {review.user?.name || "Anonymous"}
+                                      </h3>
+                                      <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                                        {renderStars(review.rating)}
+                                        <span className="text-xs font-bold text-slate-400">
+                                          {review.createdAt
+                                            ? new Date(
+                                                review.createdAt,
+                                              ).toLocaleDateString()
+                                            : ""}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                                {review.rating >= 4 && (
-                                  <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1 self-start sm:self-center">
-                                    <MdWorkspacePremium className="text-xs sm:text-sm" />
-                                    <span className="hidden sm:inline">
+
+                                  {review.rating >= 4 && (
+                                    <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[#bde9dd] bg-[#e5f8f2] px-3 py-1.5 text-xs font-black text-[#08736e]">
+                                      <MdWorkspacePremium />
                                       Verified
                                     </span>
-                                    <span className="sm:hidden">✓</span>
-                                  </span>
-                                )}
+                                  )}
+                                </div>
+
+                                <p className="mt-4 text-sm font-medium leading-7 text-slate-600 sm:text-base">
+                                  {review.comment}
+                                </p>
+                              </motion.div>
+                            ))
+                          ) : (
+                            <div className="rounded-3xl border-2 border-dashed border-[#eadfa9] bg-[#fffdf2] py-12 text-center">
+                              <div className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-white text-[#e4c25f] shadow-sm">
+                                <FiStar size={30} />
                               </div>
-
-                              <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                                {review.comment}
+                              <h3 className="mt-4 text-lg font-black text-[#073b46]">
+                                No reviews yet
+                              </h3>
+                              <p className="mt-1 text-sm font-medium text-slate-500">
+                                Student feedback will appear here.
                               </p>
-                            </motion.div>
-                          ))
-                        ) : (
-                          <div className="text-center py-8 sm:py-12 bg-linear-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl">
-                            <FiStar className="text-4xl sm:text-6xl text-gray-300 mx-auto mb-3 sm:mb-4" />
-                            <h4 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">
-                              No reviews yet
-                            </h4>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
 
-                  {activeTab === "curriculum" && (
+                    {activeTab === "curriculum" && (
+                      <motion.div
+                        key="curriculum"
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -14 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                          <div>
+                            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#fff0e9] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#d95635]">
+                              <FiPlay />
+                              Course Lessons
+                            </div>
+                            <h2 className="text-2xl font-black text-[#073b46] sm:text-3xl">
+                              Course Curriculum
+                            </h2>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            <span className="rounded-full bg-[#e5f8f2] px-3 py-1.5 text-xs font-black text-[#08736e]">
+                              {lectures.length} lectures
+                            </span>
+                            <span className="rounded-full bg-[#f1ebff] px-3 py-1.5 text-xs font-black text-[#7654c8]">
+                              {formatDuration(course.duration)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          {lectures.length > 0 ? (
+                            lectures.map((lecture, index) => (
+                              <motion.div
+                                key={lecture._id}
+                                initial={{ opacity: 0, x: -14 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                className={`overflow-hidden rounded-3xl border-2 bg-white transition-all duration-300 ${
+                                  expandedLectures[lecture._id]
+                                    ? "border-[#bce8e3] shadow-[0_12px_30px_rgba(8,115,110,0.09)]"
+                                    : "border-slate-100 hover:border-[#d8ece7] hover:shadow-md"
+                                }`}
+                              >
+                                <button
+                                  type="button"
+                                  className="flex w-full items-center justify-between gap-3 p-3.5 text-left sm:p-4"
+                                  onClick={() => toggleLecture(lecture._id)}
+                                >
+                                  <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                                    <span
+                                      className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-sm font-black sm:h-11 sm:w-11 ${
+                                        enrolled
+                                          ? "bg-[#e5f8f2] text-[#08736e]"
+                                          : "bg-[#fff0e9] text-[#d95635]"
+                                      }`}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                      <h3 className="truncate text-sm font-black text-[#073b46] sm:text-base">
+                                        {lecture.title}
+                                      </h3>
+                                      {lecture.duration && (
+                                        <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                                          <FiClock />
+                                          {lecture.duration} min
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <span
+                                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-2xl transition ${
+                                      expandedLectures[lecture._id]
+                                        ? "bg-[#073b46] text-white"
+                                        : "bg-slate-100 text-slate-500"
+                                    }`}
+                                  >
+                                    {expandedLectures[lecture._id] ? (
+                                      <FiChevronUp />
+                                    ) : (
+                                      <FiChevronDown />
+                                    )}
+                                  </span>
+                                </button>
+
+                                <AnimatePresence>
+                                  {expandedLectures[lecture._id] && (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                    >
+                                      <div className="mx-3.5 border-t border-slate-100 pb-4 pt-4 sm:mx-4">
+                                        <p className="text-sm font-medium leading-7 text-slate-600 sm:text-base">
+                                          {lecture.description ||
+                                            "No description available."}
+                                        </p>
+
+                                        {lecture.resources &&
+                                          lecture.resources.length > 0 && (
+                                            <div className="mt-4 rounded-2xl bg-[#f8fbfa] p-3">
+                                              <h4 className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+                                                Resources
+                                              </h4>
+                                              <div className="flex flex-wrap gap-2">
+                                                {lecture.resources.map(
+                                                  (resource, idx) => (
+                                                    <a
+                                                      key={idx}
+                                                      href={resource.fileUrl}
+                                                      target="_blank"
+                                                      rel="noopener noreferrer"
+                                                      className="inline-flex items-center gap-2 rounded-xl border border-[#dcece8] bg-white px-3 py-2 text-xs font-black text-[#08736e] transition hover:-translate-y-0.5 hover:border-[#62d6c7] hover:shadow-sm"
+                                                    >
+                                                      <FiDownload size={14} />
+                                                      {resource.title}
+                                                    </a>
+                                                  ),
+                                                )}
+                                              </div>
+                                            </div>
+                                          )}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </motion.div>
+                            ))
+                          ) : (
+                            <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 py-12 text-center">
+                              <div className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-white text-slate-300 shadow-sm">
+                                <FiBook size={30} />
+                              </div>
+                              <p className="mt-4 text-sm font-bold text-slate-500 sm:text-base">
+                                {isComingSoon
+                                  ? "Course content is being prepared. Check back soon!"
+                                  : "No lectures added yet"}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <aside className="hidden lg:col-span-4 lg:block">
+              <div className="sticky top-24 space-y-5">
+                <motion.div
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="rounded-4xl border-4 border-white bg-white p-5 shadow-[0_18px_50px_rgba(7,59,70,0.09)]"
+                >
+                  <div className="mb-4 flex items-center gap-3">
+                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#fff0e9] text-[#ff6542]">
+                      <FiAward size={20} />
+                    </span>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                        Learning Benefits
+                      </p>
+                      <h3 className="text-xl font-black text-[#073b46]">
+                        Course Includes
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {[
+                      {
+                        icon: FiPlay,
+                        text: `${formatDuration(course.duration)} video content`,
+                        iconClass: "bg-[#fff0e9] text-[#d95635]",
+                      },
+                      {
+                        icon: FiDownload,
+                        text: "Downloadable resources",
+                        iconClass: "bg-[#e5f8f2] text-[#08736e]",
+                      },
+                      {
+                        icon: FiBook,
+                        text: "Full lifetime access",
+                        iconClass: "bg-[#f1ebff] text-[#7654c8]",
+                      },
+                      {
+                        icon: FiCalendar,
+                        text: "Access on mobile and TV",
+                        iconClass: "bg-[#e9f5ff] text-[#2574a9]",
+                      },
+                      {
+                        icon: FiAward,
+                        text: "Certificate of completion",
+                        iconClass: "bg-[#fff8dc] text-[#a17400]",
+                      },
+                      {
+                        icon: FiUsers,
+                        text: "Direct instructor support",
+                        iconClass: "bg-[#e5f8f2] text-[#08736e]",
+                      },
+                    ].map((feature, index) => {
+                      const FeatureIcon = feature.icon;
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition hover:bg-[#f8fbfa]"
+                        >
+                          <span
+                            className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${feature.iconClass}`}
+                          >
+                            <FeatureIcon size={16} />
+                          </span>
+                          <span className="text-sm font-bold text-slate-600">
+                            {feature.text}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+
+                {/* Course Timeline */}
+                {!isComingSoon &&
+                  (course.enrollmentStart ||
+                    course.enrollmentEnd ||
+                    course.courseStart) && (
                     <motion.div
-                      key="curriculum"
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 18 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: 0.4 }}
+                      className="rounded-4xl border-4 border-white bg-white p-5 shadow-[0_18px_50px_rgba(7,59,70,0.09)]"
                     >
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
-                          Course Curriculum
-                        </h3>
-                        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 text-gray-600">
-                          <span className="bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 rounded-full font-medium text-xs sm:text-sm">
-                            {lectures.length} lectures
-                          </span>
-                          <span className="bg-purple-100 text-purple-700 px-2 sm:px-3 py-1 rounded-full font-medium text-xs sm:text-sm">
-                            {formatDuration(course.duration)}
-                          </span>
+                      <div className="mb-4 flex items-center gap-3">
+                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#f1ebff] text-[#7654c8]">
+                          <FiCalendar size={20} />
+                        </span>
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                            Important Dates
+                          </p>
+                          <h3 className="text-xl font-black text-[#073b46]">
+                            Course Timeline
+                          </h3>
                         </div>
                       </div>
 
-                      <div className="space-y-3 sm:space-y-4">
-                        {lectures.length > 0 ? (
-                          lectures.map((lecture, index) => (
-                            <motion.div
-                              key={lecture._id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="bg-white border border-gray-200 rounded-lg sm:rounded-xl hover:border-blue-300 hover:shadow-md sm:hover:shadow-lg transition-all duration-300"
+                      <div className="space-y-2.5">
+                        {[
+                          {
+                            label: "Enrollment Starts",
+                            date: course.enrollmentStart,
+                            dot: "bg-[#62d6c7]",
+                            value: "text-[#08736e]",
+                          },
+                          {
+                            label: "Enrollment Ends",
+                            date: course.enrollmentEnd,
+                            dot: "bg-[#ffd36e]",
+                            value: "text-[#9a6500]",
+                          },
+                          {
+                            label: "Course Starts",
+                            date: course.courseStart,
+                            dot: "bg-[#8b6fe8]",
+                            value: "text-[#7654c8]",
+                          },
+                        ].map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between gap-3 rounded-2xl bg-[#f8fbfa] px-3.5 py-3"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.dot}`}
+                              />
+                              <span className="text-xs font-bold text-slate-500">
+                                {item.label}
+                              </span>
+                            </div>
+                            <span
+                              className={`text-xs font-black ${item.value}`}
                             >
-                              <div
-                                className="flex items-center justify-between p-3 sm:p-4 lg:p-6 cursor-pointer"
-                                onClick={() => toggleLecture(lecture._id)}
-                              >
-                                <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-1">
-                                  <div
-                                    className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base ${
-                                      enrolled
-                                        ? "bg-green-100 text-green-600"
-                                        : "bg-blue-100 text-blue-600"
-                                    }`}
-                                  >
-                                    {index + 1}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg truncate sm:whitespace-normal">
-                                      {lecture.title}
-                                    </h4>
-                                    {lecture.duration && (
-                                      <p className="text-xs text-gray-500 mt-1">
-                                        Duration: {lecture.duration} min
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                  {expandedLectures[lecture._id] ? (
-                                    <FiChevronUp className="text-gray-400 text-base sm:text-xl" />
-                                  ) : (
-                                    <FiChevronDown className="text-gray-400 text-base sm:text-xl" />
-                                  )}
-                                </div>
-                              </div>
-
-                              <AnimatePresence>
-                                {expandedLectures[lecture._id] && (
-                                  <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="px-3 sm:px-4 lg:px-6 pb-3 sm:pb-4 lg:pb-6"
-                                  >
-                                    <div className="pt-3 sm:pt-4 border-t border-gray-200">
-                                      <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
-                                        {lecture.description ||
-                                          "No description available."}
-                                      </p>
-                                      {lecture.resources && lecture.resources.length > 0 && (
-                                        <div className="mt-3">
-                                          <h5 className="font-semibold text-gray-700 mb-2 text-sm">
-                                            Resources:
-                                          </h5>
-                                          <div className="flex flex-wrap gap-2">
-                                            {lecture.resources.map((resource, idx) => (
-                                              <a
-                                                key={idx}
-                                                href={resource.fileUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-xs text-gray-700 hover:bg-blue-100 transition-colors"
-                                              >
-                                                <FiDownload size={14} />
-                                                {resource.title}
-                                              </a>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </motion.div>
-                          ))
-                        ) : (
-                          <div className="text-center py-8 sm:py-12 bg-linear-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl lg:rounded-3xl">
-                            <FiBook className="text-4xl sm:text-6xl text-gray-300 mx-auto mb-3 sm:mb-4" />
-                            <p className="text-gray-500 text-sm sm:text-base">
-                              {isComingSoon
-                                ? "Course content is being prepared. Check back soon!"
-                                : "No lectures added yet"}
-                            </p>
+                              {formatDate(item.date)}
+                            </span>
                           </div>
-                        )}
+                        ))}
                       </div>
                     </motion.div>
                   )}
-                </AnimatePresence>
               </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="hidden lg:block space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 sticky top-24"
-            >
-              <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <FiAward className="text-blue-500" />
-                Course Includes
-              </h3>
-              <div className="space-y-4">
-                {[
-                  {
-                    icon: FiPlay,
-                    text: `${formatDuration(course.duration)} video content`,
-                  },
-                  { icon: FiDownload, text: "Downloadable resources" },
-                  { icon: FiBook, text: "Full lifetime access" },
-                  { icon: FiCalendar, text: "Access on mobile and TV" },
-                  { icon: FiAward, text: "Certificate of completion" },
-                  { icon: FiUsers, text: "Direct instructor support" },
-                ].map((feature, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-4 p-3 hover:bg-blue-50 rounded-xl transition-colors"
-                  >
-                    <feature.icon className="text-blue-500 text-lg" />
-                    <span className="text-gray-700 font-medium">
-                      {feature.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Course Timeline */}
-            {!isComingSoon && (course.enrollmentStart || course.enrollmentEnd || course.courseStart) && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 sticky top-96"
-              >
-                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  <FiCalendar className="text-purple-500" />
-                  Course Timeline
-                </h3>
-                <div className="space-y-4">
-                  {[
-                    {
-                      label: "Enrollment Starts",
-                      date: course.enrollmentStart,
-                      color: "text-green-600",
-                    },
-                    {
-                      label: "Enrollment Ends",
-                      date: course.enrollmentEnd,
-                      color: "text-amber-600",
-                    },
-                    {
-                      label: "Course Starts",
-                      date: course.courseStart,
-                      color: "text-blue-600",
-                    },
-                  ].map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center p-3 bg-gray-50 rounded-xl"
-                    >
-                      <span className="text-gray-600 font-medium">
-                        {item.label}
-                      </span>
-                      <span className={`font-semibold ${item.color}`}>
-                        {formatDate(item.date)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
+            </aside>
           </div>
         </div>
-      </div>
+      </section>
 
       <PaymentModal
         isOpen={showPaymentModal}
@@ -1074,7 +1306,7 @@ const CourseDetails = () => {
           toast.success("Successfully enrolled in the course!");
         }}
       />
-    </div>
+    </main>
   );
 };
 

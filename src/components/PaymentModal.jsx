@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiX,
@@ -11,13 +12,15 @@ import {
   FiBook,
   FiArrowRight,
   FiInfo,
+  FiShield,
+  FiCreditCard,
+  FiCheckCircle,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/axios";
 
-const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
+const PaymentModal = ({ isOpen, onClose, course }) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [error, setError] = useState("");
   const [couponCode, setCouponCode] = useState("");
@@ -28,10 +31,10 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
     if (appliedCoupon) {
       return appliedCoupon.discountedPrice;
     }
+
     return course?.price || 0;
   };
 
-  // কুপন এপ্লাই হ্যান্ডলার
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
       setError("Please enter a coupon code");
@@ -70,17 +73,23 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
   };
 
   const handleProceedToManualPayment = () => {
-    // ম্যানুয়াল পেমেন্ট পেজে নেভিগেট করুন, কুপনের তথ্য সহ
     navigate(`/courses/${course._id}/enroll/manual`, {
       state: {
         course,
-        appliedCoupon: appliedCoupon,
+        appliedCoupon,
         couponCode: appliedCoupon ? couponCode : null,
         finalAmount: calculateFinalAmount(),
       },
     });
-    onClose(); // মডাল বন্ধ করুন
+
+    onClose();
   };
+
+  const paymentSteps = [
+    "আপনার পছন্দের মোবাইল ব্যাংকিং মাধ্যমে পেমেন্ট করুন",
+    "পরবর্তী পেজে ট্রানজেকশন ও পেমেন্টের তথ্য দিন",
+    "অ্যাডমিন অনুমোদনের পর কোর্সে প্রবেশাধিকার পাবেন",
+  ];
 
   return (
     <AnimatePresence>
@@ -89,213 +98,336 @@ const PaymentModal = ({ isOpen, onClose, course, onSuccess }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-[#14231e]/65 p-3 backdrop-blur-md sm:p-5"
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            initial={{ opacity: 0, scale: 0.94, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 18 }}
+            transition={{ type: "spring", stiffness: 280, damping: 26 }}
+            className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-[1.75rem] border border-white/70 bg-[#fffdf8] shadow-[0_28px_90px_rgba(12,36,29,0.32)]"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-linear-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                  <FiLock className="text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Enroll in Course
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    ম্যানুয়াল পেমেন্ট - বিকাশ/নগদ/রকেট
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <FiX size={24} />
-              </button>
+            {/* Decorative background */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-36 overflow-hidden rounded-t-[1.75rem]">
+              <div className="absolute inset-0 bg-linear-to-br from-[#e8f5ef] via-[#fff8ea] to-[#f1edff]" />
+              <div className="absolute -right-12 -top-14 h-36 w-36 rounded-full bg-[#f7c969]/22" />
+              <div className="absolute -left-12 top-8 h-32 w-32 rounded-full bg-[#8bcdbd]/18" />
             </div>
 
-            {/* Course Info */}
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-4 mb-4">
-                {course?.thumbnail ? (
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="w-16 h-16 rounded-xl object-cover"
-                  />
-                ) : (
-                  <div className="w-16 h-16 bg-linear-to-r from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
-                    <FiBook className="text-white text-xl" />
+            {/* Header */}
+            <div className="sticky top-0 z-20 border-b border-[#e8e1d5]/80 bg-[#fffdf8]/92 px-5 py-4 backdrop-blur-xl sm:px-6">
+              <div className="relative flex items-center justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#16745f] text-white shadow-[0_10px_24px_rgba(22,116,95,0.24)]">
+                    <FiLock className="text-lg" />
                   </div>
-                )}
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800 line-clamp-2">
-                    {course?.title}
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    {course?.category?.name || "Uncategorized"}
-                  </p>
+
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-lg font-extrabold text-[#263c35] sm:text-xl">
+                        কোর্সে এনরোল করুন
+                      </h3>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#e5f4ee] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#16745f]">
+                        <FiShield />
+                        Secure
+                      </span>
+                    </div>
+
+                    <p className="mt-0.5 truncate text-xs font-medium text-[#71817b] sm:text-sm">
+                      ম্যানুয়াল পেমেন্ট • বিকাশ, নগদ অথবা রকেট
+                    </p>
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e1e5e1] bg-white/80 text-[#71817b] transition hover:border-[#efb49f] hover:bg-[#fff2eb] hover:text-[#d9704b]"
+                  aria-label="Close payment modal"
+                >
+                  <FiX size={19} />
+                </button>
               </div>
+            </div>
 
-              {/* Coupon Section */}
-              <div className="mb-4">
-                {!showCouponInput && !appliedCoupon && (
-                  <button
-                    onClick={() => setShowCouponInput(true)}
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                  >
-                    <FiPlus size={16} />
-                    Apply Coupon Code
-                  </button>
-                )}
+            <div className="relative">
+              {/* Course Summary */}
+              <div className="px-5 pb-5 pt-5 sm:px-6">
+                <div className="rounded-[1.35rem] border border-[#e7e1d6] bg-white p-3.5 shadow-[0_10px_30px_rgba(45,75,65,0.06)]">
+                  <div className="flex items-center gap-3">
+                    {course?.thumbnail ? (
+                      <img
+                        src={course.thumbnail}
+                        alt={course.title}
+                        className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-[#e5ded0]"
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-[#16745f] to-[#6ab5a1] text-white">
+                        <FiBook className="text-xl" />
+                      </div>
+                    )}
 
-                {showCouponInput && !appliedCoupon && (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Enter coupon code"
-                      value={couponCode}
-                      onChange={(e) =>
-                        setCouponCode(e.target.value.toUpperCase())
-                      }
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
-                    />
-                    <button
-                      onClick={handleApplyCoupon}
-                      disabled={applyingCoupon}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 text-sm"
-                    >
-                      {applyingCoupon ? (
-                        <FiLoader className="animate-spin" />
-                      ) : (
-                        "Apply"
-                      )}
-                    </button>
+                    <div className="min-w-0 flex-1">
+                      <span className="inline-flex rounded-full bg-[#eeeafd] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#6e5bb4]">
+                        {course?.category?.name || "Uncategorized"}
+                      </span>
+
+                      <h4 className="mt-2 line-clamp-2 text-sm font-extrabold leading-5 text-[#263c35] sm:text-base">
+                        {course?.title}
+                      </h4>
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
+                        Price
+                      </p>
+                      <p
+                        className={`mt-1 font-extrabold ${
+                          appliedCoupon
+                            ? "text-sm text-[#9ba6a2] line-through"
+                            : "text-xl text-[#263c35]"
+                        }`}
+                      >
+                        ৳{course?.price || 0}
+                      </p>
+                    </div>
                   </div>
-                )}
+                </div>
 
-                {appliedCoupon && (
-                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                {/* Coupon */}
+                <div className="mt-4 rounded-[1.3rem] border border-[#e7e1d6] bg-white p-4">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <FiTag className="text-green-600" />
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#fff0e8] text-[#d9704b]">
+                        <FiTag />
+                      </span>
+
                       <div>
-                        <p className="text-sm font-medium text-green-800">
-                          {appliedCoupon.code} Applied
+                        <p className="text-sm font-extrabold text-[#263c35]">
+                          কুপন কোড
                         </p>
-                        <p className="text-xs text-green-600">
-                          {appliedCoupon.discountType === "percentage"
-                            ? `${appliedCoupon.discountValue}% off`
-                            : `৳${appliedCoupon.discountValue} off`}
+                        <p className="text-xs text-[#7b8983]">
+                          বৈধ কুপন থাকলে মূল্য কমবে
                         </p>
                       </div>
                     </div>
-                    <button
-                      onClick={handleRemoveCoupon}
-                      className="text-green-600 hover:text-green-700"
+
+                    {!showCouponInput && !appliedCoupon && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowCouponInput(true);
+                          setError("");
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#eef8f4] px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:bg-[#e1f1eb]"
+                      >
+                        <FiPlus />
+                        যোগ করুন
+                      </button>
+                    )}
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    {showCouponInput && !appliedCoupon && (
+                      <motion.div
+                        key="coupon-input"
+                        initial={{ opacity: 0, height: 0, y: -5 }}
+                        animate={{ opacity: 1, height: "auto", y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -5 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                          <div className="relative min-w-0 flex-1">
+                            <FiTag className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a9691]" />
+                            <input
+                              type="text"
+                              placeholder="কুপন কোড লিখুন"
+                              value={couponCode}
+                              onChange={(e) => {
+                                setCouponCode(e.target.value.toUpperCase());
+                                if (error) setError("");
+                              }}
+                              className="h-11 w-full rounded-xl border border-[#dfe5e0] bg-[#fafbf8] pl-10 pr-4 text-sm font-bold uppercase tracking-wide text-[#263c35] outline-none transition placeholder:font-medium placeholder:normal-case placeholder:tracking-normal placeholder:text-[#9ca7a2] focus:border-[#8bcdbd] focus:bg-white focus:ring-4 focus:ring-[#8bcdbd]/15"
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleApplyCoupon}
+                            disabled={applyingCoupon}
+                            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#263c35] px-5 text-sm font-extrabold text-white transition hover:bg-[#1d302a] disabled:cursor-not-allowed disabled:opacity-55"
+                          >
+                            {applyingCoupon ? (
+                              <>
+                                <FiLoader className="animate-spin" />
+                                যাচাই হচ্ছে
+                              </>
+                            ) : (
+                              "Apply"
+                            )}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {appliedCoupon && (
+                      <motion.div
+                        key="coupon-applied"
+                        initial={{ opacity: 0, scale: 0.97 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.97 }}
+                        className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#cfe6dc] bg-[#edf8f3] p-3"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#16745f] text-white">
+                            <FiCheckCircle />
+                          </span>
+
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-extrabold text-[#145f50]">
+                              {appliedCoupon.code} Applied
+                            </p>
+                            <p className="mt-0.5 text-xs font-semibold text-[#4d8172]">
+                              {appliedCoupon.discountType === "percentage"
+                                ? `${appliedCoupon.discountValue}% ছাড়`
+                                : `৳${appliedCoupon.discountValue} ছাড়`}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleRemoveCoupon}
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4f8173] transition hover:bg-white hover:text-[#d9704b]"
+                          aria-label="Remove coupon"
+                        >
+                          <FiX />
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-3 flex items-start gap-2 rounded-xl border border-[#f2d2c7] bg-[#fff2ed] p-3 text-[#bc5638]"
                     >
-                      <FiX size={16} />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Price Breakdown */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Course Price</span>
-                  <span className="font-semibold text-gray-800">
-                    ৳{course?.price}
-                  </span>
+                      <FiAlertCircle className="mt-0.5 shrink-0" />
+                      <span className="text-xs font-semibold leading-5">
+                        {error}
+                      </span>
+                    </motion.div>
+                  )}
                 </div>
 
-                {appliedCoupon && (
-                  <div className="flex justify-between items-center text-green-600">
-                    <span>Discount</span>
-                    <span className="font-semibold">
-                      -৳{appliedCoupon.discountAmount}
+                {/* Price Breakdown */}
+                <div className="mt-4 overflow-hidden rounded-[1.3rem] border border-[#e7e1d6] bg-[#263c35] text-white shadow-[0_16px_38px_rgba(38,60,53,0.16)]">
+                  <div className="p-4 sm:p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-[#f7c969]">
+                          <FiCreditCard />
+                        </span>
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/55">
+                            Payment Summary
+                          </p>
+                          <p className="text-sm font-extrabold">মূল্য বিবরণ</p>
+                        </div>
+                      </div>
+
+                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/75">
+                        BDT
+                      </span>
+                    </div>
+
+                    <div className="mt-4 space-y-2.5 text-sm">
+                      <div className="flex items-center justify-between text-white/70">
+                        <span>কোর্সের মূল্য</span>
+                        <span className="font-bold text-white">
+                          ৳{course?.price || 0}
+                        </span>
+                      </div>
+
+                      {appliedCoupon && (
+                        <div className="flex items-center justify-between text-[#9de2c9]">
+                          <span>কুপন ছাড়</span>
+                          <span className="font-extrabold">
+                            -৳{appliedCoupon.discountAmount}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/10 bg-white/6 px-4 py-4 sm:px-5">
+                    <div className="flex items-end justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-medium text-white/55">
+                          সর্বমোট পরিশোধযোগ্য
+                        </p>
+                        {appliedCoupon && (
+                          <p className="mt-1 text-xs font-bold text-[#9de2c9]">
+                            আপনি ৳{appliedCoupon.savings} সাশ্রয় করছেন
+                          </p>
+                        )}
+                      </div>
+
+                      <p className="text-2xl font-extrabold text-[#f7c969]">
+                        ৳{calculateFinalAmount()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Process */}
+                <div className="mt-4 rounded-[1.3rem] border border-[#dce7e1] bg-[#f5faf7] p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e5f4ee] text-[#16745f]">
+                      <FiInfo />
                     </span>
-                  </div>
-                )}
 
-                <div className="border-t pt-3">
-                  <div className="flex justify-between items-center text-lg font-bold">
-                    <span>Total Amount</span>
-                    <span>৳{calculateFinalAmount()}</span>
-                  </div>
-                </div>
+                    <div className="min-w-0 flex-1">
+                      <h5 className="text-sm font-extrabold text-[#263c35]">
+                        ম্যানুয়াল পেমেন্ট প্রক্রিয়া
+                      </h5>
 
-                {appliedCoupon && (
-                  <div className="text-sm text-green-600 text-center">
-                    You save ৳{appliedCoupon.savings}!
+                      <div className="mt-3 space-y-3">
+                        {paymentSteps.map((step, index) => (
+                          <div
+                            key={step}
+                            className="flex items-start gap-3 text-xs leading-5 text-[#60716a] sm:text-sm"
+                          >
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-extrabold text-[#16745f] shadow-sm ring-1 ring-[#dce7e1]">
+                              {index + 1}
+                            </span>
+                            <span>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Payment Info */}
-            <div className="p-6 border-b border-gray-200 bg-blue-50">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                  <FiInfo className="text-blue-600" />
-                </div>
-                <div>
-                  <h5 className="font-semibold text-gray-800 mb-2">
-                    ম্যানুয়াল পেমেন্ট প্রক্রিয়া:
-                  </h5>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-center gap-2">
-                      <FiCheck className="text-green-500 shrink-0" />
-                      <span>
-                        ১. আপনার পছন্দের মোবাইল ব্যাংকিং (বিকাশ/নগদ/রকেট) এ
-                        পেমেন্ট করুন
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <FiCheck className="text-green-500 shrink-0" />
-                      <span>২. পরবর্তী পেজে গিয়ে পেমেন্টের তথ্য দিন</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <FiCheck className="text-green-500 shrink-0" />
-                      <span>
-                        ৩. অ্যাডমিন অ্যাপ্রুভ করার পর কোর্স এক্সেস পাবেন
-                      </span>
-                    </li>
-                  </ul>
                 </div>
               </div>
-            </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="px-6 py-3">
-                <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                  <FiAlertCircle />
-                  <span className="text-sm">{error}</span>
-                </div>
+              {/* Action */}
+              <div className="sticky bottom-0 z-20 border-t border-[#e8e1d5] bg-[#fffdf8]/94 px-5 py-4 backdrop-blur-xl sm:px-6">
+                <button
+                  type="button"
+                  onClick={handleProceedToManualPayment}
+                  disabled={!course}
+                  className="group inline-flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 text-base font-extrabold text-white shadow-[0_14px_32px_rgba(22,116,95,0.23)] transition hover:-translate-y-0.5 hover:bg-[#115f4e] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <span>পেমেন্ট তথ্য দিন</span>
+                  <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+                </button>
+
+                <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-[11px] font-medium text-[#84918c]">
+                  <FiCheck className="text-[#16745f]" />
+                  পরবর্তী ধাপে পেমেন্টের ট্রানজেকশন তথ্য জমা দিতে হবে
+                </p>
               </div>
-            )}
-
-            {/* Action Button */}
-            <div className="p-6">
-              <button
-                onClick={handleProceedToManualPayment}
-                disabled={!course}
-                className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>পেমেন্ট তথ্য দিন</span>
-                <FiArrowRight />
-              </button>
-
-              <p className="text-center text-xs text-gray-500 mt-4">
-                পেমেন্ট করার পর নিচের ফর্ম পূরণ করুন
-              </p>
             </div>
           </motion.div>
         </motion.div>

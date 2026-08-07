@@ -162,7 +162,6 @@ const DirectorVoice = () => {
       id="director-message"
       className="relative overflow-hidden bg-[#faf8f5] px-4 py-16 font-hind sm:px-6 lg:py-24"
     >
-      {/* সিম্পল ব্যাকগ্রাউন্ড ব্লব */}
       <div
         aria-hidden="true"
         className="absolute -right-32 top-20 h-64 w-64 rounded-full bg-[#7b5bb2]/5 blur-3xl"
@@ -171,8 +170,6 @@ const DirectorVoice = () => {
         aria-hidden="true"
         className="absolute -left-32 bottom-20 h-64 w-64 rounded-full bg-[#fa7478]/5 blur-3xl"
       />
-
-      {/* ফ্লোটিং আইকন - কম এবং সাবটেল */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 hidden overflow-hidden sm:block"
@@ -209,7 +206,6 @@ const DirectorVoice = () => {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl">
-        {/* সেকশন হেডিং - সিম্পল */}
         <motion.div
           className="mx-auto mb-12 max-w-2xl text-center lg:mb-16"
           initial={reduceMotion ? false : { opacity: 0, y: 15 }}
@@ -221,7 +217,7 @@ const DirectorVoice = () => {
             <HiSparkles className="text-[#7b5bb2]" />
             পরিচালকের বাণী
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-[#2d1b4e] sm:text-4xl lg:text-5xl">
+          <h2 className="font-baloo text-3xl font-bold tracking-tight text-[#2d1b4e] sm:text-4xl lg:text-5xl">
             আমাদের প্রেরণা
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-gray-600 sm:text-base">

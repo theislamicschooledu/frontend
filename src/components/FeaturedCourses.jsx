@@ -41,7 +41,6 @@ const FeaturedCourses = () => {
     fetchCourses();
   }, []);
 
-  // লোডিং স্টেট
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -50,7 +49,6 @@ const FeaturedCourses = () => {
     );
   }
 
-  // এরর স্টেট
   if (error) {
     return (
       <div className="text-center py-12">
@@ -65,7 +63,6 @@ const FeaturedCourses = () => {
     );
   }
 
-  // ডাটা নেই এমন স্টেট
   if (!courses || courses.length === 0) {
     return (
       <div className="text-center py-12">
@@ -77,7 +74,6 @@ const FeaturedCourses = () => {
     );
   }
 
-  // সফলভাবে ডাটা লোড হয়েছে
   return (
     <div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 font-hind">

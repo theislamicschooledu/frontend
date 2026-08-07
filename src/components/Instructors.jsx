@@ -521,10 +521,10 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
               আমাদের সম্মানিত উস্তাদগণ
             </div>
 
-            <h2 className="mt-5 max-w-4xl text-4xl font-black leading-[1.2] tracking-tight text-[#073b46] sm:text-5xl lg:text-[56px]">
+            <h2 className="font-baloo mt-5 max-w-4xl text-4xl font-black leading-[1.2] tracking-tight text-[#073b46] sm:text-5xl lg:text-[56px]">
               যত্নশীল উস্তাদদের কাছ থেকে শিখুন,
               <span className="relative mt-1 inline-block text-[#ff6542] sm:ml-3 sm:mt-0">
-                আত্মবিশ্বাসে এগিয়ে যান
+                আত্মবিশ্বাসে এগিয়ে যান
                 <motion.span
                   initial={{ scaleX: 0 }}
                   whileInView={{ scaleX: 1 }}

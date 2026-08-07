@@ -8,11 +8,15 @@ import {
   FiArrowLeft,
   FiBookmark,
   FiCalendar,
+  FiCheckCircle,
   FiClock,
   FiEye,
+  FiHelpCircle,
   FiMessageSquare,
   FiShare2,
   FiUser,
+  FiArrowRight,
+  FiBookOpen,
 } from "react-icons/fi";
 
 const Question = () => {
@@ -62,255 +66,400 @@ const Question = () => {
 
   const calculateReadTime = (content) => {
     const wordsPerMinute = 200;
-    const words = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
-    return Math.ceil(words / wordsPerMinute);
+    const words = content?.replace(/<[^>]*>/g, "").split(/\s+/).length || 0;
+    return Math.max(1, Math.ceil(words / wordsPerMinute));
   };
 
   const roleColors = {
-    admin: "bg-purple-100 text-purple-800",
-    teacher: "bg-blue-100 text-blue-800",
-    student: "bg-green-100 text-green-800",
+    admin: "bg-[#eeeafd] text-[#6e5bb4]",
+    teacher: "bg-[#e7f2ff] text-[#3979a9]",
+    student: "bg-[#e5f4ee] text-[#16745f]",
   };
+
+  const firstAnswer = question?.answers?.[0];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 flex items-center justify-center">
-        <p className="text-gray-600">Loading...</p>
+      <div className="font-hind min-h-screen bg-[#f8f5ed] flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-sm rounded-4xl border border-[#e6dfcf] bg-white p-8 text-center shadow-[0_20px_60px_rgba(45,75,65,0.10)]"
+        >
+          <div className="relative mx-auto mb-5 h-16 w-16">
+            <motion.div
+              className="absolute inset-0 rounded-full border-4 border-[#dcebe4]"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-r-[#1c8c73] border-t-[#1c8c73]" />
+            </motion.div>
+
+            <div className="absolute inset-3 flex items-center justify-center rounded-full bg-[#eef8f4]">
+              <FiHelpCircle className="text-xl text-[#16745f]" />
+            </div>
+          </div>
+
+          <h3 className="text-xl font-extrabold text-[#263c35]">
+            প্রশ্নটি লোড হচ্ছে
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-[#6d7c76]">
+            প্রশ্ন ও আলেমের উত্তর প্রস্তুত করা হচ্ছে।
+          </p>
+        </motion.div>
       </div>
     );
   }
 
   if (!question) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 flex items-center justify-center">
-        <p className="text-gray-600">Question not found</p>
+      <div className="font-hind min-h-screen bg-[#f8f5ed] flex items-center justify-center px-4 py-24">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md rounded-4xl border border-[#e6dfcf] bg-white p-8 text-center shadow-[0_20px_60px_rgba(45,75,65,0.10)]"
+        >
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.7rem] bg-[#fff0e8] text-[#d9704b]">
+            <FiHelpCircle className="text-4xl" />
+          </div>
+
+          <h2 className="mt-5 text-2xl font-extrabold text-[#263c35]">
+            প্রশ্নটি পাওয়া যায়নি
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-[#6d7c76]">
+            প্রশ্নটি সরিয়ে ফেলা হয়ে থাকতে পারে অথবা লিংকটি সঠিক নয়।
+          </p>
+
+          <Link
+            to="/qa"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 py-3 font-bold text-white transition hover:bg-[#115f4e]"
+          >
+            <FiArrowLeft />
+            প্রশ্নের তালিকায় ফিরুন
+          </Link>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="font-hind min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
-      {/* Header */}
-      <div className="pt-24 bg-linear-to-r from-green-600 to-emerald-500 text-white py-12 px-6">
-        <div className="max-w-6xl mx-auto">
+    <div className="font-hind min-h-screen overflow-hidden bg-[#f8f5ed] text-[#263c35]">
+      <section className="relative overflow-hidden border-b border-[#e8dfce] pt-8">
+        <div className="absolute inset-0 bg-linear-to-br from-[#fffaf0] via-[#f4fbf7] to-[#edf7f4]" />
+        <div className="absolute -left-24 top-16 h-56 w-56 rounded-full bg-[#f6c85f]/18 blur-3xl" />
+        <div className="absolute -right-20 top-10 h-64 w-64 rounded-full bg-[#9d8be8]/16 blur-3xl" />
+
+        <motion.div
+          className="absolute left-[7%] top-28 hidden h-12 w-12 rotate-12 items-center justify-center rounded-2xl bg-[#ffe8dd] text-[#df7650] shadow-sm md:flex"
+          animate={{ y: [0, -8, 0], rotate: [12, 18, 12] }}
+          transition={{ duration: 4, repeat: Infinity }}
+        >
+          <FiMessageSquare className="text-xl" />
+        </motion.div>
+
+        <motion.div
+          className="absolute right-[8%] top-32 hidden h-11 w-11 -rotate-12 items-center justify-center rounded-full bg-[#e9e5ff] text-[#7865c9] shadow-sm lg:flex"
+          animate={{ y: [0, 9, 0], rotate: [-12, -5, -12] }}
+          transition={{ duration: 4.8, repeat: Infinity }}
+        >
+          <FiHelpCircle className="text-xl" />
+        </motion.div>
+
+        <div className="relative mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.55 }}
+            className="mx-auto max-w-5xl"
           >
             <Link
               to="/qa"
-              className="inline-flex items-center text-green-100 hover:text-white mb-6 transition mr-16"
+              className="inline-flex items-center gap-2 rounded-full border border-[#d7e9e2] bg-white/80 px-3 py-1.5 text-xs font-bold text-[#16745f] shadow-sm backdrop-blur transition hover:bg-white"
             >
-              <FiArrowLeft className="mr-2" />
-              Back to Questions
+              <FiArrowLeft />
+              সব প্রশ্ন
             </Link>
 
-            <div className="bg-green-500 text-white text-sm px-4 py-1.5 rounded-full inline-block mb-4">
-              {question.category?.name}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-bold text-[#16745f]">
+                <FiBookOpen />
+                {question.category?.name || "Uncategorized"}
+              </span>
+
+              {firstAnswer && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eeeafd] px-3 py-1.5 text-xs font-bold text-[#6e5bb4]">
+                  <FiCheckCircle />
+                  উত্তর প্রদান করা হয়েছে
+                </span>
+              )}
             </div>
 
-            <h1 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="mt-4 max-w-5xl text-3xl font-extrabold leading-[1.2] text-[#263c35] sm:text-4xl lg:text-[3.15rem]">
               {question.title}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-6 text-green-100">
-              <div className="flex gap-2 items-center">
-                <FiUser className="mr-2" />
-                <span>{question.askedBy?.name || "Unknown Author"}</span>
-              </div>
-              <div className="flex items-center">
-                <FiCalendar className="mr-2" />
-                <span>
-                  {new Date(question.createdAt).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-              <div className="flex items-center">
-                <FiClock className="mr-2" />
-                <span>{calculateReadTime(question.description)} min read</span>
-              </div>
-              <div className="flex items-center">
-                <FiEye className="mr-2" />
-                <span>{question.views/2 || 0} views</span>
-              </div>
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-[#71817b] sm:text-sm">
+              <span className="inline-flex items-center gap-1.5">
+                <FiUser />
+                {question.askedBy?.name || "Unknown Author"}
+              </span>
+
+              <span className="inline-flex items-center gap-1.5">
+                <FiCalendar />
+                {new Date(question.createdAt).toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+
+              <span className="inline-flex items-center gap-1.5">
+                <FiClock />
+                {calculateReadTime(question.description)} min read
+              </span>
+
+              <span className="inline-flex items-center gap-1.5">
+                <FiEye />
+                {question.views / 2 || 0} views
+              </span>
             </div>
           </motion.div>
         </div>
-      </div>
+      </section>
 
-      <section className="py-8 px-2 md:py-16 md:px-6">
-        <div className="md:max-w-6xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-10">
-            {/* Main Content */}
-            <div className="lg:w-2/3">
+      <section className="py-7 sm:py-9">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_310px]">
+            <main className="min-w-0">
               <motion.article
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden"
+                transition={{ duration: 0.5 }}
+                className="overflow-hidden rounded-[1.7rem] border border-[#e5ded0] bg-white shadow-[0_18px_50px_rgba(45,75,65,0.08)]"
               >
-                {/* Content */}
-                <div className="p-8">
-                  {/* Action Buttons */}
-                  <div className="flex flex-col gap-2 md:flex-row justify-between items-center mb-8 pb-6 border-b border-gray-200">
-                    <div className="flex items-center gap-2 text-gray-500 text-sm">
-                      <FiUser />
-                      <span className="font-medium">
-                        {question.askedBy?.name}
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          roleColors[question.askedBy?.role]
-                        }`}
-                      >
-                        {question.askedBy?.role?.toUpperCase()}
-                      </span>
+                <div className="border-b border-[#eee8dc] bg-[#fffdf8] p-5 sm:p-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#fff0e8] text-lg font-extrabold text-[#d9704b]">
+                        Q
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d9704b]">
+                          Question
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[#687a73]">
+                          <span>
+                            {question.askedBy?.name || "Unknown Author"}
+                          </span>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                              roleColors[question.askedBy?.role] ||
+                              "bg-[#edf1ee] text-[#62726b]"
+                            }`}
+                          >
+                            {question.askedBy?.role?.toUpperCase() || "USER"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex gap-3">
-                      <button className="p-2 text-gray-500 hover:text-green-600 transition">
-                        <FiBookmark className="text-lg" />
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e1e5e1] text-[#687a73] transition hover:border-[#8bcdbd] hover:bg-[#eef8f4] hover:text-[#16745f]"
+                        aria-label="Bookmark question"
+                      >
+                        <FiBookmark />
                       </button>
-                      <button className="p-2 text-gray-500 hover:text-green-600 transition">
-                        <FiShare2 className="text-lg" />
+
+                      <button
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e1e5e1] text-[#687a73] transition hover:border-[#efb49f] hover:bg-[#fff4ee] hover:text-[#d9704b]"
+                        aria-label="Share question"
+                      >
+                        <FiShare2 />
                       </button>
                     </div>
                   </div>
+                </div>
 
-                  {/* Question Content */}
+                <div className="p-5 sm:p-7 lg:p-8">
                   <div
-                    className="prose prose-lg max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-li:text-gray-600 prose-strong:text-gray-800 prose-a:text-green-600 hover:prose-a:text-green-700 prose-blockquote:border-green-400 prose-blockquote:bg-green-50 prose-blockquote:px-6 prose-blockquote:py-4 prose-blockquote:rounded-xl"
-                    dangerouslySetInnerHTML={{ __html: question.description }}
+                    className="prose prose-base max-w-none text-[#52645d] prose-headings:font-extrabold prose-headings:text-[#263c35] prose-p:leading-8 prose-a:text-[#16745f] prose-strong:text-[#314941] prose-li:leading-8 prose-blockquote:rounded-2xl prose-blockquote:border-[#ef8f6d] prose-blockquote:bg-[#fff7f2] prose-blockquote:px-5 prose-blockquote:py-3 sm:prose-lg"
+                    dangerouslySetInnerHTML={{
+                      __html: question.description,
+                    }}
                   />
                 </div>
 
-                <div className="p-8 pt-0">
-                  {/* Answer Content */}
-                  <div className="pl-5 border-l-2 border-green-200 mb-4">
-                    <p className="text-gray-600">
-                      <span className="text-green-600 font-medium">A:</span>{" "}
+                <div className="border-t border-[#eee8dc] bg-[#f8fbf9] p-5 sm:p-7 lg:p-8">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e5f4ee] text-lg font-extrabold text-[#16745f]">
+                      A
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#16745f]">
+                        Scholar's Answer
+                      </p>
+                      <h2 className="mt-1 text-xl font-extrabold text-[#263c35]">
+                        উত্তর
+                      </h2>
+                    </div>
+                  </div>
+
+                  {firstAnswer ? (
+                    <>
                       <div
-                        className="prose prose-lg max-w-none mb-6"
+                        className="prose prose-base mt-5 max-w-none text-[#52645d] prose-headings:font-extrabold prose-headings:text-[#263c35] prose-p:leading-8 prose-a:text-[#16745f] prose-strong:text-[#314941] prose-li:leading-8 prose-blockquote:rounded-2xl prose-blockquote:border-[#8bcdbd] prose-blockquote:bg-white prose-blockquote:px-5 prose-blockquote:py-3 sm:prose-lg"
                         dangerouslySetInnerHTML={{
-                          __html: question.answers[0].text,
+                          __html: firstAnswer.text,
                         }}
                       />
-                    </p>
-                    <p className="flex gap-3 items-center">
-                      Answered By:{" "}
-                      <span className="text-green-600 font-medium">
-                        {question.answers[0].answeredBy.name}
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          roleColors[question.answers[0].answeredBy.role]
-                        }`}
-                      >
-                        {question.answers[0].answeredBy.role.toUpperCase()}
-                      </span>
-                    </p>
-                  </div>
+
+                      <div className="mt-6 flex flex-col gap-3 rounded-[1.2rem] border border-[#dfeae5] bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#16745f] font-extrabold text-white">
+                            {firstAnswer.answeredBy?.name?.charAt(0) || "S"}
+                          </div>
+
+                          <div>
+                            <p className="text-xs text-[#7a8983]">
+                              উত্তর প্রদান করেছেন
+                            </p>
+                            <p className="font-extrabold text-[#263c35]">
+                              {firstAnswer.answeredBy?.name || "Scholar"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <span
+                          className={`w-fit rounded-full px-3 py-1 text-xs font-bold ${
+                            roleColors[firstAnswer.answeredBy?.role] ||
+                            "bg-[#e5f4ee] text-[#16745f]"
+                          }`}
+                        >
+                          {firstAnswer.answeredBy?.role?.toUpperCase() ||
+                            "SCHOLAR"}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-5 rounded-[1.2rem] border border-dashed border-[#cfded7] bg-white p-6 text-center">
+                      <FiClock className="mx-auto text-3xl text-[#8aa49a]" />
+                      <h3 className="mt-3 font-extrabold text-[#263c35]">
+                        উত্তর প্রস্তুত হচ্ছে
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-[#71817b]">
+                        প্রশ্নটি আমাদের আলেমদের কাছে পাঠানো হয়েছে। উত্তর প্রকাশ
+                        হলে এখানে দেখা যাবে।
+                      </p>
+                    </div>
+                  )}
                 </div>
               </motion.article>
-            </div>
+            </main>
 
-            {/* Sidebar */}
-            <div className="lg:w-1/3">
-              {/* Author Info */}
+            <aside className="space-y-5">
               <motion.div
-                className="bg-white rounded-2xl shadow-lg p-6 mb-8"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 18 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="rounded-[1.55rem] border border-[#e5ded0] bg-white p-5 shadow-[0_14px_40px_rgba(45,75,65,0.07)] lg:sticky lg:top-24"
               >
-                <h3 className="text-lg font-bold text-gray-800 mb-4">
-                  About the Author
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8b77ce]">
+                  Asked By
+                </p>
+                <h3 className="mt-1 text-lg font-extrabold text-[#263c35]">
+                  প্রশ্নকারী
                 </h3>
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-linear-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+
+                <div className="mt-5 flex items-center gap-3">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-[#16745f] to-[#5eb49d] text-xl font-extrabold text-white shadow-[0_8px_20px_rgba(22,116,95,0.20)]">
                     {question.askedBy?.name?.charAt(0) || "U"}
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800">
+
+                  <div className="min-w-0">
+                    <h4 className="truncate font-extrabold text-[#263c35]">
                       {question.askedBy?.name || "Unknown Author"}
                     </h4>
-                    <p className="text-sm text-gray-500">
-                      {question.askedBy?.role}
-                    </p>
+                    <span
+                      className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                        roleColors[question.askedBy?.role] ||
+                        "bg-[#edf1ee] text-[#62726b]"
+                      }`}
+                    >
+                      {question.askedBy?.role?.toUpperCase() || "USER"}
+                    </span>
                   </div>
                 </div>
-                <p className="text-gray-600 text-sm">
-                  Passionate about Islamic parenting and child development.
-                  Sharing insights and experiences to help parents nurture their
-                  children with Islamic values.
-                </p>
+
+                <div className="mt-5 space-y-3 rounded-[1.15rem] bg-[#f8faf7] p-4">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[#71817b]">ক্যাটাগরি</span>
+                    <span className="text-right font-bold text-[#263c35]">
+                      {question.category?.name || "N/A"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[#71817b]">পাঠের সময়</span>
+                    <span className="font-bold text-[#263c35]">
+                      {calculateReadTime(question.description)} মিনিট
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[#71817b]">ভিউ</span>
+                    <span className="font-bold text-[#263c35]">
+                      {question.views / 2 || 0}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[#71817b]">অবস্থা</span>
+                    <span
+                      className={`font-bold ${
+                        firstAnswer ? "text-[#16745f]" : "text-[#d9704b]"
+                      }`}
+                    >
+                      {firstAnswer ? "উত্তর দেওয়া হয়েছে" : "উত্তরের অপেক্ষায়"}
+                    </span>
+                  </div>
+                </div>
               </motion.div>
 
-              {/* TODO */}
-              {/* Related Articles */}
-              {/* {relatedBlogs.length > 0 && (
-                      <motion.div
-                        className="bg-white rounded-2xl shadow-lg p-6 mb-8"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                      >
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">
-                          Related Articles
-                        </h3>
-                        <div className="space-y-4">
-                          {relatedBlogs.map((relatedBlog) => (
-                            <Link
-                              key={relatedBlog._id}
-                              to={`/blogs/${relatedBlog._id}`}
-                              className="block group"
-                            >
-                              <div className="flex gap-3 p-3 rounded-lg hover:bg-green-50 transition">
-                                <img
-                                  src={relatedBlog.cover}
-                                  alt={relatedBlog.title}
-                                  className="w-16 h-16 object-cover rounded-lg"
-                                />
-                                <div>
-                                  <h4 className="font-medium text-gray-800 group-hover:text-green-600 transition text-sm leading-tight mb-1">
-                                    {relatedBlog.title.length > 50
-                                      ? `${relatedBlog.title.substring(0, 50)}...`
-                                      : relatedBlog.title}
-                                  </h4>
-                                  <p className="text-xs text-gray-500">
-                                    {new Date(relatedBlog.createdAt).toLocaleDateString()}
-                                  </p>
-                                </div>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )} */}
-
-              {/* Ask Question */}
               <motion.div
-                className="bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 text-center"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 18 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+                className="relative overflow-hidden rounded-[1.55rem] bg-[#263c35] p-6 text-white shadow-[0_18px_45px_rgba(38,60,53,0.20)]"
               >
-                <FiMessageSquare className="text-4xl mx-auto mb-4" />
-                <h3 className="text-xl font-bold mb-2">Ask a Question</h3>
-                <p className="text-green-100 mb-4">
-                  Can't find what you're looking for? Ask our scholars.
-                </p>
-                <Link
-                  to={"/qa/ask-question"}
-                  className="bg-white text-green-600 px-5 py-2.5 rounded-xl font-medium hover:bg-green-50 transition"
-                >
-                  Ask Now
-                </Link>
+                <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#f7c969]/18" />
+                <div className="absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-[#ef8f6d]/12" />
+
+                <div className="relative">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#f7c969]">
+                    <FiMessageSquare className="text-xl" />
+                  </div>
+
+                  <h3 className="mt-5 text-xl font-extrabold">
+                    আপনারও কি কোনো প্রশ্ন আছে?
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-white/70">
+                    আপনার প্রশ্নটি পাঠান। যাচাইয়ের পর আমাদের আলেমরা উত্তর প্রদান
+                    করবেন।
+                  </p>
+
+                  <Link
+                    to="/qa/ask-question"
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f7c969] px-4 py-3 text-sm font-extrabold text-[#263c35] transition hover:-translate-y-0.5 hover:bg-[#ffda7f]"
+                  >
+                    এখনই প্রশ্ন করুন
+                    <FiArrowRight />
+                  </Link>
+                </div>
               </motion.div>
-            </div>
+            </aside>
           </div>
         </div>
       </section>

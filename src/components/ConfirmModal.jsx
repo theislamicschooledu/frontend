@@ -1,23 +1,30 @@
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { FiAlertTriangle, FiCheck, FiX, FiLoader } from "react-icons/fi";
+import {
+  FiAlertTriangle,
+  FiCheck,
+  FiX,
+  FiLoader,
+  FiShield,
+} from "react-icons/fi";
 
-const ConfirmModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title = "আপনি কি নিশ্চিত?", 
+const ConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title = "আপনি কি নিশ্চিত?",
   message = "এটি পরে পরিবর্তন করা সম্ভব নয়।",
   confirmText = "কনফার্ম",
   cancelText = "বাতিল করুন",
-  type = "danger", // 'danger', 'warning', 'success'
-  loading = false
+  type = "danger", // "danger", "warning", "success"
+  loading = false,
 }) => {
   const [internalLoading, setInternalLoading] = useState(false);
 
   const handleConfirm = async () => {
     setInternalLoading(true);
+
     try {
       await onConfirm();
     } catch (error) {
@@ -29,98 +36,175 @@ const ConfirmModal = ({
 
   const isLoading = loading || internalLoading;
 
-  // Color schemes based on type
   const typeConfig = {
     danger: {
-      icon: <FiAlertTriangle className="text-red-500" />,
-      confirmBg: "bg-red-600 hover:bg-red-700",
-      iconBg: "bg-red-50",
-      borderColor: "border-red-100"
+      icon: FiAlertTriangle,
+      eyebrow: "Critical Action",
+      accentText: "text-[#c6573a]",
+      iconText: "text-[#d86545]",
+      iconBg: "bg-[#fff0e9]",
+      iconRing: "ring-[#f3c8b8]",
+      confirmButton:
+        "bg-[#d96343] hover:bg-[#bd4f32] shadow-[0_12px_28px_rgba(217,99,67,0.24)]",
+      glow: "bg-[#ef8f6d]/18",
+      noticeBg: "bg-[#fff7f2]",
+      noticeBorder: "border-[#f1d8ce]",
+      noticeText: "text-[#835b4d]",
     },
     warning: {
-      icon: <FiAlertTriangle className="text-amber-500" />,
-      confirmBg: "bg-amber-600 hover:bg-amber-700",
-      iconBg: "bg-amber-50",
-      borderColor: "border-amber-100"
+      icon: FiAlertTriangle,
+      eyebrow: "Please Review",
+      accentText: "text-[#a87318]",
+      iconText: "text-[#b57a17]",
+      iconBg: "bg-[#fff7df]",
+      iconRing: "ring-[#f0d99c]",
+      confirmButton:
+        "bg-[#c78a24] hover:bg-[#aa7217] shadow-[0_12px_28px_rgba(199,138,36,0.24)]",
+      glow: "bg-[#f7c969]/22",
+      noticeBg: "bg-[#fffaf0]",
+      noticeBorder: "border-[#efe0b8]",
+      noticeText: "text-[#796641]",
     },
     success: {
-      icon: <FiCheck className="text-green-500" />,
-      confirmBg: "bg-green-600 hover:bg-green-700",
-      iconBg: "bg-green-50",
-      borderColor: "border-green-100"
-    }
+      icon: FiCheck,
+      eyebrow: "Confirm Action",
+      accentText: "text-[#16745f]",
+      iconText: "text-[#16745f]",
+      iconBg: "bg-[#e9f6f1]",
+      iconRing: "ring-[#bcded2]",
+      confirmButton:
+        "bg-[#16745f] hover:bg-[#115f4e] shadow-[0_12px_28px_rgba(22,116,95,0.24)]",
+      glow: "bg-[#8bcdbd]/22",
+      noticeBg: "bg-[#f1f9f6]",
+      noticeBorder: "border-[#d4e9e1]",
+      noticeText: "text-[#4f7065]",
+    },
   };
 
   const config = typeConfig[type] || typeConfig.danger;
-
-  if (!isOpen) return null;
+  const StatusIcon = config.icon;
 
   return (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
+      {isOpen && (
         <motion.div
-          className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-100 flex items-center justify-center bg-[#14231e]/65 p-4 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-modal-title"
+          aria-describedby="confirm-modal-message"
         >
-          {/* Header */}
-          <div className={`p-6 border-b ${config.borderColor}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className={`p-2 rounded-xl ${config.iconBg}`}>
-                  {config.icon}
-                </div>
-                <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-              </div>
-              <button
-                onClick={onClose}
-                disabled={isLoading}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition duration-200 cursor-pointer"
-              >
-                <FiX size={20} />
-              </button>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 27,
+            }}
+            className="relative w-full max-w-md overflow-hidden rounded-[1.75rem] border border-white/70 bg-[#fffdf8] shadow-[0_28px_90px_rgba(12,36,29,0.30)]"
+          >
+            {/* Decorative background */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 overflow-hidden">
+              <div className="absolute inset-0 bg-linear-to-br from-[#fffaf0] via-[#f5fbf8] to-[#f1edff]" />
+              <div
+                className={`absolute -right-12 -top-14 h-36 w-36 rounded-full ${config.glow}`}
+              />
+              <div className="absolute -left-16 top-10 h-32 w-32 rounded-full bg-[#9d8be8]/10" />
             </div>
-          </div>
 
-          {/* Body */}
-          <div className="p-6">
-            <p className="text-gray-600 leading-relaxed">{message}</p>
-          </div>
+            {/* Header */}
+            <div className="relative px-6 pb-5 pt-6 sm:px-7 sm:pt-7">
+              <div className="flex items-start justify-between gap-4">
+                <div
+                  className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${config.iconBg} ${config.iconText} ring-1 ${config.iconRing} shadow-sm`}
+                >
+                  <StatusIcon className="text-2xl" />
+                </div>
 
-          {/* Footer */}
-          <div className="flex justify-end space-x-3 p-6 bg-gray-50">
-            <button
-              onClick={onClose}
-              disabled={isLoading}
-              className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {cancelText}
-            </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isLoading}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e2e6e2] bg-white/80 text-[#71817b] transition hover:border-[#efb49f] hover:bg-[#fff2eb] hover:text-[#d9704b] disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Close confirmation modal"
+                >
+                  <FiX size={19} />
+                </button>
+              </div>
 
-            <button
-              onClick={handleConfirm}
-              disabled={isLoading}
-              className={`px-6 py-3 text-white rounded-xl transition duration-200 font-medium flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${config.confirmBg} cursor-pointer`}
-            >
-              {isLoading ? (
-                <>
-                  <FiLoader className="animate-spin" size={18} />
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <span>{confirmText}</span>
-              )}
-            </button>
-          </div>
+              <div className="mt-5">
+                <div
+                  className={`flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.15em] ${config.accentText}`}
+                >
+                  <FiShield />
+                  {config.eyebrow}
+                </div>
+
+                <h2
+                  id="confirm-modal-title"
+                  className="mt-2 text-2xl font-extrabold leading-tight text-[#263c35]"
+                >
+                  {title}
+                </h2>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="relative px-6 pb-6 sm:px-7">
+              <div
+                className={`rounded-[1.2rem] border p-4 ${config.noticeBg} ${config.noticeBorder}`}
+              >
+                <p
+                  id="confirm-modal-message"
+                  className={`text-sm leading-7 ${config.noticeText}`}
+                >
+                  {message}
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="relative border-t border-[#e9e2d6] bg-white/75 px-6 py-5 backdrop-blur-sm sm:px-7">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isLoading}
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-[#dfe5e0] bg-white px-5 text-sm font-extrabold text-[#53665e] transition hover:border-[#bfcfc7] hover:bg-[#f7faf8] hover:text-[#263c35] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-28"
+                >
+                  {cancelText}
+                </button>
+
+                <motion.button
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={isLoading}
+                  whileHover={{ y: isLoading ? 0 : -2 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                  className={`inline-flex h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-55 sm:min-w-36 ${config.confirmButton}`}
+                >
+                  {isLoading ? (
+                    <>
+                      <FiLoader className="animate-spin" size={18} />
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <StatusIcon size={17} />
+                      <span>{confirmText}</span>
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 };

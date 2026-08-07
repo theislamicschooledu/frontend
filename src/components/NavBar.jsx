@@ -9,6 +9,7 @@ import logoBlue from "./../../public/Logo-blue.png";
 import { MdOutlineLocalPhone } from "react-icons/md";
 import { CiLogin } from "react-icons/ci";
 import { HiSparkles } from "react-icons/hi2";
+import { FaPerson } from "react-icons/fa6";
 
 // Each nav link gets its own hover color — cycles through this palette
 const HOVER_COLORS = [
@@ -110,12 +111,21 @@ const NavBar = () => {
                 Call us
               </span>
             </p>
-            <Link to={"/login"} className="flex items-center gap-2 group">
+            {user ? (
+             <Link to={`/profile`} className="flex items-center gap-2 group">
+              <FaPerson className="text-white text-lg group-hover:translate-x-1 transition-transform" />
+              <span className="text-xs font-medium text-white sm:text-sm">
+                {user?.name}
+              </span>
+            </Link>
+            ) : (
+              <Link to={"/login"} className="flex items-center gap-2 group">
               <CiLogin className="text-white text-lg group-hover:translate-x-1 transition-transform" />
               <span className="text-xs font-medium text-white sm:text-sm">
                 Student Login
               </span>
             </Link>
+            )}
           </div>
         </div>
 

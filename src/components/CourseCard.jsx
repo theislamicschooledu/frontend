@@ -289,7 +289,7 @@ const CourseCard = ({ course = {}, index = 0 }) => {
           </span>
         </div>
 
-        <h3 className="line-clamp-2 min-h-13 text-xl font-black leading-tight text-[#342244] transition-colors duration-300 group-hover:text-[#e85e61] sm:text-[1.35rem]">
+        <h3 className="font-baloo line-clamp-2 min-h-13 text-xl font-black leading-tight text-[#342244] transition-colors duration-300 group-hover:text-[#e85e61] sm:text-[1.35rem]">
           {title}
         </h3>
 

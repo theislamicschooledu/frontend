@@ -133,7 +133,7 @@ const Heading = ({ text1, text2, label, align = "center", className = "" }) => {
             delay: 0.12,
             ease: [0.22, 1, 0.36, 1],
           }}
-          className="text-3xl font-black leading-[1.15] tracking-tight text-[#073b46] sm:text-4xl lg:text-[48px]"
+          className="text-3xl font-baloo font-black leading-[1.15] tracking-tight text-[#073b46] sm:text-4xl lg:text-[48px]"
         >
           {text1}
         </motion.h2>

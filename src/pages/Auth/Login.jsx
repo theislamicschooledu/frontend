@@ -1,14 +1,20 @@
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import {
-  FiMail,
-  FiLock,
+  FiArrowLeft,
+  FiArrowRight,
+  FiBarChart2,
+  FiBookOpen,
+  FiCheckCircle,
   FiEye,
   FiEyeOff,
-  FiArrowLeft,
+  FiLock,
+  FiMail,
+  FiPlayCircle,
+  FiShield,
+  FiTarget,
   FiUserPlus,
-  FiBookOpen,
-  FiArrowRight,
+  FiUsers,
 } from "react-icons/fi";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
@@ -18,7 +24,7 @@ import { useAuth } from "../../hooks/useAuth";
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    identifier: "", // email বা phone
+    identifier: "",
     password: "",
     rememberMe: false,
   });
@@ -28,6 +34,7 @@ const Login = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -51,234 +58,323 @@ const Login = () => {
     }
   };
 
+  const benefits = [
+    {
+      icon: FiBarChart2,
+      title: "ব্যক্তিগত ড্যাশবোর্ড",
+      text: "আপনার সব কোর্স, অগ্রগতি ও শেখার তথ্য এক জায়গায় দেখুন।",
+    },
+    {
+      icon: FiTarget,
+      title: "শেখার অগ্রগতি",
+      text: "শেষ করা পাঠ, বাকি অধ্যায় ও অর্জন নিয়মিত পর্যবেক্ষণ করুন।",
+    },
+    {
+      icon: FiPlayCircle,
+      title: "যেখান থেকে শেষ করেছিলেন",
+      text: "পূর্বের অবস্থান থেকেই সহজে আবার শেখা শুরু করুন।",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans flex items-center justify-center py-24 px-4">
-      <div className="max-w-5xl w-full flex flex-col lg:flex-row rounded-3xl overflow-hidden shadow-2xl">
-        <motion.div
-          className="w-full lg:w-3/5 bg-white p-8 md:p-12"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div className="mb-8">
-            <div className="flex justify-between gap-4">
-              <Link
-                to={'/'}
-                className="inline-flex items-center text-green-600 hover:text-green-700 transition mb-6"
-              >
-                <FiArrowLeft className="mr-2" />
-                Back to Home
-              </Link>
-              <Link
-                to={'/signup'}
-                className="inline-flex items-center text-green-600 hover:text-green-700 transition mb-6"
-              >
-                
-                Sign Up
-                <FiArrowRight className="ml-2" />
-              </Link>
+    <div className="font-hind relative min-h-screen overflow-hidden bg-[#f8f5ed] px-3 py-8 text-[#263c35] sm:px-5">
+      {/* Decorative background */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-32 top-8 h-80 w-80 rounded-full bg-[#f7c969]/16 blur-3xl" />
+        <div className="absolute -right-28 top-20 h-80 w-80 rounded-full bg-[#9d8be8]/14 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[#8bcdbd]/12 blur-3xl" />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55 }}
+        className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-4xl border border-white/80 bg-white shadow-[0_28px_90px_rgba(31,67,55,0.16)] lg:grid-cols-[1.08fr_0.92fr]"
+      >
+        {/* Login form */}
+        <section className="order-2 bg-[#fffdf8] p-5 sm:p-8 lg:order-1 lg:p-10 xl:p-12">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-full border border-[#dce5df] bg-white px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:border-[#8bcdbd] hover:bg-[#f1f8f5]"
+            >
+              <FiArrowLeft />
+              হোমে ফিরে যান
+            </Link>
+
+            <Link
+              to="/signup"
+              className="inline-flex items-center gap-2 rounded-full bg-[#eef8f4] px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:bg-[#e2f2ec]"
+            >
+              সাইন আপ
+              <FiArrowRight />
+            </Link>
+          </div>
+
+          <div className="mt-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#eeeafd] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
+              <FiShield />
+              Secure Login
             </div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Sign In to Your Account
+
+            <h1 className="mt-4 text-3xl font-extrabold leading-tight text-[#263c35] sm:text-4xl">
+              আপনার অ্যাকাউন্টে
+              <span className="relative ml-2 inline-block text-[#16745f]">
+                সাইন ইন করুন
+                <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
+              </span>
             </h1>
-            <p className="text-gray-600">
-              Enter your credentials to access your dashboard
+
+            <p className="mt-3 max-w-xl text-sm leading-7 text-[#71817b]">
+              আপনার কোর্স, শেখার অগ্রগতি ও ব্যক্তিগত ড্যাশবোর্ডে প্রবেশ করতে
+              ইমেইল অথবা মোবাইল নম্বর ব্যবহার করুন।
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email or Phone */}
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            {/* Identifier */}
             <div>
               <label
                 htmlFor="identifier"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
               >
-                Email or Phone
+                <FiMail className="text-[#16745f]" />
+                ইমেইল অথবা মোবাইল নম্বর
+                <span className="text-[#d9704b]">*</span>
               </label>
+
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="text-gray-400" />
-                </div>
+                <FiMail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8b9893]" />
+
                 <input
                   type="text"
                   id="identifier"
                   name="identifier"
                   value={formData.identifier}
                   onChange={handleChange}
-                  className="pl-10 w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
-                  placeholder="Enter your email or phone"
+                  className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-white pl-11 pr-4 text-sm font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:ring-4 focus:ring-[#8bcdbd]/15"
+                  placeholder="name@example.com অথবা 01XXXXXXXXX"
                   required
+                  autoComplete="username"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label
+                  htmlFor="password"
+                  className="flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
+                >
+                  <FiLock className="text-[#d9704b]" />
+                  পাসওয়ার্ড
+                  <span className="text-[#d9704b]">*</span>
+                </label>
+
+                <Link
+                  to="/forget-password"
+                  className="text-xs font-extrabold text-[#16745f] transition hover:text-[#115f4e]"
+                >
+                  পাসওয়ার্ড ভুলে গেছেন?
+                </Link>
+              </div>
+
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="text-gray-400" />
-                </div>
+                <FiLock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8b9893]" />
+
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="pl-10 pr-10 w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
-                  placeholder="Enter your password"
+                  className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-white pl-11 pr-12 text-sm font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:ring-4 focus:ring-[#8bcdbd]/15"
+                  placeholder="আপনার পাসওয়ার্ড লিখুন"
                   required
+                  autoComplete="current-password"
                 />
+
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#8b9893] transition hover:bg-[#eef3ef] hover:text-[#16745f]"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <FiEyeOff className="text-gray-400" />
-                  ) : (
-                    <FiEye className="text-gray-400" />
-                  )}
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
                 </button>
               </div>
             </div>
 
-            {/* Remember & Forgot */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
+            {/* Remember me */}
+            <div className="rounded-[1.15rem] border border-[#dfe7e1] bg-[#f8faf7] p-4">
+              <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
                   name="rememberMe"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  className="mt-0.5 h-4 w-4 rounded border-[#cbd6cf] text-[#16745f] focus:ring-[#8bcdbd]"
                 />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+
+                <span className="text-sm font-medium leading-6 text-[#63736c]">
+                  এই ডিভাইসে আমাকে মনে রাখুন
+                </span>
               </label>
-              <a
-                href="/forget-password"
-                className="text-sm text-green-600 hover:text-green-700"
-              >
-                Forgot password?
-              </a>
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ y: loading ? 0 : -2 }}
+              whileTap={{ scale: loading ? 1 : 0.99 }}
               type="submit"
               disabled={loading}
-              className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="group inline-flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#16745f] px-6 text-base font-extrabold text-white shadow-[0_15px_34px_rgba(22,116,95,0.24)] transition hover:bg-[#115f4e] disabled:cursor-not-allowed disabled:opacity-55"
             >
-              {loading ? "Signing In..." : "Sign In"}
+              {loading ? (
+                <>
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                  সাইন ইন হচ্ছে...
+                </>
+              ) : (
+                <>
+                  সাইন ইন করুন
+                  <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+                </>
+              )}
             </motion.button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{" "}
-              <a
-                href="/signup"
-                className="text-green-600 hover:text-green-700 font-medium inline-flex items-center"
+          <div className="mt-7 border-t border-[#ece5d8] pt-5 text-center">
+            <p className="text-sm text-[#71817b]">
+              অ্যাকাউন্ট নেই?{" "}
+              <Link
+                to="/signup"
+                className="inline-flex items-center gap-1 font-extrabold text-[#16745f] transition hover:text-[#115f4e]"
               >
-                Sign Up <FiUserPlus className="ml-1" />
-              </a>
+                নতুন অ্যাকাউন্ট তৈরি করুন
+                <FiUserPlus />
+              </Link>
             </p>
           </div>
-        </motion.div>
 
-        {/* Right Side - Illustration */}
-        <motion.div
-          className="w-full lg:w-2/5 bg-linear-to-br from-green-600 to-emerald-500 text-white p-8 md:p-12 flex flex-col justify-center relative"
-          initial={{ opacity: 0, x: -20 }}
+          <p className="mt-5 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-[#8a9691]">
+            <FiShield className="text-[#16745f]" />
+            আপনার লগইন তথ্য নিরাপদভাবে সংরক্ষিত থাকে
+          </p>
+        </section>
+
+        {/* Benefits */}
+        <motion.aside
+          initial={{ opacity: 0, x: 18 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.55, delay: 0.12 }}
+          className="relative hidden md:block order-1 overflow-hidden bg-[#263c35] p-6 text-white sm:p-8 lg:order-2 lg:p-10 xl:p-12"
         >
-          <div className="absolute top-6 left-6">
-            <div className="bg-white/20 backdrop-blur-sm rounded-full p-2">
-              <div className="w-12 h-12 bg-white/30 rounded-full flex items-center justify-center">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                  <FiBookOpen className="text-green-600 text-lg" />
-                </div>
+          <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-[#f7c969]/16" />
+          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#ef8f6d]/10" />
+          <div className="absolute right-10 top-1/2 h-40 w-40 rounded-full bg-[#8bcdbd]/10 blur-2xl" />
+
+          <div className="relative flex h-full flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#f7c969]">
+                  <FiBookOpen />
+                  Welcome Back
+                </span>
+
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#9de2c9]">
+                  <FiCheckCircle className="text-xl" />
+                </span>
+              </div>
+
+              <h2 className="mt-7 text-3xl font-extrabold leading-tight sm:text-4xl">
+                আপনার ইসলামিক শেখার যাত্রা আবার শুরু করুন
+              </h2>
+
+              <p className="mt-4 max-w-lg text-sm leading-7 text-white/68 sm:text-base">
+                যেখানে শেষ করেছিলেন সেখান থেকেই কোর্স চালিয়ে যান এবং আপনার শেখার
+                অগ্রগতি নিয়মিত অনুসরণ করুন।
+              </p>
+
+              <div className="mt-8 space-y-3">
+                {benefits.map((benefit, index) => {
+                  const Icon = benefit.icon;
+
+                  return (
+                    <motion.div
+                      key={benefit.title}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.4,
+                        delay: index * 0.09 + 0.25,
+                      }}
+                      className="flex items-start gap-3 rounded-[1.15rem] border border-white/10 bg-white/5.5 p-3.5 backdrop-blur"
+                    >
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-[#f7c969]">
+                        <Icon />
+                      </span>
+
+                      <div>
+                        <h3 className="text-sm font-extrabold text-white">
+                          {benefit.title}
+                        </h3>
+                        <p className="mt-1 text-xs leading-5 text-white/58">
+                          {benefit.text}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
-          </div>
 
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Welcome Back!</h2>
-            <p className="text-green-100 opacity-90">
-              Continue your Islamic learning journey with us
-            </p>
-          </div>
+            <div className="mt-8 border-t border-white/10 pt-6">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: "৪২+", label: "কোর্স" },
+                  { value: "১১৪+", label: "শিক্ষক" },
+                  { value: "১ লক্ষ+", label: "শিক্ষার্থী" },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-xl bg-white/[0.07] p-3 text-center"
+                  >
+                    <p className="text-lg font-extrabold text-[#f7c969]">
+                      {stat.value}
+                    </p>
+                    <p className="mt-1 text-[10px] font-semibold text-white/45">
+                      {stat.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
 
-          <div className="flex justify-center mb-8">
-            <div className="relative">
-              <div className="w-40 h-40 bg-white/20 rounded-full flex items-center justify-center">
-                <div className="w-28 h-28 bg-white/30 rounded-full flex items-center justify-center">
-                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-green-600 text-4xl">
-                    📖
+              <div className="mt-5 flex items-center justify-center">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((item) => (
+                    <div
+                      key={item}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#263c35] bg-linear-to-br from-[#6ab5a1] to-[#16745f] text-xs font-extrabold text-white"
+                    >
+                      {item}
+                    </div>
+                  ))}
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#263c35] bg-[#f7c969] text-[10px] font-extrabold text-[#263c35]">
+                    +2k
                   </div>
                 </div>
               </div>
-              <div className="absolute -bottom-2 -right-2 bg-white/90 text-green-600 rounded-full p-2 shadow-lg">
-                <div className="w-12 h-12 rounded-full bg-linear-to-r from-green-500 to-emerald-400 flex items-center justify-center">
-                  <span className="text-white font-bold">100%</span>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div className="space-y-4">
-            {[
-              { text: "Access your personalized dashboard", icon: "📊" },
-              { text: "Track your child's progress", icon: "📈" },
-              { text: "Continue where you left off", icon: "🎯" },
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 + 0.4 }}
-                className="flex items-center justify-center"
-              >
-                <span className="text-2xl mr-3">{feature.icon}</span>
-                <span className="text-green-100 text-sm">{feature.text}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="mt-10 pt-8 border-t border-green-400/30">
-            <div className="text-center">
-              <p className="text-green-100 text-sm">
-                Join thousands of parents using our platform
+              <p className="mt-3 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-white/45">
+                <FiUsers className="text-[#9de2c9]" />
+                হাজারো শিক্ষার্থীর বিশ্বস্ত লার্নিং প্ল্যাটফর্ম
               </p>
-              <div className="flex justify-center mt-3">
-                {[
-                  "https://i.pravatar.cc/150?img=32",
-                  "https://i.pravatar.cc/150?img=45",
-                  "https://i.pravatar.cc/150?img=12",
-                  "https://i.pravatar.cc/150?img=22",
-                ].map((src, index) => (
-                  <img
-                    key={index}
-                    src={src}
-                    alt="User"
-                    className="w-10 h-10 rounded-full border-2 border-white -ml-2 first:ml-0"
-                  />
-                ))}
-                <div className="w-10 h-10 rounded-full bg-green-500 border-2 border-white -ml-2 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">+2k</span>
-                </div>
-              </div>
             </div>
           </div>
-        </motion.div>
-      </div>
+        </motion.aside>
+      </motion.div>
     </div>
   );
 };

@@ -3,7 +3,18 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import { FiHelpCircle, FiBook, FiSend, FiCheckCircle } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiBook,
+  FiCheckCircle,
+  FiClock,
+  FiEdit3,
+  FiHelpCircle,
+  FiInfo,
+  FiSend,
+  FiShield,
+  FiUsers,
+} from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
 import { useNavigate } from "react-router";
@@ -39,7 +50,8 @@ const AskQuestion = () => {
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
-        placeholder: "Provide more context about your situation, age of children, specific challenges, etc.",
+        placeholder:
+          "Provide more context about your situation, age of children, specific challenges, etc.",
         modules: {
           toolbar: [["bold", "italic", "underline", "strike"], ["clean"]],
         },
@@ -76,227 +88,375 @@ const AskQuestion = () => {
     }
   };
 
+  const guidelines = [
+    "আপনার পরিস্থিতি ও প্রয়োজনীয় প্রেক্ষাপট পরিষ্কারভাবে লিখুন",
+    "প্রশ্নের ভাষা সংক্ষিপ্ত, সম্মানজনক ও নির্দিষ্ট রাখুন",
+    "একটি প্রশ্নে একটি মূল বিষয়কে প্রাধান্য দিন",
+    "ব্যক্তিগত বা সংবেদনশীল তথ্য প্রকাশ করা থেকে বিরত থাকুন",
+  ];
+
+  const tips = [
+    "ঘটনার বয়স, সময় বা প্রাসঙ্গিক অবস্থা উল্লেখ করুন",
+    "আপনি ইতোমধ্যে কী চেষ্টা করেছেন তা লিখতে পারেন",
+    "প্রয়োজনে নির্দিষ্ট ইসলামী বিধান বা দিকনির্দেশনা জানতে চান",
+  ];
+
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-green-50 text-gray-800 font-sans">
-      {/* Header */}
-      <div className="pt-24 bg-linear-to-r from-green-600 to-emerald-500 text-white py-12 px-6">
-        <div className="max-w-4xl mx-auto">
+    <div className="font-hind min-h-screen overflow-hidden bg-[#f8f5ed] text-[#263c35]">
+      {/* Compact Hero */}
+      <section className="relative overflow-hidden border-b border-[#e8dfce] pt-8">
+        <div className="absolute inset-0 bg-linear-to-br from-[#fffaf0] via-[#f4fbf7] to-[#edf7f4]" />
+        <div className="absolute -left-24 top-12 h-56 w-56 rounded-full bg-[#f6c85f]/18 blur-3xl" />
+        <div className="absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#9d8be8]/16 blur-3xl" />
+
+        <motion.div
+          className="absolute left-[7%] top-28 hidden h-12 w-12 rotate-12 items-center justify-center rounded-2xl bg-[#ffe8dd] text-[#df7650] shadow-sm md:flex"
+          animate={{ y: [0, -8, 0], rotate: [12, 18, 12] }}
+          transition={{ duration: 4, repeat: Infinity }}
+        >
+          <FiEdit3 className="text-xl" />
+        </motion.div>
+
+        <motion.div
+          className="absolute right-[8%] top-28 hidden h-11 w-11 -rotate-12 items-center justify-center rounded-full bg-[#e9e5ff] text-[#7865c9] shadow-sm lg:flex"
+          animate={{ y: [0, 9, 0], rotate: [-12, -5, -12] }}
+          transition={{ duration: 4.8, repeat: Infinity }}
+        >
+          <FiHelpCircle className="text-xl" />
+        </motion.div>
+
+        <div className="relative mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
+            transition={{ duration: 0.55 }}
+            className="mx-auto max-w-4xl text-center"
           >
-            <div className="bg-green-500/20 backdrop-blur-sm rounded-2xl p-4 inline-flex items-center mb-6">
-              <FiHelpCircle className="text-2xl mr-3" />
-              <span className="text-lg font-semibold">Ask a Question</span>
+            <button
+              type="button"
+              onClick={() => navigate("/qa")}
+              className="inline-flex items-center gap-2 rounded-full border border-[#d7e9e2] bg-white/80 px-3 py-1.5 text-xs font-bold text-[#16745f] shadow-sm backdrop-blur transition hover:bg-white"
+            >
+              <FiArrowLeft />
+              সব প্রশ্নে ফিরে যান
+            </button>
+
+            <div className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#16745f]">
+              <FiHelpCircle />
+              Ask a Question
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              Get Islamic Parenting Advice
+            <h1 className="mt-4 text-3xl font-extrabold leading-[1.18] text-[#263c35] sm:text-4xl lg:text-[3.1rem]">
+              আপনার প্রশ্নটি
+              <span className="relative ml-2 inline-block text-[#16745f]">
+                আলেমদের কাছে পাঠান
+                <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
+              </span>
             </h1>
-            <p className="text-green-100 text-lg max-w-2xl mx-auto">
-              Share your parenting questions and get guidance from our community
-              of experienced parents and Islamic scholars.
+
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#687a73] sm:text-base">
+              ইসলাম, পরিবার, শিক্ষা ও দৈনন্দিন জীবনের বিষয়ে আপনার প্রশ্ন
+              বিস্তারিতভাবে লিখুন। যাচাইয়ের পর উত্তর প্রকাশ করা হবে।
             </p>
           </motion.div>
         </div>
-      </div>
+      </section>
 
-      {/* Question Form */}
-      <section className="py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-10">
+      {/* Form Section */}
+      <section className="py-7 sm:py-9">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_310px]">
             {/* Main Form */}
-            <div className="lg:w-2/3">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden"
-              >
-                <div className="p-8">
-                  <form onSubmit={handleSubmit}>
-                    {/* Category Selection */}
-                    <div className="mb-8">
-                      <label className="flex items-center text-lg font-bold text-gray-800 mb-4">
-                        <FiBook className="mr-2 text-green-600" />
-                        Select Category
-                      </label>
-                      {loading ? (
-                        <div className="text-center py-4">
-                          <p className="text-gray-500">Loading categories...</p>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                          {categories.map((category) => (
+            <motion.main
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="min-w-0"
+            >
+              <div className="overflow-hidden rounded-[1.7rem] border border-[#e5ded0] bg-white shadow-[0_18px_50px_rgba(45,75,65,0.08)]">
+                <div className="border-b border-[#eee8dc] bg-[#fffdf8] px-5 py-4 sm:px-7 sm:py-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#fff0e8] text-[#d9704b]">
+                      <FiEdit3 className="text-xl" />
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d9704b]">
+                        Question Form
+                      </p>
+                      <h2 className="mt-1 text-xl font-extrabold text-[#263c35] sm:text-2xl">
+                        প্রশ্নের তথ্য পূরণ করুন
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-5 sm:p-7 lg:p-8">
+                  {/* Category Selection */}
+                  <div>
+                    <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <label className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg">
+                          <FiBook className="text-[#16745f]" />
+                          ক্যাটাগরি নির্বাচন করুন
+                        </label>
+                        <p className="mt-1 text-xs leading-5 text-[#7b8983] sm:text-sm">
+                          প্রশ্নের সঙ্গে সবচেয়ে প্রাসঙ্গিক একটি বিষয় বেছে নিন।
+                        </p>
+                      </div>
+
+                      {selectedCategory && (
+                        <span className="w-fit rounded-full bg-[#e5f4ee] px-3 py-1 text-xs font-bold text-[#16745f]">
+                          নির্বাচিত
+                        </span>
+                      )}
+                    </div>
+
+                    {loading ? (
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        {Array.from({ length: 6 }).map((_, index) => (
+                          <div
+                            key={index}
+                            className="h-12 animate-pulse rounded-xl bg-[#f0f2ed]"
+                          />
+                        ))}
+                      </div>
+                    ) : categories.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+                        {categories.map((category) => {
+                          const isSelected = selectedCategory === category._id;
+
+                          return (
                             <motion.button
                               key={category._id}
                               type="button"
-                              whileHover={{ scale: 1.02 }}
+                              whileHover={{ y: -2 }}
                               whileTap={{ scale: 0.98 }}
                               onClick={() => setSelectedCategory(category._id)}
-                              className={`p-2 rounded-xl border-2 transition-all ${
-                                selectedCategory === category._id
-                                  ? "border-green-500 bg-green-50 text-green-700"
-                                  : "border-gray-200 hover:border-green-300 hover:bg-green-25"
-                              } cursor-pointer`}
+                              className={`group flex min-h-12 items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition ${
+                                isSelected
+                                  ? "border-[#16745f] bg-[#eaf6f1] text-[#16745f] shadow-[0_8px_20px_rgba(22,116,95,0.10)]"
+                                  : "border-[#e0e5e0] bg-[#fafbf8] text-[#53665e] hover:border-[#8bcdbd] hover:bg-[#f2f9f6] hover:text-[#16745f]"
+                              }`}
                             >
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium">
-                                  {category.name}
-                                </span>
-                                {selectedCategory === category._id && (
-                                  <FiCheckCircle className="text-green-500" />
-                                )}
-                              </div>
+                              <span className="line-clamp-2">
+                                {category.name}
+                              </span>
+
+                              <span
+                                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition ${
+                                  isSelected
+                                    ? "bg-[#16745f] text-white"
+                                    : "bg-[#edf1ee] text-[#9aa6a1] group-hover:bg-[#dff0e9] group-hover:text-[#16745f]"
+                                }`}
+                              >
+                                <FiCheckCircle className="text-sm" />
+                              </span>
                             </motion.button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Question Input */}
-                    <div className="mb-8">
-                      <label className="block text-lg font-bold text-gray-800 mb-4">
-                        Your Question
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="What would you like to ask about?"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent text-lg"
-                        maxLength={200}
-                      />
-                      <div className="text-right text-sm text-gray-500 mt-2">
-                        {title.length}/200 characters
+                          );
+                        })}
                       </div>
-                    </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-[#d9dfda] bg-[#fafbf8] p-5 text-center text-sm text-[#71817b]">
+                        কোনো ক্যাটাগরি পাওয়া যায়নি।
+                      </div>
+                    )}
+                  </div>
 
-                    {/* Description */}
-                    <div className="mb-8">
-                      <label className="block text-lg font-bold text-gray-800 mb-4">
-                        Question Details
+                  {/* Question Title */}
+                  <div className="mt-7">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <label
+                        htmlFor="question-title"
+                        className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg"
+                      >
+                        <FiHelpCircle className="text-[#d9704b]" />
+                        আপনার প্রশ্ন
                       </label>
-                      <div
-                        ref={editorRef}
-                        className="bg-gray-100 rounded-xl min-h-75 p-3"
-                      ></div>
+
+                      <span
+                        className={`text-xs font-bold ${
+                          title.length >= 180
+                            ? "text-[#d9704b]"
+                            : "text-[#8b9893]"
+                        }`}
+                      >
+                        {title.length}/200
+                      </span>
                     </div>
 
-                    {/* Submit Button */}
-                    <motion.button
-                      type="submit"
-                      disabled={submitting}
-                      whileHover={{ scale: submitting ? 1 : 1.02 }}
-                      whileTap={{ scale: submitting ? 1 : 0.98 }}
-                      className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
-                    >
-                      {submitting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                          Submitting...
-                        </>
-                      ) : (
-                        <>
-                          <FiSend className="mr-2" />
-                          Submit Question
-                        </>
-                      )}
-                    </motion.button>
-                  </form>
-                </div>
-              </motion.div>
-            </div>
+                    <input
+                      id="question-title"
+                      type="text"
+                      placeholder="সংক্ষেপে আপনার মূল প্রশ্নটি লিখুন..."
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-[#fafbf8] px-4 text-base font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:bg-white focus:ring-4 focus:ring-[#8bcdbd]/15"
+                      maxLength={200}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div className="mt-7">
+                    <div className="mb-3">
+                      <label className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg">
+                        <FiEdit3 className="text-[#7865c9]" />
+                        প্রশ্নের বিস্তারিত
+                      </label>
+                      <p className="mt-1 text-xs leading-5 text-[#7b8983] sm:text-sm">
+                        প্রয়োজনীয় ঘটনা, সময়, বয়স বা প্রেক্ষাপট যুক্ত করলে উত্তর
+                        দেওয়া সহজ হবে।
+                      </p>
+                    </div>
+
+                    <div className="overflow-hidden rounded-[1.25rem] border border-[#dfe5e0] bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] [&_.ql-container.ql-snow]:min-h-64 [&_.ql-container.ql-snow]:border-0 [&_.ql-editor]:min-h-64 [&_.ql-editor]:p-4 [&_.ql-editor]:text-base [&_.ql-editor]:leading-8 [&_.ql-editor]:text-[#52645d] [&_.ql-editor.ql-blank:before]:left-4 [&_.ql-editor.ql-blank:before]:right-4 [&_.ql-editor.ql-blank:before]:text-[#9ba6a2] [&_.ql-toolbar.ql-snow]:border-0 [&_.ql-toolbar.ql-snow]:border-b [&_.ql-toolbar.ql-snow]:border-[#e6ebe7] [&_.ql-toolbar.ql-snow]:bg-[#f8faf7]">
+                      <div ref={editorRef} />
+                    </div>
+                  </div>
+
+                  {/* Notice */}
+                  <div className="mt-6 flex items-start gap-3 rounded-[1.15rem] border border-[#f0dfba] bg-[#fff9eb] p-4">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#f7c969]/25 text-[#b27b16]">
+                      <FiInfo />
+                    </div>
+                    <p className="text-xs leading-6 text-[#78694b] sm:text-sm">
+                      প্রশ্নটি সরাসরি প্রকাশ নাও হতে পারে। প্রয়োজনীয় যাচাই ও
+                      অনুমোদনের পর প্রশ্ন এবং উত্তর প্ল্যাটফর্মে প্রদর্শিত হবে।
+                    </p>
+                  </div>
+
+                  {/* Submit Button */}
+                  <motion.button
+                    type="submit"
+                    disabled={submitting}
+                    whileHover={{ y: submitting ? 0 : -2 }}
+                    whileTap={{ scale: submitting ? 1 : 0.99 }}
+                    className="mt-6 inline-flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#16745f] px-6 text-base font-extrabold text-white shadow-[0_14px_30px_rgba(22,116,95,0.22)] transition hover:bg-[#115f4e] disabled:cursor-not-allowed disabled:opacity-55"
+                  >
+                    {submitting ? (
+                      <>
+                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                        প্রশ্ন পাঠানো হচ্ছে...
+                      </>
+                    ) : (
+                      <>
+                        <FiSend />
+                        প্রশ্ন জমা দিন
+                      </>
+                    )}
+                  </motion.button>
+                </form>
+              </div>
+            </motion.main>
 
             {/* Sidebar */}
-            <div className="lg:w-1/3">
-              {/* Guidelines */}
-              <motion.div
-                className="bg-white rounded-2xl shadow-lg p-6 mb-8"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                  <FiCheckCircle className="mr-2 text-green-600" />
-                  Question Guidelines
-                </h3>
-                <ul className="space-y-3 text-sm text-gray-600">
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
-                    <span>
-                      Be specific about your situation and child's age
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
-                    <span>Focus on Islamic parenting principles</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
-                    <span>Be respectful in your wording</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-3 shrink-0"></div>
-                    <span>Include relevant context for better advice</span>
-                  </li>
-                </ul>
-              </motion.div>
+            <aside className="space-y-5">
+              <div className="space-y-5 lg:sticky lg:top-24">
+                <motion.div
+                  initial={{ opacity: 0, x: 18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.12 }}
+                  className="rounded-[1.55rem] border border-[#e5ded0] bg-white p-5 shadow-[0_14px_40px_rgba(45,75,65,0.07)]"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8b77ce]">
+                        Guidelines
+                      </p>
+                      <h3 className="mt-1 text-lg font-extrabold text-[#263c35]">
+                        প্রশ্ন করার নির্দেশনা
+                      </h3>
+                    </div>
 
-              {/* Tips */}
-              <motion.div
-                className="bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg p-6 mb-8"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                <h3 className="text-lg font-bold mb-4">
-                  Tips for Good Questions
-                </h3>
-                <div className="space-y-3 text-green-100 text-sm">
-                  <div className="flex items-start">
-                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
-                    <span>
-                      Mention your child's age for age-appropriate advice
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eeeafd] text-[#7865c9]">
+                      <FiShield />
                     </span>
                   </div>
-                  <div className="flex items-start">
-                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
-                    <span>Describe what you've already tried</span>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="w-2 h-2 bg-white rounded-full mt-1.5 mr-3 shrink-0"></div>
-                    <span>Ask about specific Islamic rulings if needed</span>
-                  </div>
-                </div>
-              </motion.div>
 
-              {/* Response Time */}
-              <motion.div
-                className="bg-white rounded-2xl shadow-lg p-6"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                <h3 className="text-lg font-bold text-gray-800 mb-2">
-                  Response Time
-                </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Our community typically responds within 24-48 hours. Urgent
-                  questions may receive faster responses.
-                </p>
-                <div className="bg-green-50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    24-48h
+                  <ul className="mt-5 space-y-3.5">
+                    {guidelines.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-3 text-sm leading-6 text-[#63736c]"
+                      >
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e5f4ee] text-[#16745f]">
+                          <FiCheckCircle className="text-xs" />
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.22 }}
+                  className="relative overflow-hidden rounded-[1.55rem] bg-[#263c35] p-6 text-white shadow-[0_18px_45px_rgba(38,60,53,0.20)]"
+                >
+                  <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#f7c969]/18" />
+                  <div className="absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-[#ef8f6d]/12" />
+
+                  <div className="relative">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#f7c969]">
+                      <FiUsers className="text-xl" />
+                    </div>
+
+                    <h3 className="mt-5 text-xl font-extrabold">
+                      ভালো প্রশ্নের কিছু টিপস
+                    </h3>
+
+                    <div className="mt-4 space-y-3">
+                      {tips.map((item) => (
+                        <div
+                          key={item}
+                          className="flex items-start gap-3 text-sm leading-6 text-white/75"
+                        >
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#f7c969]" />
+                          {item}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-sm text-green-700">
-                    Average response time
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.32 }}
+                  className="rounded-[1.55rem] border border-[#e5ded0] bg-white p-5 shadow-[0_14px_40px_rgba(45,75,65,0.07)]"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff0e8] text-[#d9704b]">
+                      <FiClock />
+                    </span>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d9704b]">
+                        Response Time
+                      </p>
+                      <h3 className="mt-1 font-extrabold text-[#263c35]">
+                        সম্ভাব্য উত্তর দেওয়ার সময়
+                      </h3>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            </div>
+
+                  <div className="mt-4 rounded-[1.15rem] bg-[#f8faf7] p-4 text-center">
+                    <div className="text-3xl font-extrabold text-[#16745f]">
+                      24–48h
+                    </div>
+                    <p className="mt-1 text-xs font-semibold text-[#71817b]">
+                      গড় প্রতিক্রিয়ার সময়
+                    </p>
+                  </div>
+
+                  <p className="mt-3 text-xs leading-6 text-[#7b8983]">
+                    প্রশ্নের ধরন ও যাচাইয়ের প্রয়োজন অনুযায়ী উত্তর পেতে কিছুটা
+                    বেশি সময় লাগতে পারে।
+                  </p>
+                </motion.div>
+              </div>
+            </aside>
           </div>
         </div>
       </section>

@@ -1,23 +1,24 @@
 // eslint-disable-next-line no-unused-vars
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  FiUser,
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiCalendar,
-  FiEdit3,
-  FiSave,
   FiArrowLeft,
-  FiLock,
-  FiBookOpen,
+  FiArrowRight,
   FiBarChart2,
-  FiUpload,
-  FiX,
+  FiBookOpen,
+  FiCalendar,
   FiCheckCircle,
   FiClock,
-  FiShield,
+  FiEdit3,
+  FiLock,
   FiLogOut,
+  FiMail,
+  FiMapPin,
+  FiPhone,
+  FiSave,
+  FiShield,
+  FiUpload,
+  FiUser,
+  FiX,
 } from "react-icons/fi";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router";
@@ -51,7 +52,7 @@ const Profile = () => {
 
       const [userRes, enrollmentRes] = await Promise.all([
         api.get(`/auth/${user._id}`),
-        api.get(`/enrollments/my-enrollments`),
+        api.get("/enrollments/my-enrollments"),
       ]);
 
       if (userRes.data.success) {
@@ -103,10 +104,12 @@ const Profile = () => {
 
   const averageProgress = useMemo(() => {
     if (!completedEnrollments.length) return 0;
+
     const total = completedEnrollments.reduce(
       (sum, item) => sum + (item.progress || 0),
       0,
     );
+
     return Math.round(total / completedEnrollments.length);
   }, [completedEnrollments]);
 
@@ -115,16 +118,22 @@ const Profile = () => {
       label: "মোট Enrollment",
       value: enrollments.length,
       icon: FiBookOpen,
+      iconBg: "bg-[#fff0e8]",
+      iconText: "text-[#d9704b]",
     },
     {
       label: "Approved Courses",
       value: completedEnrollments.length,
       icon: FiCheckCircle,
+      iconBg: "bg-[#e5f4ee]",
+      iconText: "text-[#16745f]",
     },
     {
       label: "Average Progress",
       value: `${averageProgress}%`,
       icon: FiBarChart2,
+      iconBg: "bg-[#eeeafd]",
+      iconText: "text-[#6e5bb4]",
     },
   ];
 
@@ -134,7 +143,7 @@ const Profile = () => {
       toast.success("সফলভাবে লগ আউট হয়েছে");
       navigate("/login");
     } catch (error) {
-      console.log(error);      
+      console.log(error);
       toast.error("লগ আউট করতে সমস্যা হয়েছে");
     }
   };
@@ -207,6 +216,7 @@ const Profile = () => {
 
         if (updatedUser) {
           localStorage.setItem("user", JSON.stringify(updatedUser));
+
           if (setUser) {
             setUser(updatedUser);
           }
@@ -236,580 +246,765 @@ const Profile = () => {
 
   const getStatusBadge = (status) => {
     if (status === "completed") {
-      return "bg-green-100 text-green-700";
+      return "border-[#cfe6dc] bg-[#edf8f3] text-[#16745f]";
     }
+
     if (status === "pending") {
-      return "bg-yellow-100 text-yellow-700";
+      return "border-[#efe0b8] bg-[#fffaf0] text-[#a87318]";
     }
+
     if (status === "cancelled") {
-      return "bg-red-100 text-red-700";
+      return "border-[#f1d8ce] bg-[#fff7f2] text-[#c6573a]";
     }
-    return "bg-gray-100 text-gray-700";
+
+    return "border-[#e3e8e4] bg-[#f5f7f5] text-[#6d7b75]";
   };
 
   if (pageLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-emerald-50 via-white to-green-50 flex items-center justify-center pt-20 px-4">
-        <div className="text-center">
-          <div className="h-12 w-12 mx-auto rounded-full border-b-2 border-green-600 animate-spin"></div>
-          <p className="mt-4 text-gray-600">প্রোফাইল লোড হচ্ছে...</p>
-        </div>
+      <div className="font-hind min-h-screen bg-[#f8f5ed] flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-sm rounded-4xl border border-[#e6dfcf] bg-white p-8 text-center shadow-[0_20px_60px_rgba(45,75,65,0.10)]"
+        >
+          <div className="relative mx-auto mb-5 h-16 w-16">
+            <motion.div
+              className="absolute inset-0 rounded-full border-4 border-[#dcebe4]"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-r-[#16745f] border-t-[#16745f]" />
+            </motion.div>
+
+            <div className="absolute inset-3 flex items-center justify-center rounded-full bg-[#eef8f4]">
+              <FiUser className="text-xl text-[#16745f]" />
+            </div>
+          </div>
+
+          <h3 className="text-xl font-extrabold text-[#263c35]">
+            প্রোফাইল লোড হচ্ছে
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-[#6d7c76]">
+            আপনার অ্যাকাউন্ট ও কোর্সের তথ্য প্রস্তুত করা হচ্ছে।
+          </p>
+        </motion.div>
       </div>
     );
   }
 
   if (!userData) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-emerald-50 via-white to-green-50 flex items-center justify-center pt-20 px-4">
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8 text-center">
-          <p className="text-lg font-semibold text-gray-700">
-            Profile data not found
+      <div className="font-hind min-h-screen bg-[#f8f5ed] flex items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-4xl border border-[#e6dfcf] bg-white p-8 text-center shadow-[0_20px_60px_rgba(45,75,65,0.10)]">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#fff0e8] text-[#d9704b]">
+            <FiUser className="text-2xl" />
+          </div>
+          <h2 className="mt-4 text-xl font-extrabold text-[#263c35]">
+            প্রোফাইল তথ্য পাওয়া যায়নি
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[#71817b]">
+            পুনরায় লগইন করে চেষ্টা করুন অথবা সাপোর্টের সঙ্গে যোগাযোগ করুন।
           </p>
+          <Link
+            to="/login"
+            className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 text-sm font-extrabold text-white"
+          >
+            সাইন ইন করুন
+            <FiArrowRight />
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-emerald-50 via-white to-green-50 text-gray-800 py-6 px-3 sm:px-4 pt-20">
-      <div className="max-w-7xl mx-auto">
+    <div className="font-hind min-h-screen overflow-hidden bg-[#f8f5ed] text-[#263c35]">
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-[#e8dfce] pt-8">
+        <div className="absolute inset-0 bg-linear-to-br from-[#fffaf0] via-[#f4fbf7] to-[#edf7f4]" />
+        <div className="absolute -left-24 top-10 h-56 w-56 rounded-full bg-[#f6c85f]/18 blur-3xl" />
+        <div className="absolute -right-20 top-6 h-64 w-64 rounded-full bg-[#9d8be8]/16 blur-3xl" />
+
         <motion.div
-          initial={{ opacity: 0, y: -14 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          className="absolute left-[7%] top-28 hidden h-12 w-12 rotate-12 items-center justify-center rounded-2xl bg-[#ffe8dd] text-[#df7650] shadow-sm md:flex"
+          animate={{ y: [0, -8, 0], rotate: [12, 18, 12] }}
+          transition={{ duration: 4, repeat: Infinity }}
         >
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center text-green-600 hover:text-green-700 transition text-sm sm:text-base"
-            >
-              <FiArrowLeft className="mr-1" />
-              Back
-            </button>
-
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">প্রোফাইল</h1>
-              <p className="text-gray-500 text-sm">
-                আপনার তথ্য ও কোর্স স্ট্যাটাস
-              </p>
-            </div>
-          </div>
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleEditToggle}
-            disabled={loading}
-            className={`flex items-center justify-center px-5 py-3 rounded-2xl font-semibold transition w-full sm:w-auto ${
-              isEditing
-                ? "bg-green-600 hover:bg-green-700 text-white"
-                : "bg-white border border-green-600 text-green-700 hover:bg-green-50"
-            } ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
-          >
-            {loading ? (
-              <>
-                <div className="h-4 w-4 rounded-full border-b-2 border-white animate-spin mr-2"></div>
-                Saving...
-              </>
-            ) : isEditing ? (
-              <>
-                <FiSave className="mr-2" />
-                Save Changes
-              </>
-            ) : (
-              <>
-                <FiEdit3 className="mr-2" />
-                Edit Profile
-              </>
-            )}
-          </motion.button>
+          <FiUser className="text-xl" />
         </motion.div>
 
-        <div className="grid lg:grid-cols-12 gap-6 lg:gap-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-4"
-          >
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-green-100">
-              <div className="bg-linear-to-br from-green-700 to-emerald-500 text-white p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+        <motion.div
+          className="absolute right-[8%] top-28 hidden h-11 w-11 -rotate-12 items-center justify-center rounded-full bg-[#e9e5ff] text-[#7865c9] shadow-sm lg:flex"
+          animate={{ y: [0, 9, 0], rotate: [-12, -5, -12] }}
+          transition={{ duration: 4.8, repeat: Infinity }}
+        >
+          <FiShield className="text-xl" />
+        </motion.div>
+
+        <div className="relative mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55 }}
+            >
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#16745f]">
+                <FiUser />
+                My Profile
+              </div>
+
+              <h1 className="mt-4 text-3xl font-extrabold leading-[1.18] text-[#263c35] sm:text-4xl lg:text-[3.05rem]">
+                আপনার অ্যাকাউন্ট
+                <span className="relative ml-2 inline-block text-[#16745f]">
+                  ও শেখার অগ্রগতি
+                  <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
+                </span>
+              </h1>
+
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[#687a73] sm:text-base">
+                ব্যক্তিগত তথ্য, প্রোফাইল ছবি, কোর্স enrollment এবং learning
+                progress এক জায়গা থেকে পরিচালনা করুন।
+              </p>
+            </motion.div>
+
+            <motion.button
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.12 }}
+              whileHover={{ y: loading ? 0 : -2 }}
+              whileTap={{ scale: loading ? 1 : 0.99 }}
+              type="button"
+              onClick={handleEditToggle}
+              disabled={loading}
+              className={`inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-extrabold transition disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto ${
+                isEditing
+                  ? "bg-[#16745f] text-white shadow-[0_14px_30px_rgba(22,116,95,0.22)] hover:bg-[#115f4e]"
+                  : "border border-[#cfe2d9] bg-white text-[#16745f] shadow-sm hover:border-[#8bcdbd] hover:bg-[#f1f8f5]"
+              }`}
+            >
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current" />
+                  সংরক্ষণ হচ্ছে...
+                </>
+              ) : isEditing ? (
+                <>
+                  <FiSave />
+                  পরিবর্তন সংরক্ষণ করুন
+                </>
+              ) : (
+                <>
+                  <FiEdit3 />
+                  প্রোফাইল এডিট করুন
+                </>
+              )}
+            </motion.button>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-7 sm:py-9">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+            {/* Profile sidebar */}
+            <motion.aside
+              initial={{ opacity: 0, x: -18 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-5"
+            >
+              <div className="overflow-hidden rounded-[1.7rem] border border-[#e5ded0] bg-white shadow-[0_18px_50px_rgba(45,75,65,0.08)]">
+                <div className="relative overflow-hidden bg-[#263c35] p-6 text-white">
+                  <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#f7c969]/16" />
+                  <div className="absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-[#ef8f6d]/10" />
+
                   <div className="relative">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-white/20 bg-white/10">
-                      {previewImage ? (
-                        <img
-                          src={previewImage}
-                          alt="Profile"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <FiUser className="text-white text-4xl" />
+                    <div className="flex flex-col items-center text-center">
+                      <div className="relative">
+                        <div className="h-28 w-28 overflow-hidden rounded-4xl border-4 border-white/15 bg-white/10 shadow-[0_14px_35px_rgba(0,0,0,0.18)]">
+                          {previewImage ? (
+                            <img
+                              src={previewImage}
+                              alt="Profile"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <FiUser className="text-4xl text-white/85" />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    {isEditing && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="absolute bottom-0 right-0 w-8 h-8 bg-green-500 hover:bg-green-600 rounded-full border-2 border-white flex items-center justify-center"
-                        >
-                          <FiUpload className="text-white text-xs" />
-                        </button>
+                        {isEditing && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#263c35] bg-[#f7c969] text-[#263c35] shadow-lg transition hover:scale-105"
+                              aria-label="Upload profile photo"
+                            >
+                              <FiUpload />
+                            </button>
 
-                        {selectedFile && (
-                          <button
-                            type="button"
-                            onClick={handleRemoveImage}
-                            className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center"
-                          >
-                            <FiX className="text-white text-xs" />
-                          </button>
+                            {selectedFile && (
+                              <button
+                                type="button"
+                                onClick={handleRemoveImage}
+                                className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#d96343] text-white shadow-lg transition hover:bg-[#bd4f32]"
+                                aria-label="Remove selected profile photo"
+                              >
+                                <FiX />
+                              </button>
+                            )}
+
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileSelect}
+                              className="hidden"
+                            />
+                          </>
+                        )}
+                      </div>
+
+                      <div className="mt-5 w-full">
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={editData.name}
+                            onChange={(e) =>
+                              handleInputChange("name", e.target.value)
+                            }
+                            className="h-11 w-full rounded-xl border border-white/15 bg-white/10 px-3 text-center text-lg font-extrabold text-white outline-none transition placeholder:text-white/45 focus:border-white/35 focus:bg-white/15"
+                            placeholder="আপনার নাম লিখুন"
+                          />
+                        ) : (
+                          <h2 className="text-2xl font-extrabold">
+                            {userData.name || "User"}
+                          </h2>
                         )}
 
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileSelect}
-                          className="hidden"
-                        />
-                      </>
-                    )}
+                        <div className="mt-3 flex flex-wrap justify-center gap-2">
+                          <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold capitalize text-white/75">
+                            {userData.role || "student"}
+                          </span>
+
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-extrabold ${
+                              userData.verified
+                                ? "bg-[#9de2c9]/16 text-[#b8ebd9]"
+                                : "bg-[#f7c969]/15 text-[#f8d77f]"
+                            }`}
+                          >
+                            {userData.verified && <FiCheckCircle />}
+                            {userData.verified ? "Verified" : "Not Verified"}
+                          </span>
+                        </div>
+
+                        <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-white/50">
+                          <FiCalendar />
+                          Joined {formattedDate}
+                        </p>
+                      </div>
+                    </div>
                   </div>
+                </div>
 
-                  <div className="flex-1 w-full">
-                    <h2 className="text-xl sm:text-2xl font-bold mb-1">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={editData.name}
-                          onChange={(e) =>
-                            handleInputChange("name", e.target.value)
-                          }
-                          className="w-full bg-white/20 rounded-lg px-3 py-2 text-white placeholder-white/80 focus:outline-none focus:ring-2 focus:ring-white/40"
-                          placeholder="আপনার নাম লিখুন"
-                        />
-                      ) : (
-                        userData.name || "User"
-                      )}
-                    </h2>
+                <div className="p-5">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 rounded-xl bg-[#f8faf7] p-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e5f4ee] text-[#16745f]">
+                        <FiMail />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
+                          Email
+                        </p>
+                        <p className="mt-1 break-all text-sm font-extrabold text-[#40554d]">
+                          {userData.email || "-"}
+                        </p>
+                      </div>
+                    </div>
 
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="px-3 py-1 rounded-full bg-white/20 text-xs sm:text-sm capitalize">
-                        {userData.role || "student"}
+                    <div className="flex items-start gap-3 rounded-xl bg-[#f8faf7] p-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#fff0e8] text-[#d9704b]">
+                        <FiPhone />
+                      </span>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
+                          Phone
+                        </p>
+                        <p className="mt-1 text-sm font-extrabold text-[#40554d]">
+                          {userData.phone || "-"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 rounded-xl bg-[#f8faf7] p-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#eeeafd] text-[#7865c9]">
+                        <FiMapPin />
                       </span>
 
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs sm:text-sm ${
-                          userData.verified
-                            ? "bg-green-200 text-green-800"
-                            : "bg-yellow-200 text-yellow-800"
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
+                          Address
+                        </p>
+
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={editData.address}
+                            onChange={(e) =>
+                              handleInputChange("address", e.target.value)
+                            }
+                            className="mt-1 h-10 w-full rounded-lg border border-[#dfe5e0] bg-white px-3 text-sm font-medium text-[#263c35] outline-none transition focus:border-[#8bcdbd] focus:ring-3 focus:ring-[#8bcdbd]/15"
+                            placeholder="আপনার ঠিকানা লিখুন"
+                          />
+                        ) : (
+                          <p className="mt-1 text-sm font-extrabold text-[#40554d]">
+                            {userData.address || "-"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-[#dfe7e1] bg-[#f8faf7] p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
+                        Account
+                      </p>
+                      <p
+                        className={`mt-1 text-sm font-extrabold ${
+                          userData.isBanned
+                            ? "text-[#c6573a]"
+                            : "text-[#16745f]"
                         }`}
                       >
-                        {userData.verified ? "Verified ✔" : "Not Verified"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center text-green-100 text-sm mt-3">
-                      <FiCalendar className="mr-1" />
-                      <span>Joined {formattedDate}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-5 sm:p-6 space-y-5">
-                <div className="flex items-center">
-                  <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center mr-4 shrink-0">
-                    <FiMail className="text-green-600 text-lg" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm text-gray-500">ইমেইল</p>
-                    <p className="font-medium break-all">
-                      {userData.email || "-"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <div className="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center mr-4 shrink-0">
-                    <FiPhone className="text-blue-600 text-lg" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">ফোন নাম্বার</p>
-                    <p className="font-medium">{userData.phone || "-"}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center mr-4 shrink-0">
-                    <FiMapPin className="text-purple-600 text-lg" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-500">ঠিকানা</p>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editData.address}
-                        onChange={(e) =>
-                          handleInputChange("address", e.target.value)
-                        }
-                        className="w-full mt-1 bg-gray-50 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-300"
-                        placeholder="আপনার ঠিকানা লিখুন"
-                      />
-                    ) : (
-                      <p className="font-medium">{userData.address || "-"}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div className="rounded-2xl bg-gray-50 p-4">
-                    <p className="text-xs text-gray-500 mb-1">Account Status</p>
-                    <p
-                      className={`font-semibold ${
-                        userData.isBanned ? "text-red-600" : "text-green-600"
-                      }`}
-                    >
-                      {userData.isBanned ? "Banned" : "Active"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-gray-50 p-4">
-                    <p className="text-xs text-gray-500 mb-1">
-                      Pending Request
-                    </p>
-                    <p className="font-semibold text-yellow-600">
-                      {pendingEnrollments.length}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 pt-2">
-                  <Link
-                    to="/change-password"
-                    className="w-full flex items-center justify-center py-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition"
-                  >
-                    <FiLock className="mr-2 text-gray-600" />
-                    <span className="text-gray-700 font-medium">
-                      পাসওয়ার্ড পরিবর্তন করুন
-                    </span>
-                  </Link>
-
-                  <button
-                    onClick={handleLogOut}
-                    className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-medium transition flex items-center justify-center"
-                  >
-                    <FiLogOut className="mr-2" />
-                    লগ আউট করুন
-                  </button>
-                </div>
-
-                <p className="text-xs text-gray-400 text-center pt-2">
-                  “Seek knowledge from cradle to grave.” 📖
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-8"
-          >
-            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: index * 0.08 }}
-                  className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-500 text-sm">{stat.label}</p>
-                      <p className="text-2xl font-bold text-green-700 mt-2">
-                        {stat.value}
+                        {userData.isBanned ? "Banned" : "Active"}
                       </p>
                     </div>
-                    <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center">
-                      <stat.icon className="text-green-700 text-xl" />
+
+                    <div className="rounded-xl border border-[#eee5cb] bg-[#fffaf0] p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
+                        Pending
+                      </p>
+                      <p className="mt-1 text-sm font-extrabold text-[#a87318]">
+                        {pendingEnrollments.length}
+                      </p>
                     </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
 
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-green-100">
-              <div className="border-b border-gray-200">
-                <nav className="flex">
-                  {[
-                    { id: "courses", label: "আমার কোর্সসমূহ" },
-                    { id: "account", label: "অ্যাকাউন্ট তথ্য" },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex-1 py-4 px-4 sm:px-6 text-center font-medium transition text-sm sm:text-base ${
-                        activeTab === tab.id
-                          ? "text-green-600 border-b-2 border-green-600"
-                          : "text-gray-500 hover:text-gray-700"
-                      }`}
+                  <div className="mt-4 space-y-2.5 border-t border-[#eee8dc] pt-4">
+                    <Link
+                      to="/change-password"
+                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#dfe5e0] bg-white text-sm font-extrabold text-[#53665e] transition hover:border-[#8bcdbd] hover:bg-[#f1f8f5] hover:text-[#16745f]"
                     >
-                      {tab.label}
+                      <FiLock />
+                      পাসওয়ার্ড পরিবর্তন করুন
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={handleLogOut}
+                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#f1d8ce] bg-[#fff7f2] text-sm font-extrabold text-[#c6573a] transition hover:bg-[#fff0e9]"
+                    >
+                      <FiLogOut />
+                      লগ আউট করুন
                     </button>
-                  ))}
-                </nav>
+                  </div>
+                </div>
+              </div>
+            </motion.aside>
+
+            {/* Main area */}
+            <motion.main
+              initial={{ opacity: 0, x: 18 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.08 }}
+              className="min-w-0"
+            >
+              {/* Stats */}
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {stats.map((stat, index) => {
+                  const StatIcon = stat.icon;
+
+                  return (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, delay: index * 0.08 }}
+                      whileHover={{ y: -3 }}
+                      className="rounded-[1.45rem] border border-[#e5ded0] bg-white p-5 shadow-[0_12px_34px_rgba(45,75,65,0.07)] transition hover:shadow-[0_18px_42px_rgba(45,75,65,0.11)]"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-bold text-[#7c8984]">
+                            {stat.label}
+                          </p>
+                          <p className="mt-2 text-3xl font-extrabold text-[#263c35]">
+                            {stat.value}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${stat.iconBg} ${stat.iconText}`}
+                        >
+                          <StatIcon className="text-xl" />
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
 
-              <div className="p-4 sm:p-6">
-                {activeTab === "courses" && (
-                  <div>
-                    <div className="flex items-center justify-between mb-5">
-                      <div>
-                        <h3 className="text-xl sm:text-2xl font-bold text-gray-800">
-                          আমার কোর্সসমূহ
-                        </h3>
-                        <p className="text-gray-500 mt-1 text-sm sm:text-base">
-                          আপনার enrollment ও learning progress এখানে দেখানো
-                          হচ্ছে
-                        </p>
-                      </div>
-                    </div>
+              {/* Tabs card */}
+              <div className="mt-5 overflow-hidden rounded-[1.7rem] border border-[#e5ded0] bg-white shadow-[0_18px_50px_rgba(45,75,65,0.08)]">
+                <div className="border-b border-[#eee8dc] bg-[#fffdf8] px-3 pt-3 sm:px-5">
+                  <nav className="grid grid-cols-2 gap-2">
+                    {[
+                      {
+                        id: "courses",
+                        label: "আমার কোর্সসমূহ",
+                        icon: FiBookOpen,
+                      },
+                      {
+                        id: "account",
+                        label: "অ্যাকাউন্ট তথ্য",
+                        icon: FiShield,
+                      },
+                    ].map((tab) => {
+                      const TabIcon = tab.icon;
+                      const isActive = activeTab === tab.id;
 
-                    {enrollments.length === 0 ? (
-                      <div className="text-center py-12">
-                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <FiBookOpen className="text-green-600 text-3xl" />
-                        </div>
-                        <h4 className="text-xl font-bold text-gray-800 mb-2">
-                          এখনো কোনো কোর্সে যুক্ত হননি
-                        </h4>
-                        <p className="text-gray-600 mb-5">
-                          আপনার জন্য উপযুক্ত কোর্স দেখে enrollment করুন।
-                        </p>
+                      return (
                         <button
-                          onClick={() => navigate("/courses")}
-                          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition"
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`relative inline-flex h-12 items-center justify-center gap-2 rounded-t-xl px-3 text-sm font-extrabold transition ${
+                            isActive
+                              ? "bg-white text-[#16745f]"
+                              : "text-[#7c8984] hover:bg-white/70 hover:text-[#40554d]"
+                          }`}
                         >
-                          কোর্স দেখুন
+                          <TabIcon />
+                          {tab.label}
+
+                          {isActive && (
+                            <motion.span
+                              layoutId="profile-active-tab"
+                              className="absolute inset-x-4 bottom-0 h-0.5 rounded-full bg-[#16745f]"
+                            />
+                          )}
                         </button>
-                      </div>
-                    ) : (
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        {enrollments.map((item) => (
-                          <div
-                            key={item._id}
-                            className="rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition bg-white"
-                          >
-                            <div className="h-40 bg-gray-100 overflow-hidden">
-                              {item.course?.thumbnail ? (
-                                <img
-                                  src={item.course.thumbnail}
-                                  alt={item.course?.title || "Course"}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                  <FiBookOpen className="text-4xl" />
-                                </div>
-                              )}
+                      );
+                    })}
+                  </nav>
+                </div>
+
+                <div className="p-4 sm:p-6">
+                  <AnimatePresence mode="wait">
+                    {activeTab === "courses" && (
+                      <motion.div
+                        key="courses-tab"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                          <div>
+                            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#d9704b]">
+                              Learning Collection
+                            </p>
+                            <h3 className="mt-1 text-2xl font-extrabold text-[#263c35]">
+                              আমার কোর্সসমূহ
+                            </h3>
+                            <p className="mt-1 text-sm leading-6 text-[#71817b]">
+                              Enrollment status ও learning progress এখানে দেখা
+                              যাচ্ছে।
+                            </p>
+                          </div>
+
+                          <span className="w-fit rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-extrabold text-[#16745f]">
+                            {enrollments.length}টি enrollment
+                          </span>
+                        </div>
+
+                        {enrollments.length === 0 ? (
+                          <div className="rounded-3xl border border-dashed border-[#d6ded8] bg-[#fafbf8] px-5 py-10 text-center">
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eef8f4] text-[#16745f]">
+                              <FiBookOpen className="text-2xl" />
                             </div>
 
-                            <div className="p-4 sm:p-5">
-                              <div className="flex items-start justify-between gap-3 mb-3">
-                                <h4 className="font-semibold text-base text-gray-800 line-clamp-2">
-                                  {item.course?.title || "Untitled Course"}
-                                </h4>
+                            <h4 className="mt-4 text-xl font-extrabold text-[#263c35]">
+                              এখনো কোনো কোর্সে যুক্ত হননি
+                            </h4>
 
-                                <span
-                                  className={`px-2 py-1 text-xs rounded-full whitespace-nowrap ${getStatusBadge(
-                                    item.paymentStatus,
-                                  )}`}
+                            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#71817b]">
+                              আপনার প্রয়োজন অনুযায়ী একটি কোর্স বেছে নিয়ে
+                              enrollment শুরু করুন।
+                            </p>
+
+                            <button
+                              type="button"
+                              onClick={() => navigate("/courses")}
+                              className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(22,116,95,0.22)] transition hover:bg-[#115f4e]"
+                            >
+                              কোর্স দেখুন
+                              <FiArrowRight />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {enrollments.map((item, index) => {
+                              const progress = item.progress || 0;
+
+                              return (
+                                <motion.article
+                                  key={item._id}
+                                  initial={{ opacity: 0, y: 12 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{
+                                    duration: 0.35,
+                                    delay: Math.min(index * 0.05, 0.3),
+                                  }}
+                                  whileHover={{ y: -3 }}
+                                  className="group overflow-hidden rounded-[1.35rem] border border-[#e5ded0] bg-white shadow-[0_10px_30px_rgba(45,75,65,0.06)] transition hover:border-[#cfe5dc] hover:shadow-[0_16px_38px_rgba(45,75,65,0.10)]"
                                 >
-                                  {item.paymentStatus || "unknown"}
-                                </span>
-                              </div>
+                                  <div className="relative h-40 overflow-hidden bg-[#edf2ee]">
+                                    {item.course?.thumbnail ? (
+                                      <img
+                                        src={item.course.thumbnail}
+                                        alt={item.course?.title || "Course"}
+                                        className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                                      />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center text-[#9ca8a2]">
+                                        <FiBookOpen className="text-4xl" />
+                                      </div>
+                                    )}
 
-                              <div className="space-y-2 text-sm text-gray-600 mb-4">
-                                <p>
-                                  <span className="font-medium text-gray-800">
-                                    Category:
-                                  </span>{" "}
-                                  {item.course?.category?.name || "-"}
-                                </p>
-                                <p>
-                                  <span className="font-medium text-gray-800">
-                                    Duration:
-                                  </span>{" "}
-                                  {item.course?.duration
-                                    ? `${item.course.duration} days`
-                                    : "-"}
-                                </p>
-                                <p>
-                                  <span className="font-medium text-gray-800">
-                                    Paid:
-                                  </span>{" "}
-                                  ৳{item.amount || 0}
-                                </p>
-                              </div>
+                                    <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-[#21382f]/70 to-transparent" />
 
-                              <div className="mb-4">
-                                <div className="flex items-center justify-between mb-2 text-sm">
-                                  <span className="text-gray-600">
-                                    Progress
+                                    <span
+                                      className={`absolute right-3 top-3 rounded-full border px-3 py-1 text-[10px] font-extrabold capitalize shadow-sm backdrop-blur ${getStatusBadge(
+                                        item.paymentStatus,
+                                      )}`}
+                                    >
+                                      {item.paymentStatus || "unknown"}
+                                    </span>
+
+                                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-3 text-xs font-bold text-white">
+                                      <span className="inline-flex items-center gap-1.5">
+                                        <FiClock />
+                                        {item.course?.duration
+                                          ? `${item.course.duration} days`
+                                          : "-"}
+                                      </span>
+
+                                      <span className="inline-flex items-center gap-1.5">
+                                        <FiBarChart2 />
+                                        {progress}%
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="p-4">
+                                    <h4 className="line-clamp-2 min-h-12 text-base font-extrabold leading-6 text-[#263c35] transition group-hover:text-[#16745f]">
+                                      {item.course?.title || "Untitled Course"}
+                                    </h4>
+
+                                    <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold">
+                                      <span className="rounded-full bg-[#f8faf7] px-2.5 py-1 text-[#6f7e78]">
+                                        {item.course?.category?.name ||
+                                          "No category"}
+                                      </span>
+
+                                      <span className="rounded-full bg-[#fff9eb] px-2.5 py-1 text-[#8b6b2e]">
+                                        Paid ৳{item.amount || 0}
+                                      </span>
+                                    </div>
+
+                                    <div className="mt-4">
+                                      <div className="flex items-center justify-between text-xs font-bold">
+                                        <span className="text-[#71817b]">
+                                          Progress
+                                        </span>
+                                        <span className="text-[#16745f]">
+                                          {progress}%
+                                        </span>
+                                      </div>
+
+                                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#e8eee9]">
+                                        <motion.div
+                                          initial={{ width: 0 }}
+                                          animate={{ width: `${progress}%` }}
+                                          transition={{ duration: 0.7 }}
+                                          className="h-full rounded-full bg-linear-to-r from-[#16745f] to-[#72baa7]"
+                                        />
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#eee8dc] pt-3 text-[11px] font-medium text-[#86928d]">
+                                      <span className="inline-flex items-center gap-1.5">
+                                        <FiClock />
+                                        {item.completionStatus || "in-progress"}
+                                      </span>
+
+                                      <span>
+                                        {new Date(
+                                          item.createdAt ||
+                                            item.enrolledAt ||
+                                            Date.now(),
+                                        ).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </motion.article>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {activeTab === "account" && (
+                      <motion.div
+                        key="account-tab"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <div className="mb-5">
+                          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
+                            Account Overview
+                          </p>
+                          <h3 className="mt-1 text-2xl font-extrabold text-[#263c35]">
+                            অ্যাকাউন্ট তথ্য
+                          </h3>
+                          <p className="mt-1 text-sm leading-6 text-[#71817b]">
+                            আপনার account এবং learning summary একসাথে দেখুন।
+                          </p>
+                        </div>
+
+                        <div className="grid gap-5 md:grid-cols-2">
+                          <div className="rounded-[1.4rem] border border-[#d7e9e2] bg-[#f5faf7] p-5">
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e5f4ee] text-[#16745f]">
+                                <FiShield />
+                              </span>
+
+                              <div>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#7f8d87]">
+                                  Account
+                                </p>
+                                <h4 className="mt-1 font-extrabold text-[#263c35]">
+                                  Account Summary
+                                </h4>
+                              </div>
+                            </div>
+
+                            <div className="mt-5 space-y-3">
+                              {[
+                                ["Full Name", userData.name || "-"],
+                                ["Email", userData.email || "-"],
+                                ["Phone", userData.phone || "-"],
+                                ["Role", userData.role || "-"],
+                                ["Verified", userData.verified ? "Yes" : "No"],
+                                ["Address", userData.address || "-"],
+                                ["Joined", formattedDate],
+                              ].map(([label, value]) => (
+                                <div
+                                  key={label}
+                                  className="flex items-start justify-between gap-4 border-b border-[#e3ece7] pb-3 last:border-0 last:pb-0"
+                                >
+                                  <span className="text-xs font-semibold text-[#7c8984]">
+                                    {label}
                                   </span>
-                                  <span className="font-semibold text-gray-800">
-                                    {item.progress || 0}%
+                                  <span className="max-w-[60%] wrap-break-word text-right text-xs font-extrabold capitalize text-[#40554d]">
+                                    {value}
                                   </span>
                                 </div>
+                              ))}
+                            </div>
+                          </div>
 
-                                <div className="h-2 bg-gray-200 rounded-full">
-                                  <div
-                                    className="h-full bg-green-600 rounded-full"
-                                    style={{ width: `${item.progress || 0}%` }}
-                                  />
+                          <div className="rounded-[1.4rem] border border-[#ded8f4] bg-[#f8f6ff] p-5">
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eeeafd] text-[#7865c9]">
+                                <FiBarChart2 />
+                              </span>
+
+                              <div>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#817897]">
+                                  Learning
+                                </p>
+                                <h4 className="mt-1 font-extrabold text-[#263c35]">
+                                  Learning Summary
+                                </h4>
+                              </div>
+                            </div>
+
+                            <div className="mt-5 space-y-3">
+                              {[
+                                ["Total Enrollments", enrollments.length],
+                                [
+                                  "Approved Courses",
+                                  completedEnrollments.length,
+                                ],
+                                ["Pending Requests", pendingEnrollments.length],
+                                ["Average Progress", `${averageProgress}%`],
+                              ].map(([label, value]) => (
+                                <div
+                                  key={label}
+                                  className="flex items-center justify-between gap-4 border-b border-[#e6e0f4] pb-3 last:border-0 last:pb-0"
+                                >
+                                  <span className="text-xs font-semibold text-[#817897]">
+                                    {label}
+                                  </span>
+                                  <span className="text-sm font-extrabold text-[#6e5bb4]">
+                                    {value}
+                                  </span>
                                 </div>
+                              ))}
+                            </div>
+
+                            <div className="mt-5 rounded-xl border border-[#e6e0f4] bg-white/70 p-4">
+                              <div className="flex items-center justify-between text-xs font-bold">
+                                <span className="text-[#817897]">
+                                  Overall Progress
+                                </span>
+                                <span className="text-[#6e5bb4]">
+                                  {averageProgress}%
+                                </span>
                               </div>
 
-                              <div className="flex items-center justify-between text-sm text-gray-500 gap-3">
-                                <span className="flex items-center">
-                                  <FiClock className="mr-1" />
-                                  {item.completionStatus || "in-progress"}
-                                </span>
-                                <span>
-                                  {new Date(
-                                    item.createdAt ||
-                                      item.enrolledAt ||
-                                      Date.now(),
-                                  ).toLocaleDateString()}
-                                </span>
+                              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#e8e3f4]">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${averageProgress}%` }}
+                                  transition={{ duration: 0.8 }}
+                                  className="h-full rounded-full bg-linear-to-r from-[#7865c9] to-[#a99be3]"
+                                />
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      </motion.div>
                     )}
-                  </div>
-                )}
-
-                {activeTab === "account" && (
-                  <div className="grid md:grid-cols-2 gap-5">
-                    <div className="rounded-2xl bg-green-50 border border-green-100 p-5">
-                      <div className="flex items-center mb-3">
-                        <FiShield className="text-green-600 text-xl mr-2" />
-                        <h4 className="font-bold text-gray-800">
-                          Account Summary
-                        </h4>
-                      </div>
-
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">Full Name</span>
-                          <span className="font-medium text-right">
-                            {userData.name || "-"}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">Email</span>
-                          <span className="font-medium text-right break-all">
-                            {userData.email || "-"}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">Phone</span>
-                          <span className="font-medium text-right">
-                            {userData.phone || "-"}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">Role</span>
-                          <span className="font-medium capitalize">
-                            {userData.role || "-"}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">Verified</span>
-                          <span className="font-medium">
-                            {userData.verified ? "Yes" : "No"}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">Address</span>
-                          <span className="font-medium text-right">
-                            {userData.address || "-"}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">Joined</span>
-                          <span className="font-medium">{formattedDate}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl bg-blue-50 border border-blue-100 p-5">
-                      <div className="flex items-center mb-3">
-                        <FiBarChart2 className="text-blue-600 text-xl mr-2" />
-                        <h4 className="font-bold text-gray-800">
-                          Learning Summary
-                        </h4>
-                      </div>
-
-                      <div className="space-y-3 text-sm">
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">
-                            Total Enrollments
-                          </span>
-                          <span className="font-medium">
-                            {enrollments.length}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">
-                            Approved Courses
-                          </span>
-                          <span className="font-medium">
-                            {completedEnrollments.length}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">
-                            Pending Requests
-                          </span>
-                          <span className="font-medium">
-                            {pendingEnrollments.length}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between gap-4">
-                          <span className="text-gray-500">
-                            Average Progress
-                          </span>
-                          <span className="font-medium">
-                            {averageProgress}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  </AnimatePresence>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.main>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

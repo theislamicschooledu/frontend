@@ -1,39 +1,71 @@
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import {
-  FiUsers,
+  FiArrowRight,
   FiAward,
   FiBook,
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiGlobe,
-  FiClock,
   FiCheck,
+  FiClock,
+  FiGlobe,
   FiHeart,
-  FiEye,
-  FiTarget,
-  FiGlobe as FiGlobeIcon,
-  FiStar,
-  FiMessageSquare,
-  FiVideo,
+  FiMail,
+  FiMapPin,
   FiMessageCircle,
+  FiMessageSquare,
+  FiPhone,
   FiSend,
+  FiUsers,
+  FiVideo,
 } from "react-icons/fi";
 import {
   FaChalkboardTeacher,
-  FaHandshake,
+  FaGraduationCap,
+  FaMosque,
   FaPray,
   FaQuran,
-  FaMosque,
-  FaGraduationCap,
 } from "react-icons/fa";
-import { MdWorkspacePremium, MdSecurity } from "react-icons/md";
 import { GiTeacher } from "react-icons/gi";
-import { useEffect, useState } from "react";
-
-import { toast } from "react-hot-toast";
+import { HiSparkles } from "react-icons/hi2";
+import { MdSecurity, MdWorkspacePremium } from "react-icons/md";
 import api from "../utils/axios";
+
+const floatingDecorations = [
+  { left: "4%", top: "13%", size: 18, delay: 0.2, duration: 6.2 },
+  { left: "13%", top: "74%", size: 13, delay: 1.1, duration: 7.1 },
+  { left: "31%", top: "28%", size: 15, delay: 0.5, duration: 6.8 },
+  { left: "58%", top: "82%", size: 17, delay: 1.5, duration: 7.4 },
+  { left: "78%", top: "18%", size: 14, delay: 0.8, duration: 6.5 },
+  { left: "93%", top: "65%", size: 19, delay: 1.8, duration: 7.2 },
+];
+
+const SectionHeading = ({ badge, title, description, align = "center" }) => (
+  <div
+    className={`mb-7 sm:mb-9 ${
+      align === "left" ? "text-left" : "mx-auto max-w-3xl text-center"
+    }`}
+  >
+    {badge && (
+      <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#073b46]/10 bg-white px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.13em] text-[#08736e] shadow-sm">
+        <span className="grid h-6 w-6 place-items-center rounded-full bg-[#ff6542] text-white">
+          <HiSparkles size={13} />
+        </span>
+        {badge}
+      </div>
+    )}
+
+    <h2 className="text-2xl font-black leading-tight tracking-tight text-[#073b46] sm:text-3xl lg:text-4xl">
+      {title}
+    </h2>
+
+    {description && (
+      <p className="mt-3 text-sm font-medium leading-7 text-slate-600 sm:text-base">
+        {description}
+      </p>
+    )}
+  </div>
+);
 
 const AboutUs = () => {
   const [documentation, setDocumentation] = useState(null);
@@ -77,21 +109,29 @@ const AboutUs = () => {
       icon: FaQuran,
       title: "কুরআন-সুন্নাহ ভিত্তিক",
       desc: "সমস্ত শিক্ষা কুরআন ও বিশুদ্ধ সুন্নাহর আলোকে পরিচালিত হয়",
+      accent: "bg-[#e9f8f5] text-[#08736e]",
+      border: "hover:border-[#62d6c7]",
     },
     {
       icon: GiTeacher,
       title: "প্রশিক্ষিত উস্তায",
       desc: "মাদ্রাসা ও বিশ্ববিদ্যালয় শিক্ষিত অভিজ্ঞ আলেম দ্বারা পাঠদান",
+      accent: "bg-[#f2ecff] text-[#7654c8]",
+      border: "hover:border-[#cbbdff]",
     },
     {
       icon: MdSecurity,
       title: "নিরাপদ পরিবেশ",
       desc: "শরীয়ত সম্মত ও আদব-কায়দা রক্ষা করে অনলাইন ক্লাস পরিচালনা",
+      accent: "bg-[#fff0eb] text-[#e85031]",
+      border: "hover:border-[#ffc4b2]",
     },
     {
       icon: FaGraduationCap,
       title: "আন্তর্জাতিক মান",
       desc: "আন্তর্জাতিক কারিকুলাম ও আধুনিক পদ্ধতিতে শিক্ষাদান",
+      accent: "bg-[#fff5cc] text-[#9a6900]",
+      border: "hover:border-[#f2ce63]",
     },
   ];
 
@@ -101,25 +141,29 @@ const AboutUs = () => {
       icon: FiUsers,
       value: "১,২৯,০৩২+",
       label: "মোট শিক্ষার্থী",
-      color: "from-blue-500 to-cyan-500",
+      color: "bg-[#08736e]",
+      soft: "bg-[#e9f8f5]",
     },
     {
       icon: FaChalkboardTeacher,
       value: "১১৪+",
       label: "উস্তায ও স্টাফ",
-      color: "from-purple-500 to-pink-500",
+      color: "bg-[#7654c8]",
+      soft: "bg-[#f2ecff]",
     },
     {
       icon: FiBook,
       value: "৪২+",
       label: "ইসলামিক কোর্স",
-      color: "from-green-500 to-emerald-500",
+      color: "bg-[#ff6542]",
+      soft: "bg-[#fff0eb]",
     },
     {
       icon: FiAward,
       value: "৯৭%",
       label: "সন্তুষ্টি হার",
-      color: "from-amber-500 to-orange-500",
+      color: "bg-[#e2a318]",
+      soft: "bg-[#fff5cc]",
     },
   ];
 
@@ -150,6 +194,7 @@ const AboutUs = () => {
         "+৮৮০১৯১১-৯৮৭৬৫৪",
       ],
       desc: "সকাল ৯টা - রাত ১০টা (শুক্রবার ব্যতীত)",
+      accent: "bg-[#e9f8f5] text-[#08736e]",
     },
     {
       icon: FiMail,
@@ -159,6 +204,7 @@ const AboutUs = () => {
         "admission@islamicacademy.com",
       ],
       desc: "২৪ ঘন্টার মধ্যে উত্তর প্রদান",
+      accent: "bg-[#f2ecff] text-[#7654c8]",
     },
     {
       icon: FiMapPin,
@@ -167,15 +213,17 @@ const AboutUs = () => {
         ? [documentation.contact.headOffice]
         : ["১২৩ ইসলামিক টাওয়ার, বিজয়নগর", "ঢাকা-১২১২, বাংলাদেশ"],
       desc: "সোম-বৃহঃ সকাল ১০টা - সন্ধ্যা ৬টা",
+      accent: "bg-[#fff0eb] text-[#e85031]",
     },
     {
-      icon: FiGlobeIcon,
+      icon: FiGlobe,
       title: "ওয়েবসাইট",
       details: documentation?.contact?.website || [
         "www.islamicacademy.com",
         "www.learnislam.tv",
       ],
       desc: "২৪/৭ লাইভ সাপোর্ট",
+      accent: "bg-[#fff5cc] text-[#9a6900]",
     },
   ];
 
@@ -263,410 +311,610 @@ const AboutUs = () => {
   // লোডিং স্টেট
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">লোড হচ্ছে...</p>
-        </div>
+      <div className="grid min-h-screen place-items-center bg-linear-to-b from-[#fff9e7] via-[#eef9ff] to-[#f2fbf6] font-hind">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <div className="relative mx-auto mb-5 h-20 w-20">
+            <div className="absolute inset-0 rounded-full border-4 border-[#62d6c7]/25" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#08736e]"
+            />
+            <div className="absolute inset-3 grid place-items-center rounded-full bg-[#fff4c9] text-[#073b46]">
+              <FaMosque size={25} />
+            </div>
+          </div>
+          <h2 className="text-2xl font-black text-[#073b46]">লোড হচ্ছে...</h2>
+          <p className="mt-2 text-sm font-medium text-slate-500">
+            আমাদের সম্পর্কে তথ্য প্রস্তুত হচ্ছে।
+          </p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50">
-      {/* Hero Section */}
-      <div className="pt-16 sm:pt-20 bg-linear-to-br from-blue-600 to-purple-600 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `radial-gradient(circle at 25px 25px, white 2%, transparent 0%), radial-gradient(circle at 75px 75px, white 2%, transparent 0%)`,
-              backgroundSize: "100px 100px",
-            }}
-          ></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 relative">
+    <main className="relative min-h-screen overflow-x-hidden bg-linear-to-b from-[#fff9e7] via-[#eef9ff] to-[#f2fbf6] font-hind text-slate-800">
+      {/* Page decorations */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      >
+        {floatingDecorations.map((item, index) => (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
+            key={index}
+            className="absolute text-[#ffd36e]/45"
+            style={{ left: item.left, top: item.top }}
+            animate={{
+              y: [0, -13, 0],
+              rotate: [0, 15, -8, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: item.duration,
+              repeat: Infinity,
+              delay: item.delay,
+              ease: "easeInOut",
+            }}
           >
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-              <FaMosque className="text-amber-300" />
-              <span className="text-sm font-medium">
-                ২০০৫ সাল থেকে ইসলামী শিক্ষা বিস্তারে নিবেদিত
+            <HiSparkles size={item.size} />
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Hero Section */}
+      <section className="relative isolate z-10 overflow-hidden bg-[#fff4c9] pb-16 pt-12 sm:pb-20 sm:pt-14 lg:pb-24 lg:pt-16">
+        <div
+          aria-hidden="true"
+          className="absolute -left-24 -top-20 h-72 w-72 rounded-full bg-[#ff6542]/14"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute -right-20 top-6 h-80 w-80 rounded-full bg-[#62d6c7]/24"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute bottom-5 left-[46%] h-40 w-40 rounded-full bg-[#8b6fe8]/10"
+        />
+
+        <motion.div
+          animate={{ y: [0, -10, 0], rotate: [0, 6, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute left-[7%] top-16 hidden h-14 w-14 place-items-center rounded-3xl border-4 border-white bg-[#ff6542] text-white shadow-lg md:grid"
+        >
+          <FaMosque size={27} />
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, 11, 0], rotate: [0, -8, 0] }}
+          transition={{ duration: 5.8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute right-[8%] top-20 hidden h-12 w-12 place-items-center rounded-full border-4 border-white bg-[#8b6fe8] text-white shadow-lg md:grid"
+        >
+          <HiSparkles size={24} />
+        </motion.div>
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="mx-auto max-w-4xl text-center"
+          >
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#073b46]/10 bg-white/75 px-3.5 py-1.5 text-xs font-extrabold text-[#073b46] shadow-sm backdrop-blur-sm">
+              <span className="grid h-6 w-6 place-items-center rounded-full bg-[#08736e] text-white">
+                <FaMosque size={13} />
+              </span>
+              ২০০৫ সাল থেকে ইসলামী শিক্ষা বিস্তারে নিবেদিত
+            </div>
+
+            <h1 className="text-3xl font-black leading-[1.1] tracking-tight text-[#073b46] sm:text-4xl lg:text-5xl">
+              ইসলামী জ্ঞানের যাত্রায়
+              <span className="relative ml-2 inline-block text-[#ff6542]">
+                আপনার বিশ্বস্ত সঙ্গী
+                <svg
+                  viewBox="0 0 260 18"
+                  aria-hidden="true"
+                  className="absolute -bottom-3 left-0 h-4 w-full text-[#ffd36e]"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M3 12C66 3 151 3 257 10"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-5 max-w-3xl text-sm font-medium leading-7 text-slate-600 sm:text-base sm:leading-8">
+              এশিয়ার বৃহত্তম অনলাইন ইসলামিক লার্নিং প্ল্যাটফর্ম, যেখানে ১৮
+              বছরের অভিজ্ঞতায় আমরা তৈরি করেছি একটি সহজ, বিশ্বস্ত ও মানসম্মত
+              শিক্ষা পরিবেশ।
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-xs font-extrabold text-[#08736e] shadow-sm">
+                <FiUsers size={15} /> ১ লক্ষের বেশি শিক্ষার্থী
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-xs font-extrabold text-[#7654c8] shadow-sm">
+                <FiBook size={15} /> মানসম্মত ইসলামিক কোর্স
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-xs font-extrabold text-[#e85031] shadow-sm">
+                <FiAward size={15} /> অভিজ্ঞ উস্তায
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 lg:mb-6 leading-tight">
-              ইসলামী জ্ঞানের যাত্রায়{" "}
-              <span className="text-amber-300">আপনার বিশ্বস্ত সঙ্গী</span>
-            </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl text-blue-100 max-w-4xl mx-auto leading-relaxed">
-              এশিয়ার বৃহত্তম অনলাইন ইসলামিক লার্নিং প্ল্যাটফর্ম, যেখানে ১৮
-              বছরের অভিজ্ঞতায় আমরা তৈরি করেছি এক আদর্শ শিক্ষা পরিবেশ।
-            </p>
           </motion.div>
         </div>
-      </div>
+
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 1440 110"
+          preserveAspectRatio="none"
+          className="absolute -bottom-px left-0 h-10 w-full sm:h-14"
+        >
+          <path
+            d="M0 52C158 94 334 101 500 66C692 26 809 15 1002 54C1167 87 1308 91 1440 42V110H0Z"
+            fill="#eef9ff"
+          />
+        </svg>
+      </section>
+
+      {error && (
+        <section className="relative z-20 mx-auto -mt-5 max-w-3xl px-4 sm:px-6">
+          <div className="rounded-2xl border border-[#ffd1c2] bg-[#fff0eb] px-4 py-3 text-center text-sm font-bold text-[#c9472b] shadow-sm">
+            {error} — ডিফল্ট তথ্য দেখানো হচ্ছে।
+          </div>
+        </section>
+      )}
 
       {/* Mission & Vision */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12 lg:mb-16">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
+      <section className="relative z-10 mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <motion.article
+            initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6 }}
-            className="bg-linear-to-br from-blue-500 to-purple-500 rounded-2xl lg:rounded-3xl p-6 lg:p-8 text-white shadow-xl"
+            className="group relative overflow-hidden rounded-4xl border-4 border-white bg-[#08736e] p-6 text-white shadow-[0_18px_45px_rgba(7,59,70,0.13)] sm:p-7"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-white/20 rounded-xl">
-                <FaPray className="text-2xl" />
-              </div>
-              <h3 className="text-2xl lg:text-3xl font-bold">আমাদের মিশন</h3>
-            </div>
-            <p className="text-blue-50 text-lg leading-relaxed">{mission}</p>
-            <div className="mt-6 flex items-center gap-2 text-blue-100">
-              <FiCheck className="text-green-300" />
-              <span className="text-sm">১৮ বছরের সফল অভিজ্ঞতা</span>
-            </div>
-          </motion.div>
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
+            <div className="absolute -bottom-12 -left-10 h-36 w-36 rounded-full bg-[#62d6c7]/25" />
 
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="bg-linear-to-br from-amber-500 to-orange-500 rounded-2xl lg:rounded-3xl p-6 lg:p-8 text-white shadow-xl"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-white/20 rounded-xl">
-                <MdWorkspacePremium className="text-2xl" />
-              </div>
-              <h3 className="text-2xl lg:text-3xl font-bold">আমাদের ভিশন</h3>
-            </div>
-            <p className="text-amber-50 text-lg leading-relaxed">{vision}</p>
-            <div className="mt-6 flex items-center gap-2 text-amber-100">
-              <FiCheck className="text-green-300" />
-              <span className="text-sm">৫ টি দেশে আমাদের কার্যক্রম</span>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Core Values */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <h2 className="text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-4">
-            আমাদের মূল্যবোধ ও আদর্শ
-          </h2>
-          <p className="text-gray-600 text-center text-lg mb-10 lg:mb-12 max-w-3xl mx-auto">
-            যে নীতি ও আদর্শের উপর ভিত্তি করে আমরা আমাদের শিক্ষা কার্যক্রম
-            পরিচালনা করি
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {coreValues.map((value, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 group"
-              >
-                <div className="w-14 h-14 rounded-xl bg-linear-to-r from-blue-100 to-purple-100 flex items-center justify-center mb-4">
-                  <value.icon className="text-2xl text-blue-600" />
+            <div className="relative">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-[#fff4c9] ring-1 ring-white/20">
+                  <FaPray size={23} />
+                </span>
+                <div>
+                  <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#aee9df]">
+                    Our Purpose
+                  </span>
+                  <h2 className="text-2xl font-black sm:text-3xl">
+                    আমাদের মিশন
+                  </h2>
                 </div>
-                <h4 className="text-xl font-bold text-gray-800 mb-2">
+              </div>
+
+              <p className="text-sm font-medium leading-7 text-[#e6fffa] sm:text-base">
+                {mission}
+              </p>
+
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/12 px-3.5 py-2 text-xs font-extrabold text-white ring-1 ring-white/15">
+                <FiCheck className="text-[#ffd36e]" /> ১৮ বছরের সফল অভিজ্ঞতা
+              </div>
+            </div>
+          </motion.article>
+
+          <motion.article
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+            className="group relative overflow-hidden rounded-4xl border-4 border-white bg-[#7654c8] p-6 text-white shadow-[0_18px_45px_rgba(79,61,137,0.13)] sm:p-7"
+          >
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
+            <div className="absolute -bottom-12 -left-10 h-36 w-36 rounded-full bg-[#ffcf66]/20" />
+
+            <div className="relative">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-[#fff4c9] ring-1 ring-white/20">
+                  <MdWorkspacePremium size={25} />
+                </span>
+                <div>
+                  <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#ded5ff]">
+                    Our Direction
+                  </span>
+                  <h2 className="text-2xl font-black sm:text-3xl">
+                    আমাদের ভিশন
+                  </h2>
+                </div>
+              </div>
+
+              <p className="text-sm font-medium leading-7 text-[#f4f0ff] sm:text-base">
+                {vision}
+              </p>
+
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/12 px-3.5 py-2 text-xs font-extrabold text-white ring-1 ring-white/15">
+                <FiCheck className="text-[#ffd36e]" /> ৫টি দেশে আমাদের কার্যক্রম
+              </div>
+            </div>
+          </motion.article>
+        </div>
+      </section>
+
+      {/* Core Values */}
+      <section className="relative z-10 mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+        <SectionHeading
+          badge="Our Foundation"
+          title="আমাদের মূল্যবোধ ও আদর্শ"
+          description="যে নীতি ও আদর্শের উপর ভিত্তি করে আমরা প্রতিটি শিক্ষা কার্যক্রম পরিচালনা করি।"
+        />
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {coreValues.map((value, index) => {
+            const Icon = value.icon;
+
+            return (
+              <motion.article
+                key={index}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                whileHover={{ y: -6 }}
+                className={`group rounded-3xl border-2 border-white bg-white p-5 shadow-[0_12px_32px_rgba(7,59,70,0.08)] transition duration-300 ${value.border}`}
+              >
+                <div
+                  className={`mb-4 grid h-12 w-12 place-items-center rounded-2xl transition duration-300 group-hover:rotate-3 group-hover:scale-105 ${value.accent}`}
+                >
+                  <Icon size={23} />
+                </div>
+                <h3 className="text-lg font-black text-[#073b46]">
                   {value.title}
-                </h4>
-                <p className="text-gray-600">{value.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
+                </h3>
+                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
+                  {value.desc}
+                </p>
+              </motion.article>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Stats Section */}
-      <div className="bg-linear-to-r from-blue-50 to-indigo-50 py-12 lg:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-10 lg:mb-12">
+      <section className="relative z-10 overflow-hidden bg-[#073b46] py-11 text-white sm:py-14">
+        <div className="absolute -left-20 top-0 h-60 w-60 rounded-full bg-[#62d6c7]/12" />
+        <div className="absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-[#ff6542]/12" />
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-7 text-center sm:mb-9">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-[#aee9df] ring-1 ring-white/10">
+              <FiAward size={14} /> Our Impact
+            </div>
+            <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl">
               গর্বের অর্জন ও পরিসংখ্যান
             </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-white rounded-2xl p-6 text-center shadow-lg"
-                >
-                  <div className="flex justify-center mb-3">
-                    <div
-                      className={`p-3 rounded-full bg-linear-to-r ${stat.color} text-white`}
-                    >
-                      <stat.icon className="text-2xl" />
-                    </div>
-                  </div>
-                  <div className="text-3xl lg:text-4xl font-bold text-gray-800 mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-gray-600 font-medium">{stat.label}</div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Teaching Methodology & Accreditation */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <div className="text-center mb-10 lg:mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
-              আমাদের শিক্ষা পদ্ধতি
-            </h2>
-            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-              আধুনিক প্রযুক্তি ও প্রথাগত ইসলামী শিক্ষা পদ্ধতির সমন্বয়ে আমরা
-              তৈরি করেছি অনন্য এক শিক্ষা ব্যবস্থা
-            </p>
           </div>
 
-          <div className="bg-linear-to-r from-blue-50 to-purple-50 rounded-2xl lg:rounded-3xl p-6 lg:p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* অনলাইন লার্নিং ফিচারস */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                  <FaChalkboardTeacher className="text-blue-600" />
-                  অনলাইন লার্নিং ফিচারস
-                </h3>
-                <ul className="space-y-4">
-                  {methodologies && methodologies.length > 0 ? (
-                    methodologies.map((item, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        className="flex items-start gap-3"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shrink-0 mt-1">
-                          <FiCheck className="text-white text-sm" />
-                        </div>
-                        <span className="text-gray-700">{item}</span>
-                      </motion.li>
-                    ))
-                  ) : (
-                    <li className="text-gray-500">লোড হচ্ছে...</li>
-                  )}
-                </ul>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+
+              return (
+                <motion.article
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: index * 0.08 }}
+                  className="rounded-3xl border border-white/10 bg-white/8 p-4 text-center backdrop-blur-sm sm:p-5"
+                >
+                  <div
+                    className={`mx-auto mb-3 grid h-11 w-11 place-items-center rounded-2xl text-white shadow-lg sm:h-12 sm:w-12 ${stat.color}`}
+                  >
+                    <Icon size={21} />
+                  </div>
+                  <div className="text-2xl font-black sm:text-3xl lg:text-4xl">
+                    {stat.value}
+                  </div>
+                  <div className="mt-1 text-xs font-bold text-slate-300 sm:text-sm">
+                    {stat.label}
+                  </div>
+                </motion.article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Teaching Methodology & Accreditation */}
+      <section className="relative z-10 mx-auto max-w-7xl px-4 py-11 sm:px-6 sm:py-14 lg:px-8">
+        <SectionHeading
+          badge="How We Teach"
+          title="আমাদের শিক্ষা পদ্ধতি"
+          description="আধুনিক প্রযুক্তি ও প্রথাগত ইসলামী শিক্ষা পদ্ধতির সমন্বয়ে তৈরি একটি সহজ, কার্যকর ও মানবিক শিক্ষা ব্যবস্থা।"
+        />
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.65 }}
+          className="overflow-hidden rounded-4xl border-4 border-white bg-white shadow-[0_18px_48px_rgba(7,59,70,0.09)]"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            <div className="bg-[#eef9f7] p-5 sm:p-7 lg:p-8">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#08736e] text-white shadow-lg">
+                  <FaChalkboardTeacher size={23} />
+                </span>
+                <div>
+                  <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[#08736e]">
+                    Learning Experience
+                  </span>
+                  <h3 className="text-xl font-black text-[#073b46] sm:text-2xl">
+                    অনলাইন লার্নিং ফিচারস
+                  </h3>
+                </div>
               </div>
 
-              {/* স্বীকৃতি ও অনুমোদন */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                  <FiAward className="text-purple-600" />
-                  স্বীকৃতি ও অনুমোদন
-                </h3>
-                <ul className="space-y-4">
-                  {accreditations && accreditations.length > 0 ? (
-                    accreditations.map((item, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        className="flex items-start gap-3"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center shrink-0 mt-1">
-                          <MdWorkspacePremium className="text-white text-sm" />
-                        </div>
-                        <span className="text-gray-700">{item}</span>
-                      </motion.li>
-                    ))
-                  ) : (
-                    <li className="text-gray-500">লোড হচ্ছে...</li>
-                  )}
-                </ul>
+              <ul className="space-y-3">
+                {methodologies && methodologies.length > 0 ? (
+                  methodologies.map((item, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, x: -18 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: index * 0.07 }}
+                      className="flex items-start gap-3 rounded-2xl bg-white p-3.5 shadow-sm"
+                    >
+                      <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#08736e] text-white">
+                        <FiCheck size={13} />
+                      </span>
+                      <span className="text-sm font-semibold leading-6 text-slate-700">
+                        {item}
+                      </span>
+                    </motion.li>
+                  ))
+                ) : (
+                  <li className="text-sm font-semibold text-slate-500">
+                    লোড হচ্ছে...
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <div className="bg-[#faf7ff] p-5 sm:p-7 lg:p-8">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#7654c8] text-white shadow-lg">
+                  <MdWorkspacePremium size={24} />
+                </span>
+                <div>
+                  <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[#7654c8]">
+                    Recognition
+                  </span>
+                  <h3 className="text-xl font-black text-[#073b46] sm:text-2xl">
+                    স্বীকৃতি ও অনুমোদন
+                  </h3>
+                </div>
               </div>
+
+              <ul className="space-y-3">
+                {accreditations && accreditations.length > 0 ? (
+                  accreditations.map((item, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, x: 18 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: index * 0.07 }}
+                      className="flex items-start gap-3 rounded-2xl bg-white p-3.5 shadow-sm"
+                    >
+                      <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#7654c8] text-white">
+                        <FiAward size={13} />
+                      </span>
+                      <span className="text-sm font-semibold leading-6 text-slate-700">
+                        {item}
+                      </span>
+                    </motion.li>
+                  ))
+                ) : (
+                  <li className="text-sm font-semibold text-slate-500">
+                    লোড হচ্ছে...
+                  </li>
+                )}
+              </ul>
             </div>
           </div>
         </motion.div>
-      </div>
+      </section>
 
       {/* Contact Information */}
-      <div className="bg-linear-to-br from-slate-50 to-blue-50 py-12 lg:py-16 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="text-center mb-10 lg:mb-12">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
-                যোগাযোগের ঠিকানা
-              </h2>
-              <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-                আমাদের সাথে যে কোনো প্রয়োজনে যোগাযোগ করতে পারেন। আমরা আপনার
-                সেবায় সদা প্রস্তুত
-              </p>
-            </div>
+      <section className="relative z-10 border-y border-[#073b46]/8 bg-[#fffdf5] py-11 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            badge="Get In Touch"
+            title="যোগাযোগের ঠিকানা"
+            description="আপনার প্রশ্ন, ভর্তি সংক্রান্ত তথ্য বা যেকোনো সহযোগিতার জন্য আমাদের সাথে যোগাযোগ করুন।"
+          />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-              {contactInfo.map((contact, index) => (
-                <motion.div
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {contactInfo.map((contact, index) => {
+              const Icon = contact.icon;
+
+              return (
+                <motion.article
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                  transition={{ duration: 0.45, delay: index * 0.08 }}
+                  whileHover={{ y: -5 }}
+                  className="rounded-3xl border-2 border-white bg-white p-5 shadow-[0_12px_32px_rgba(7,59,70,0.08)] transition duration-300 hover:border-[#62d6c7]/50"
                 >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 rounded-xl bg-linear-to-r from-blue-100 to-purple-100">
-                      <contact.icon className="text-xl text-blue-600" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800">
+                  <div className="mb-4 flex items-center gap-3">
+                    <span
+                      className={`grid h-11 w-11 place-items-center rounded-2xl ${contact.accent}`}
+                    >
+                      <Icon size={20} />
+                    </span>
+                    <h3 className="text-lg font-black text-[#073b46]">
                       {contact.title}
                     </h3>
                   </div>
-                  <div className="space-y-2">
+
+                  <div className="min-h-13 space-y-1.5">
                     {Array.isArray(contact.details) ? (
                       contact.details.map((detail, idx) => (
-                        <p key={idx} className="text-gray-700 font-medium">
+                        <p
+                          key={idx}
+                          className="wrap-break-word text-sm font-bold text-slate-700"
+                        >
                           {detail}
                         </p>
                       ))
                     ) : (
-                      <p className="text-gray-700 font-medium">
+                      <p className="wrap-break-word text-sm font-bold text-slate-700">
                         {contact.details}
                       </p>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-3 flex items-center gap-1">
-                    <FiClock className="text-gray-400" />
+
+                  <p className="mt-4 flex items-start gap-2 border-t border-slate-100 pt-3 text-xs font-semibold leading-5 text-slate-500">
+                    <FiClock className="mt-0.5 shrink-0 text-[#08736e]" />
                     {contact.desc}
                   </p>
-                </motion.div>
-              ))}
+                </motion.article>
+              );
+            })}
+          </div>
+
+          {/* Social Media */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mt-7 rounded-4xl border-4 border-white bg-[#eef9f7] p-5 shadow-[0_15px_38px_rgba(7,59,70,0.08)] sm:p-7"
+          >
+            <div className="mb-5 flex flex-col gap-2 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
+              <div>
+                <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[#08736e]">
+                  Social Community
+                </span>
+                <h3 className="mt-1 text-xl font-black text-[#073b46] sm:text-2xl">
+                  সামাজিক যোগাযোগ মাধ্যমে যুক্ত থাকুন
+                </h3>
+              </div>
+              <p className="text-xs font-semibold text-slate-500 sm:max-w-xs sm:text-right">
+                সর্বশেষ ক্লাস, ঘোষণা ও শিক্ষামূলক কনটেন্ট পেতে আমাদের অনুসরণ
+                করুন।
+              </p>
             </div>
 
-            {/* Social Media Links - Updated with proper icons */}
-            <div className="bg-linear-to-r from-blue-50 to-purple-50 rounded-2xl lg:rounded-3xl p-6 lg:p-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-                সামাজিক যোগাযোগ মাধ্যমে আমাদের সাথে যুক্ত থাকুন
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {socialMedia.map((social, index) => {
-                  const IconComponent = social.iconComponent;
-                  return (
-                    <motion.a
-                      key={index}
-                      href={social.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className={`bg-white rounded-xl p-4 text-center hover:shadow-lg transition-all hover:scale-105 cursor-pointer border border-gray-100 hover:border-blue-200`}
-                    >
-                      <div
-                        className={`w-12 h-12 rounded-lg ${social.bgColor} flex items-center justify-center mx-auto mb-3`}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {socialMedia.map((social, index) => {
+                const IconComponent = social.iconComponent;
+
+                return (
+                  <motion.a
+                    key={index}
+                    href={social.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.07 }}
+                    whileHover={{ y: -4 }}
+                    className="group rounded-2xl border border-[#073b46]/8 bg-white p-4 shadow-sm transition hover:border-[#62d6c7] hover:shadow-md"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${social.bgColor}`}
                       >
                         <IconComponent className={`text-xl ${social.color}`} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-black text-[#073b46]">
+                          {social.name}
+                        </h4>
+                        <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
+                          {social.link.replace(/^(https?:\/\/)?/, "")}
+                        </p>
                       </div>
-                      <h4 className="font-semibold text-gray-800 mb-1">
-                        {social.name}
-                      </h4>
-                      <p className="text-sm text-gray-600 break-all">
-                        {social.link.replace(/^(https?:\/\/)?/, "")}
-                      </p>
-                      {social.subscribers && (
-                        <p className="text-xs text-amber-600 mt-1 font-medium">
-                          {social.subscribers} সাবস্ক্রাইবার
-                        </p>
-                      )}
-                      {social.members && (
-                        <p className="text-xs text-green-600 mt-1 font-medium">
-                          {social.members} সদস্য
-                        </p>
-                      )}
-                    </motion.a>
-                  );
-                })}
-              </div>
+                      <FiArrowRight className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#08736e]" />
+                    </div>
+
+                    {(social.subscribers || social.members) && (
+                      <div className="mt-3 rounded-xl bg-[#fffdf5] px-3 py-2 text-center text-xs font-extrabold text-[#9a6900]">
+                        {social.subscribers &&
+                          `${social.subscribers} সাবস্ক্রাইবার`}
+                        {social.members && `${social.members} সদস্য`}
+                      </div>
+                    )}
+                  </motion.a>
+                );
+              })}
             </div>
           </motion.div>
         </div>
-      </div>
+      </section>
 
       {/* Final CTA */}
-      <div className="bg-linear-to-br from-blue-600 to-purple-600 py-12 lg:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative z-10 overflow-hidden bg-[#08736e] py-12 text-white sm:py-16">
+        <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-[#62d6c7]/20" />
+        <div className="absolute -right-16 -bottom-20 h-72 w-72 rounded-full bg-[#ff6542]/16" />
+        <div className="absolute left-[47%] top-8 h-32 w-32 rounded-full bg-[#ffd36e]/10" />
+
+        <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-              <FiHeart className="text-red-300" />
-              <span className="text-sm font-medium">
-                ১৮ বছর ধরে ইসলামী শিক্ষার সেবায় নিয়োজিত
-              </span>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-2 text-xs font-extrabold ring-1 ring-white/15 backdrop-blur-sm">
+              <FiHeart className="text-[#ffb8a6]" />
+              ১৮ বছর ধরে ইসলামী শিক্ষার সেবায় নিয়োজিত
             </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
-              ইসলামী জ্ঞানার্জনের এই মহান যাত্রায় শরিক হোন
+
+            <h2 className="text-2xl font-black leading-tight sm:text-3xl lg:text-4xl">
+              ইসলামী জ্ঞানার্জনের মহান যাত্রায় শরিক হোন
             </h2>
-            <p className="text-xl text-blue-100 mb-8">
+            <p className="mx-auto mt-4 max-w-2xl text-sm font-medium leading-7 text-[#d8f5ef] sm:text-base">
               এখনই রেজিস্ট্রেশন করুন এবং একটি ফ্রি ডেমো ক্লাসে অংশগ্রহণ করুন।
               আমাদের অভিজ্ঞ উস্তাযদের সাথে সরাসরি কথা বলুন।
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all hover:scale-105 shadow-lg">
-                <span className="flex items-center justify-center gap-2">
-                  <FiPhone />
-                  ফ্রি কনসালটেশন বুক করুন
-                </span>
+
+            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+              <button className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fff4c9] px-6 py-3.5 text-sm font-black text-[#073b46] shadow-lg transition hover:-translate-y-0.5 hover:bg-white">
+                <FiPhone />
+                ফ্রি কনসালটেশন বুক করুন
+                <FiArrowRight className="transition group-hover:translate-x-1" />
               </button>
-              <button className="px-8 py-3 bg-transparent border-2 border-white text-white rounded-xl font-semibold hover:bg-white/10 transition-all">
-                <span className="flex items-center justify-center gap-2">
-                  <FiMail />
-                  ইমেইলে তথ্য চাই
-                </span>
+
+              <button className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/70 bg-white/5 px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/12">
+                <FiMail />
+                ইমেইলে তথ্য চাই
               </button>
             </div>
-            <p className="text-blue-200 mt-6 text-sm">
+
+            <p className="mt-5 text-xs font-semibold leading-5 text-[#aee9df]">
               সকাল ৯টা থেকে রাত ১০টা পর্যন্ত খোলা (শুক্রবার দুপুর ১২টা থেকে ৩টা
               পর্যন্ত বন্ধ)
             </p>
           </motion.div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 
