@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const VerifyOtp = () => {
   const [formData, setFormData] = useState({
@@ -27,6 +28,7 @@ const VerifyOtp = () => {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const { verifyOtp } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -52,13 +54,13 @@ const VerifyOtp = () => {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("verifyOtpPage.validation.emailRequired");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = t("verifyOtpPage.validation.invalidEmail");
     }
 
     if (!formData.code) {
-      newErrors.code = "OTP is required";
+      newErrors.code = t("verifyOtpPage.validation.otpRequired");
     }
 
     setErrors(newErrors);
@@ -79,28 +81,28 @@ const VerifyOtp = () => {
 
       if (response?.success) {
         setIsSuccess(true);
-        setMessage("Verification successful! Redirecting to login...");
+        setMessage(t("verifyOtpPage.successMessage"));
 
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       } else {
         setIsSuccess(false);
-        setMessage(response?.message || "Verification failed");
+        setMessage(response?.message || t("verifyOtpPage.verificationFailed"));
       }
     } catch (err) {
       console.error(err);
       setIsSuccess(false);
-      setMessage("Server error. Please try again.");
+      setMessage(t("verifyOtpPage.serverError"));
     } finally {
       setLoading(false);
     }
   };
 
   const steps = [
-    "আপনার নিবন্ধিত ইমেইল ঠিকানা লিখুন",
-    "ইমেইলে পাওয়া OTP কোডটি দিন",
-    "ভেরিফিকেশন সম্পন্ন হলে সাইন ইন করুন",
+    t("verifyOtpPage.steps.email"),
+    t("verifyOtpPage.steps.otp"),
+    t("verifyOtpPage.steps.login"),
   ];
 
   return (
@@ -125,26 +127,25 @@ const VerifyOtp = () => {
             className="inline-flex items-center gap-2 rounded-full border border-[#dce5df] bg-white px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:border-[#8bcdbd] hover:bg-[#f1f8f5]"
           >
             <FiArrowLeft />
-            সাইন ইন পেজে ফিরে যান
+            {t("verifyOtpPage.backLogin")}
           </Link>
 
           <div className="mt-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#eeeafd] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
               <FiShield />
-              Account Verification
+              {t("verifyOtpPage.badge")}
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold leading-tight text-[#263c35] sm:text-4xl">
-              আপনার অ্যাকাউন্ট
+              {t("verifyOtpPage.headingPrefix")}
               <span className="relative ml-2 inline-block text-[#16745f]">
-                ভেরিফাই করুন
+                {t("verifyOtpPage.headingAccent")}
                 <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
               </span>
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-7 text-[#71817b]">
-              আপনার ইমেইলে পাঠানো OTP কোডটি ব্যবহার করে অ্যাকাউন্ট ভেরিফিকেশন
-              সম্পন্ন করুন।
+              {t("verifyOtpPage.description")}
             </p>
           </div>
 
@@ -158,10 +159,10 @@ const VerifyOtp = () => {
 
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                    Step One
+                    {t("verifyOtpPage.stepOne")}
                   </p>
                   <p className="text-xs font-extrabold text-[#263c35] sm:text-sm">
-                    OTP গ্রহণ করুন
+                    {t("verifyOtpPage.receiveOtp")}
                   </p>
                 </div>
               </div>
@@ -177,10 +178,10 @@ const VerifyOtp = () => {
 
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                    Step Two
+                    {t("verifyOtpPage.stepTwo")}
                   </p>
                   <p className="text-xs font-extrabold text-[#263c35] sm:text-sm">
-                    অ্যাকাউন্ট ভেরিফাই
+                    {t("verifyOtpPage.verifyAccountShort")}
                   </p>
                 </div>
               </div>
@@ -195,7 +196,7 @@ const VerifyOtp = () => {
                 className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
               >
                 <FiMail className="text-[#16745f]" />
-                ইমেইল ঠিকানা
+                {t("verifyOtpPage.emailLabel")}
                 <span className="text-[#d9704b]">*</span>
               </label>
 
@@ -239,7 +240,7 @@ const VerifyOtp = () => {
                 className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
               >
                 <FiKey className="text-[#7865c9]" />
-                OTP কোড
+                {t("verifyOtpPage.otpLabel")}
                 <span className="text-[#d9704b]">*</span>
               </label>
 
@@ -257,7 +258,7 @@ const VerifyOtp = () => {
                       ? "border-[#e4a58f] focus:border-[#d9704b] focus:ring-[#ef8f6d]/12"
                       : "border-[#dfe5e0] focus:border-[#a99be3] focus:ring-[#a99be3]/15"
                   }`}
-                  placeholder="OTP কোড লিখুন"
+                  placeholder={t("verifyOtpPage.otpPlaceholder")}
                   autoComplete="one-time-code"
                 />
               </div>
@@ -315,11 +316,11 @@ const VerifyOtp = () => {
               {loading ? (
                 <>
                   <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                  ভেরিফাই করা হচ্ছে...
+                  {t("verifyOtpPage.verifying")}
                 </>
               ) : (
                 <>
-                  অ্যাকাউন্ট ভেরিফাই করুন
+                  {t("verifyOtpPage.verifyAccount")}
                   <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                 </>
               )}
@@ -330,8 +331,7 @@ const VerifyOtp = () => {
             <div className="flex items-start gap-3 rounded-[1.15rem] border border-[#d4e9e1] bg-[#f1f9f6] p-4">
               <FiInfo className="mt-0.5 shrink-0 text-[#16745f]" />
               <p className="text-xs leading-6 text-[#4f7065] sm:text-sm">
-                OTP কোড কাউকে শেয়ার করবেন না। ভেরিফিকেশন সফল হলে আপনাকে
-                স্বয়ংক্রিয়ভাবে সাইন ইন পেজে নেওয়া হবে।
+                {t("verifyOtpPage.notice")}
               </p>
             </div>
           </div>
@@ -353,7 +353,7 @@ const VerifyOtp = () => {
               <div className="flex items-center justify-between gap-4">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#f7c969]">
                   <FiUserCheck />
-                  Email Verification
+                  {t("verifyOtpPage.asideBadge")}
                 </span>
 
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#9de2c9]">
@@ -362,12 +362,11 @@ const VerifyOtp = () => {
               </div>
 
               <h2 className="mt-7 text-3xl font-extrabold leading-tight sm:text-4xl">
-                আর মাত্র একটি ধাপ, তারপর আপনার অ্যাকাউন্ট প্রস্তুত
+                {t("verifyOtpPage.asideTitle")}
               </h2>
 
               <p className="mt-4 max-w-lg text-sm leading-7 text-white/68 sm:text-base">
-                ইমেইল ভেরিফিকেশন আপনার অ্যাকাউন্টকে সুরক্ষিত রাখে এবং সঠিক
-                ব্যবহারকারী হিসেবে পরিচয় নিশ্চিত করে।
+                {t("verifyOtpPage.asideDescription")}
               </p>
 
               <div className="mt-8 space-y-3">
@@ -401,11 +400,10 @@ const VerifyOtp = () => {
 
                   <div>
                     <p className="text-sm font-extrabold text-white">
-                      Verification Security
+                      {t("verifyOtpPage.securityTitle")}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-white/52">
-                      OTP শুধুমাত্র আপনার নিবন্ধিত ইমেইলে পাঠানো হয় এবং এটি
-                      ব্যক্তিগত verification code হিসেবে ব্যবহার করা উচিত।
+                      {t("verifyOtpPage.securityDescription")}
                     </p>
                   </div>
                 </div>
@@ -413,7 +411,7 @@ const VerifyOtp = () => {
 
               <p className="mt-5 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-white/45">
                 <FiShield className="text-[#9de2c9]" />
-                Secure account verification workflow
+                {t("verifyOtpPage.secureWorkflow")}
               </p>
             </div>
           </div>

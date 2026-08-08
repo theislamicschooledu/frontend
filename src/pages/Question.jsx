@@ -18,9 +18,13 @@ import {
   FiArrowRight,
   FiBookOpen,
 } from "react-icons/fi";
+import { useLanguage } from "../hooks/useLanguage";
 
 const Question = () => {
   const { id } = useParams();
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
   const [loading, setLoading] = useState(true);
   const [question, setQuestion] = useState(null);
   const hasIncrementedView = useRef(false);
@@ -37,7 +41,7 @@ const Question = () => {
         }
       } catch (error) {
         console.error("Error fetching question:", error);
-        toast.error("Failed to load question");
+        toast.error(t("questionDetailsPage.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -58,6 +62,7 @@ const Question = () => {
       fetchQuestion();
       incrementView();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -74,6 +79,13 @@ const Question = () => {
     admin: "bg-[#eeeafd] text-[#6e5bb4]",
     teacher: "bg-[#e7f2ff] text-[#3979a9]",
     student: "bg-[#e5f4ee] text-[#16745f]",
+  };
+
+  const supportedRoles = ["admin", "teacher", "student", "user", "scholar"];
+
+  const getRoleLabel = (role, fallback = "user") => {
+    const safeRole = supportedRoles.includes(role) ? role : fallback;
+    return t(`questionDetailsPage.roles.${safeRole}`);
   };
 
   const firstAnswer = question?.answers?.[0];
@@ -101,10 +113,10 @@ const Question = () => {
           </div>
 
           <h3 className="text-xl font-extrabold text-[#263c35]">
-            প্রশ্নটি লোড হচ্ছে
+            {t("questionDetailsPage.loadingTitle")}
           </h3>
           <p className="mt-2 text-sm leading-6 text-[#6d7c76]">
-            প্রশ্ন ও আলেমের উত্তর প্রস্তুত করা হচ্ছে।
+            {t("questionDetailsPage.loadingDescription")}
           </p>
         </motion.div>
       </div>
@@ -124,10 +136,10 @@ const Question = () => {
           </div>
 
           <h2 className="mt-5 text-2xl font-extrabold text-[#263c35]">
-            প্রশ্নটি পাওয়া যায়নি
+            {t("questionDetailsPage.notFoundTitle")}
           </h2>
           <p className="mt-3 text-sm leading-7 text-[#6d7c76]">
-            প্রশ্নটি সরিয়ে ফেলা হয়ে থাকতে পারে অথবা লিংকটি সঠিক নয়।
+            {t("questionDetailsPage.notFoundDescription")}
           </p>
 
           <Link
@@ -135,7 +147,7 @@ const Question = () => {
             className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 py-3 font-bold text-white transition hover:bg-[#115f4e]"
           >
             <FiArrowLeft />
-            প্রশ্নের তালিকায় ফিরুন
+            {t("questionDetailsPage.backToList")}
           </Link>
         </motion.div>
       </div>
@@ -177,19 +189,20 @@ const Question = () => {
               className="inline-flex items-center gap-2 rounded-full border border-[#d7e9e2] bg-white/80 px-3 py-1.5 text-xs font-bold text-[#16745f] shadow-sm backdrop-blur transition hover:bg-white"
             >
               <FiArrowLeft />
-              সব প্রশ্ন
+              {t("questionDetailsPage.allQuestions")}
             </Link>
 
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-bold text-[#16745f]">
                 <FiBookOpen />
-                {question.category?.name || "Uncategorized"}
+                {question.category?.name ||
+                  t("questionDetailsPage.uncategorized")}
               </span>
 
               {firstAnswer && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eeeafd] px-3 py-1.5 text-xs font-bold text-[#6e5bb4]">
                   <FiCheckCircle />
-                  উত্তর প্রদান করা হয়েছে
+                  {t("questionDetailsPage.answeredBadge")}
                 </span>
               )}
             </div>
@@ -201,12 +214,13 @@ const Question = () => {
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-[#71817b] sm:text-sm">
               <span className="inline-flex items-center gap-1.5">
                 <FiUser />
-                {question.askedBy?.name || "Unknown Author"}
+                {question.askedBy?.name ||
+                  t("questionDetailsPage.unknownAuthor")}
               </span>
 
               <span className="inline-flex items-center gap-1.5">
                 <FiCalendar />
-                {new Date(question.createdAt).toLocaleString("en-US", {
+                {new Date(question.createdAt).toLocaleString(locale, {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
@@ -215,12 +229,16 @@ const Question = () => {
 
               <span className="inline-flex items-center gap-1.5">
                 <FiClock />
-                {calculateReadTime(question.description)} min read
+                {t("questionDetailsPage.minRead", {
+                  count: formatNumber(calculateReadTime(question.description)),
+                })}
               </span>
 
               <span className="inline-flex items-center gap-1.5">
                 <FiEye />
-                {question.views / 2 || 0} views
+                {t("questionDetailsPage.views", {
+                  count: formatNumber(question.views / 2 || 0),
+                })}
               </span>
             </div>
           </motion.div>
@@ -246,11 +264,12 @@ const Question = () => {
 
                       <div>
                         <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d9704b]">
-                          Question
+                          {t("questionDetailsPage.questionLabel")}
                         </p>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[#687a73]">
                           <span>
-                            {question.askedBy?.name || "Unknown Author"}
+                            {question.askedBy?.name ||
+                              t("questionDetailsPage.unknownAuthor")}
                           </span>
                           <span
                             className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
@@ -258,7 +277,7 @@ const Question = () => {
                               "bg-[#edf1ee] text-[#62726b]"
                             }`}
                           >
-                            {question.askedBy?.role?.toUpperCase() || "USER"}
+                            {getRoleLabel(question.askedBy?.role)}
                           </span>
                         </div>
                       </div>
@@ -267,14 +286,14 @@ const Question = () => {
                     <div className="flex items-center gap-2">
                       <button
                         className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e1e5e1] text-[#687a73] transition hover:border-[#8bcdbd] hover:bg-[#eef8f4] hover:text-[#16745f]"
-                        aria-label="Bookmark question"
+                        aria-label={t("questionDetailsPage.bookmark")}
                       >
                         <FiBookmark />
                       </button>
 
                       <button
                         className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e1e5e1] text-[#687a73] transition hover:border-[#efb49f] hover:bg-[#fff4ee] hover:text-[#d9704b]"
-                        aria-label="Share question"
+                        aria-label={t("questionDetailsPage.share")}
                       >
                         <FiShare2 />
                       </button>
@@ -299,10 +318,10 @@ const Question = () => {
 
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#16745f]">
-                        Scholar's Answer
+                        {t("questionDetailsPage.scholarAnswerBadge")}
                       </p>
                       <h2 className="mt-1 text-xl font-extrabold text-[#263c35]">
-                        উত্তর
+                        {t("questionDetailsPage.answer")}
                       </h2>
                     </div>
                   </div>
@@ -324,10 +343,11 @@ const Question = () => {
 
                           <div>
                             <p className="text-xs text-[#7a8983]">
-                              উত্তর প্রদান করেছেন
+                              {t("questionDetailsPage.answeredBy")}
                             </p>
                             <p className="font-extrabold text-[#263c35]">
-                              {firstAnswer.answeredBy?.name || "Scholar"}
+                              {firstAnswer.answeredBy?.name ||
+                                t("questionDetailsPage.scholar")}
                             </p>
                           </div>
                         </div>
@@ -338,8 +358,10 @@ const Question = () => {
                             "bg-[#e5f4ee] text-[#16745f]"
                           }`}
                         >
-                          {firstAnswer.answeredBy?.role?.toUpperCase() ||
-                            "SCHOLAR"}
+                          {getRoleLabel(
+                            firstAnswer.answeredBy?.role,
+                            "scholar",
+                          )}
                         </span>
                       </div>
                     </>
@@ -347,11 +369,10 @@ const Question = () => {
                     <div className="mt-5 rounded-[1.2rem] border border-dashed border-[#cfded7] bg-white p-6 text-center">
                       <FiClock className="mx-auto text-3xl text-[#8aa49a]" />
                       <h3 className="mt-3 font-extrabold text-[#263c35]">
-                        উত্তর প্রস্তুত হচ্ছে
+                        {t("questionDetailsPage.answerPendingTitle")}
                       </h3>
                       <p className="mt-2 text-sm leading-6 text-[#71817b]">
-                        প্রশ্নটি আমাদের আলেমদের কাছে পাঠানো হয়েছে। উত্তর প্রকাশ
-                        হলে এখানে দেখা যাবে।
+                        {t("questionDetailsPage.answerPendingDescription")}
                       </p>
                     </div>
                   )}
@@ -367,10 +388,10 @@ const Question = () => {
                 className="rounded-[1.55rem] border border-[#e5ded0] bg-white p-5 shadow-[0_14px_40px_rgba(45,75,65,0.07)] lg:sticky lg:top-24"
               >
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8b77ce]">
-                  Asked By
+                  {t("questionDetailsPage.askedBy")}
                 </p>
                 <h3 className="mt-1 text-lg font-extrabold text-[#263c35]">
-                  প্রশ্নকারী
+                  {t("questionDetailsPage.asker")}
                 </h3>
 
                 <div className="mt-5 flex items-center gap-3">
@@ -380,7 +401,8 @@ const Question = () => {
 
                   <div className="min-w-0">
                     <h4 className="truncate font-extrabold text-[#263c35]">
-                      {question.askedBy?.name || "Unknown Author"}
+                      {question.askedBy?.name ||
+                        t("questionDetailsPage.unknownAuthor")}
                     </h4>
                     <span
                       className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${
@@ -388,41 +410,56 @@ const Question = () => {
                         "bg-[#edf1ee] text-[#62726b]"
                       }`}
                     >
-                      {question.askedBy?.role?.toUpperCase() || "USER"}
+                      {getRoleLabel(question.askedBy?.role)}
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-5 space-y-3 rounded-[1.15rem] bg-[#f8faf7] p-4">
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[#71817b]">ক্যাটাগরি</span>
+                    <span className="text-[#71817b]">
+                      {t("questionDetailsPage.category")}
+                    </span>
                     <span className="text-right font-bold text-[#263c35]">
-                      {question.category?.name || "N/A"}
+                      {question.category?.name ||
+                        t("questionDetailsPage.uncategorized")}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[#71817b]">পাঠের সময়</span>
+                    <span className="text-[#71817b]">
+                      {t("questionDetailsPage.readTime")}
+                    </span>
                     <span className="font-bold text-[#263c35]">
-                      {calculateReadTime(question.description)} মিনিট
+                      {t("questionDetailsPage.minutes", {
+                        count: formatNumber(
+                          calculateReadTime(question.description),
+                        ),
+                      })}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[#71817b]">ভিউ</span>
+                    <span className="text-[#71817b]">
+                      {t("questionDetailsPage.viewsLabel")}
+                    </span>
                     <span className="font-bold text-[#263c35]">
-                      {question.views / 2 || 0}
+                      {formatNumber(question.views / 2 || 0)}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[#71817b]">অবস্থা</span>
+                    <span className="text-[#71817b]">
+                      {t("questionDetailsPage.status")}
+                    </span>
                     <span
                       className={`font-bold ${
                         firstAnswer ? "text-[#16745f]" : "text-[#d9704b]"
                       }`}
                     >
-                      {firstAnswer ? "উত্তর দেওয়া হয়েছে" : "উত্তরের অপেক্ষায়"}
+                      {firstAnswer
+                        ? t("questionDetailsPage.answered")
+                        : t("questionDetailsPage.awaiting")}
                     </span>
                   </div>
                 </div>
@@ -443,18 +480,17 @@ const Question = () => {
                   </div>
 
                   <h3 className="mt-5 text-xl font-extrabold">
-                    আপনারও কি কোনো প্রশ্ন আছে?
+                    {t("questionDetailsPage.ctaTitle")}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-white/70">
-                    আপনার প্রশ্নটি পাঠান। যাচাইয়ের পর আমাদের আলেমরা উত্তর প্রদান
-                    করবেন।
+                    {t("questionDetailsPage.ctaDescription")}
                   </p>
 
                   <Link
                     to="/qa/ask-question"
                     className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f7c969] px-4 py-3 text-sm font-extrabold text-[#263c35] transition hover:-translate-y-0.5 hover:bg-[#ffda7f]"
                   >
-                    এখনই প্রশ্ন করুন
+                    {t("questionDetailsPage.askNow")}
                     <FiArrowRight />
                   </Link>
                 </div>

@@ -17,6 +17,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +30,7 @@ const ResetPassword = () => {
 
   const { token } = useParams();
   const { resetPassword, error, loading, logout } = useAuth();
+  const { t } = useLanguage();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,6 +45,17 @@ const ResetPassword = () => {
     e.preventDefault();
 
     const password = formData.password;
+
+    if (password.length < 8) {
+      toast.error(t("resetPasswordPage.validation.passwordLength"));
+      return;
+    }
+
+    if (formData.confirmPassword !== password) {
+      toast.error(t("resetPasswordPage.validation.passwordMismatch"));
+      return;
+    }
+
     const response = await resetPassword(token, password);
 
     if (response?.success) {
@@ -53,7 +66,7 @@ const ResetPassword = () => {
         response?.message ||
           error?.response?.data?.message ||
           error?.message ||
-          "Password reset failed",
+          t("resetPasswordPage.resetFailed"),
       );
     }
   };
@@ -84,29 +97,29 @@ const ResetPassword = () => {
             className="inline-flex items-center gap-2 rounded-full border border-[#dce5df] bg-white px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:border-[#8bcdbd] hover:bg-[#f1f8f5]"
           >
             <FiArrowLeft />
-            সাইন ইন পেজে ফিরে যান
+            {t("resetPasswordPage.backLogin")}
           </Link>
 
           <div className="mt-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#eeeafd] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
               <FiShield />
-              Secure Password Reset
+              {t("resetPasswordPage.badge")}
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold leading-tight text-[#263c35] sm:text-4xl">
               {step === 1 ? (
                 <>
-                  একটি নতুন
+                  {t("resetPasswordPage.headingStep1Prefix")}
                   <span className="relative ml-2 inline-block text-[#16745f]">
-                    পাসওয়ার্ড তৈরি করুন
+                    {t("resetPasswordPage.headingStep1Accent")}
                     <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
                   </span>
                 </>
               ) : (
                 <>
-                  পাসওয়ার্ড
+                  {t("resetPasswordPage.headingStep2Prefix")}
                   <span className="relative ml-2 inline-block text-[#16745f]">
-                    সফলভাবে পরিবর্তন হয়েছে
+                    {t("resetPasswordPage.headingStep2Accent")}
                     <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
                   </span>
                 </>
@@ -115,8 +128,8 @@ const ResetPassword = () => {
 
             <p className="mt-3 max-w-xl text-sm leading-7 text-[#71817b]">
               {step === 1
-                ? "আপনার অ্যাকাউন্টের জন্য একটি নতুন নিরাপদ পাসওয়ার্ড লিখুন এবং একই পাসওয়ার্ড পুনরায় নিশ্চিত করুন।"
-                : "আপনার নতুন পাসওয়ার্ড এখন সক্রিয়। নতুন পাসওয়ার্ড ব্যবহার করে আবার সাইন ইন করতে পারবেন।"}
+                ? t("resetPasswordPage.descriptionStep1")
+                : t("resetPasswordPage.descriptionStep2")}
             </p>
           </div>
 
@@ -136,10 +149,10 @@ const ResetPassword = () => {
 
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                    Step One
+                    {t("resetPasswordPage.stepOne")}
                   </p>
                   <p className="text-xs font-extrabold text-[#263c35] sm:text-sm">
-                    নতুন পাসওয়ার্ড
+                    {t("resetPasswordPage.newPasswordShort")}
                   </p>
                 </div>
               </div>
@@ -171,10 +184,10 @@ const ResetPassword = () => {
 
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                    Step Two
+                    {t("resetPasswordPage.stepTwo")}
                   </p>
                   <p className="text-xs font-extrabold text-[#263c35] sm:text-sm">
-                    সম্পন্ন
+                    {t("resetPasswordPage.completed")}
                   </p>
                 </div>
               </div>
@@ -199,7 +212,7 @@ const ResetPassword = () => {
                     className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                   >
                     <FiKey className="text-[#7865c9]" />
-                    নতুন পাসওয়ার্ড
+                    {t("resetPasswordPage.newPasswordLabel")}
                     <span className="text-[#d9704b]">*</span>
                   </label>
 
@@ -213,7 +226,9 @@ const ResetPassword = () => {
                       value={formData.password}
                       onChange={handleChange}
                       className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-white pl-11 pr-12 text-sm font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:ring-4 focus:ring-[#8bcdbd]/15"
-                      placeholder="নতুন পাসওয়ার্ড লিখুন"
+                      placeholder={t(
+                        "resetPasswordPage.newPasswordPlaceholder",
+                      )}
                       required
                       autoComplete="new-password"
                     />
@@ -223,7 +238,9 @@ const ResetPassword = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#8b9893] transition hover:bg-[#eef3ef] hover:text-[#16745f]"
                       aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                        showPassword
+                          ? t("resetPasswordPage.hidePassword")
+                          : t("resetPasswordPage.showPassword")
                       }
                     >
                       {showPassword ? <FiEyeOff /> : <FiEye />}
@@ -238,7 +255,7 @@ const ResetPassword = () => {
                     className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                   >
                     <FiLock className="text-[#d9704b]" />
-                    নতুন পাসওয়ার্ড নিশ্চিত করুন
+                    {t("resetPasswordPage.confirmPasswordLabel")}
                     <span className="text-[#d9704b]">*</span>
                   </label>
 
@@ -258,7 +275,9 @@ const ResetPassword = () => {
                             : "border-[#e4a58f] focus:border-[#d9704b] focus:ring-[#ef8f6d]/12"
                           : "border-[#dfe5e0] focus:border-[#8bcdbd] focus:ring-[#8bcdbd]/15"
                       }`}
-                      placeholder="পাসওয়ার্ড আবার লিখুন"
+                      placeholder={t(
+                        "resetPasswordPage.confirmPasswordPlaceholder",
+                      )}
                       required
                       autoComplete="new-password"
                     />
@@ -271,8 +290,8 @@ const ResetPassword = () => {
                       className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#8b9893] transition hover:bg-[#eef3ef] hover:text-[#16745f]"
                       aria-label={
                         showConfirmPassword
-                          ? "Hide confirmed password"
-                          : "Show confirmed password"
+                          ? t("resetPasswordPage.hideConfirmPassword")
+                          : t("resetPasswordPage.showConfirmPassword")
                       }
                     >
                       {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
@@ -291,8 +310,8 @@ const ResetPassword = () => {
                       >
                         {passwordsMatch ? <FiCheckCircle /> : <FiInfo />}
                         {passwordsMatch
-                          ? "দুটি পাসওয়ার্ড মিলেছে"
-                          : "দুটি পাসওয়ার্ড মিলছে না"}
+                          ? t("resetPasswordPage.passwordsMatch")
+                          : t("resetPasswordPage.passwordsDoNotMatch")}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -302,8 +321,7 @@ const ResetPassword = () => {
                 <div className="flex items-start gap-3 rounded-[1.15rem] border border-[#ded8f4] bg-[#f7f4ff] p-4">
                   <FiInfo className="mt-0.5 shrink-0 text-[#7865c9]" />
                   <p className="text-xs leading-6 text-[#665d82] sm:text-sm">
-                    নিরাপত্তার জন্য এমন পাসওয়ার্ড ব্যবহার করুন যা অন্য কোনো
-                    অ্যাকাউন্টে ব্যবহার করেন না।
+                    {t("resetPasswordPage.notice")}
                   </p>
                 </div>
 
@@ -317,11 +335,11 @@ const ResetPassword = () => {
                   {loading ? (
                     <>
                       <FiLoader className="animate-spin" />
-                      রিসেট করা হচ্ছে...
+                      {t("resetPasswordPage.resetting")}
                     </>
                   ) : (
                     <>
-                      পাসওয়ার্ড রিসেট করুন
+                      {t("resetPasswordPage.resetButton")}
                       <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                     </>
                   )}
@@ -347,12 +365,11 @@ const ResetPassword = () => {
                   </motion.div>
 
                   <h3 className="mt-4 text-xl font-extrabold text-[#263c35]">
-                    পাসওয়ার্ড আপডেট হয়েছে
+                    {t("resetPasswordPage.successTitle")}
                   </h3>
 
                   <p className="mt-2 text-sm leading-7 text-[#5d746a]">
-                    আপনার নতুন পাসওয়ার্ড সফলভাবে সংরক্ষণ করা হয়েছে। এখন নতুন
-                    পাসওয়ার্ড ব্যবহার করে সাইন ইন করুন।
+                    {t("resetPasswordPage.successDescription")}
                   </p>
                 </div>
 
@@ -360,7 +377,7 @@ const ResetPassword = () => {
                   to="/login"
                   className="group mt-5 inline-flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#16745f] px-6 text-base font-extrabold text-white shadow-[0_15px_34px_rgba(22,116,95,0.24)] transition hover:-translate-y-0.5 hover:bg-[#115f4e]"
                 >
-                  এখন সাইন ইন করুন
+                  {t("resetPasswordPage.signInNow")}
                   <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                 </Link>
               </motion.div>
@@ -384,7 +401,7 @@ const ResetPassword = () => {
               <div className="flex items-center justify-between gap-4">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#f7c969]">
                   <FiKey />
-                  New Password
+                  {t("resetPasswordPage.asideBadge")}
                 </span>
 
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#9de2c9]">
@@ -393,20 +410,19 @@ const ResetPassword = () => {
               </div>
 
               <h2 className="mt-7 text-3xl font-extrabold leading-tight sm:text-4xl">
-                নতুন পাসওয়ার্ডটি শক্তিশালী ও আলাদা রাখুন
+                {t("resetPasswordPage.asideTitle")}
               </h2>
 
               <p className="mt-4 max-w-lg text-sm leading-7 text-white/68 sm:text-base">
-                একটি শক্তিশালী পাসওয়ার্ড আপনার অ্যাকাউন্ট, কোর্স ও ব্যক্তিগত
-                তথ্যকে অননুমোদিত প্রবেশ থেকে সুরক্ষিত রাখতে সাহায্য করে।
+                {t("resetPasswordPage.asideDescription")}
               </p>
 
               <div className="mt-8 space-y-3">
                 {[
-                  "কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড ব্যবহার করা ভালো",
-                  "বড় ও ছোট হাতের অক্ষর, সংখ্যা ও চিহ্ন মিশিয়ে ব্যবহার করুন",
-                  "আগের পাসওয়ার্ড পুনরায় ব্যবহার না করাই নিরাপদ",
-                  "পাসওয়ার্ড অন্য কারও সঙ্গে শেয়ার করবেন না",
+                  t("resetPasswordPage.tips.minLength"),
+                  t("resetPasswordPage.tips.mixCharacters"),
+                  t("resetPasswordPage.tips.noReuse"),
+                  t("resetPasswordPage.tips.doNotShare"),
                 ].map((item, index) => (
                   <motion.div
                     key={item}
@@ -437,11 +453,10 @@ const ResetPassword = () => {
 
                   <div>
                     <p className="text-sm font-extrabold text-white">
-                      Security Reminder
+                      {t("resetPasswordPage.securityTitle")}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-white/52">
-                      পাসওয়ার্ড reset link বা নতুন পাসওয়ার্ড কারও সঙ্গে শেয়ার
-                      করবেন না।
+                      {t("resetPasswordPage.securityDescription")}
                     </p>
                   </div>
                 </div>
@@ -449,7 +464,7 @@ const ResetPassword = () => {
 
               <p className="mt-5 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-white/45">
                 <FiShield className="text-[#9de2c9]" />
-                Secure password reset workflow
+                {t("resetPasswordPage.secureWorkflow")}
               </p>
             </div>
           </div>

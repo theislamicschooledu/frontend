@@ -18,6 +18,7 @@ import { useNavigate, useParams } from "react-router";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
 const UpdateQuestion = () => {
   const [title, setTitle] = useState("");
@@ -28,6 +29,7 @@ const UpdateQuestion = () => {
   const quillRef = useRef(null);
   const { id } = useParams();
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
 
   useEffect(() => {
     const fetchQuestion = async () => {
@@ -42,13 +44,16 @@ const UpdateQuestion = () => {
           quillRef.current.root.innerHTML = q.description || "";
         }
       } catch (error) {
-        toast.error(error.message);
+        toast.error(
+          error?.response?.data?.message || t("updateQuestionPage.loadFailed"),
+        );
       } finally {
         setLocalLoading(false);
       }
     };
 
     fetchQuestion();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -57,31 +62,42 @@ const UpdateQuestion = () => {
         const res = await api.get("/qna/questionCategory");
         setCategories(res.data.categories);
       } catch (error) {
-        toast.error(error.message);
+        toast.error(
+          error?.response?.data?.message ||
+            t("updateQuestionPage.categoriesLoadFailed"),
+        );
       }
     };
 
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
-        placeholder: "Update your question details here...",
+        placeholder: t("updateQuestionPage.editorPlaceholder"),
         modules: {
           toolbar: [["bold", "italic", "underline", "strike"], ["clean"]],
         },
       });
     }
-  }, []);
+
+    if (quillRef.current?.root) {
+      quillRef.current.root.dataset.placeholder = t(
+        "updateQuestionPage.editorPlaceholder",
+      );
+    }
+  }, [language, t]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const description = quillRef.current.root.innerHTML;
+    const description = quillRef.current?.root?.innerHTML || "";
+    const descriptionText = quillRef.current?.getText()?.trim() || "";
 
-    if (!title || !description || !selectedCategory) {
-      toast.error("Title, description, and category are required!");
+    if (!title.trim() || !descriptionText || !selectedCategory) {
+      toast.error(t("updateQuestionPage.validationRequired"));
       return;
     }
 
@@ -96,29 +112,31 @@ const UpdateQuestion = () => {
       const res = await api.put(`/qna/${id}`, formData);
 
       if (res.data.success) {
-        toast.success(res.data.message || "Question updated successfully!");
+        toast.success(res.data.message || t("updateQuestionPage.updated"));
         navigate("/admin/questions");
       } else {
-        toast.error(res.data.message || "Failed to update!");
+        toast.error(res.data.message || t("updateQuestionPage.updateFailed"));
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(
+        error?.response?.data?.message || t("updateQuestionPage.updateFailed"),
+      );
     } finally {
       setLocalLoading(false);
     }
   };
 
   const guidelines = [
-    "প্রশ্নের মূল বিষয় ও প্রেক্ষাপট পরিষ্কারভাবে উপস্থাপন করুন",
-    "শিরোনাম সংক্ষিপ্ত, নির্দিষ্ট ও সহজবোধ্য রাখুন",
-    "অপ্রয়োজনীয় ব্যক্তিগত বা সংবেদনশীল তথ্য সরিয়ে দিন",
-    "প্রকাশের আগে বানান, ভাষা ও তথ্য পুনরায় যাচাই করুন",
+    t("updateQuestionPage.guidelines.context"),
+    t("updateQuestionPage.guidelines.title"),
+    t("updateQuestionPage.guidelines.privacy"),
+    t("updateQuestionPage.guidelines.review"),
   ];
 
   const tips = [
-    "প্রয়োজনীয় বয়স, সময় বা ঘটনার প্রেক্ষাপট উল্লেখ রাখুন",
-    "একাধিক বিষয় থাকলে মূল প্রশ্নটিকে অগ্রাধিকার দিন",
-    "প্রয়োজনে প্রশ্নের ভাষা আরও সম্মানজনক ও নিরপেক্ষ করুন",
+    t("updateQuestionPage.tips.context"),
+    t("updateQuestionPage.tips.priority"),
+    t("updateQuestionPage.tips.respectful"),
   ];
 
   return (
@@ -158,25 +176,24 @@ const UpdateQuestion = () => {
               className="inline-flex items-center gap-2 rounded-full border border-[#d7e9e2] bg-white/80 px-3 py-1.5 text-xs font-bold text-[#16745f] shadow-sm backdrop-blur transition hover:bg-white"
             >
               <FiArrowLeft />
-              ফিরে যান
+              {t("updateQuestionPage.back")}
             </button>
 
             <div className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full bg-[#eeeafd] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
               <FiEdit3 />
-              Question Management
+              {t("updateQuestionPage.badge")}
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold leading-[1.18] text-[#263c35] sm:text-4xl lg:text-[3.1rem]">
-              প্রশ্নের তথ্য
+              {t("updateQuestionPage.headingPrefix")}
               <span className="relative ml-2 inline-block text-[#16745f]">
-                আপডেট করুন
+                {t("updateQuestionPage.headingAccent")}
                 <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
               </span>
             </h1>
 
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#687a73] sm:text-base">
-              প্রশ্নের শিরোনাম, ক্যাটাগরি ও বিস্তারিত তথ্য পর্যালোচনা করে
-              প্রয়োজনীয় পরিবর্তন সংরক্ষণ করুন।
+              {t("updateQuestionPage.description")}
             </p>
           </motion.div>
         </div>
@@ -215,10 +232,10 @@ const UpdateQuestion = () => {
 
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d9704b]">
-                        Edit Form
+                        {t("updateQuestionPage.formBadge")}
                       </p>
                       <h2 className="mt-1 text-xl font-extrabold text-[#263c35] sm:text-2xl">
-                        প্রশ্নের তথ্য সম্পাদনা
+                        {t("updateQuestionPage.formTitle")}
                       </h2>
                     </div>
                   </div>
@@ -233,7 +250,7 @@ const UpdateQuestion = () => {
                         className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg"
                       >
                         <FiHelpCircle className="text-[#d9704b]" />
-                        প্রশ্নের শিরোনাম
+                        {t("updateQuestionPage.titleLabel")}
                       </label>
 
                       <span
@@ -252,7 +269,7 @@ const UpdateQuestion = () => {
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Enter your question title..."
+                      placeholder={t("updateQuestionPage.titlePlaceholder")}
                       className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-[#fafbf8] px-4 text-base font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:bg-white focus:ring-4 focus:ring-[#8bcdbd]/15"
                       maxLength={200}
                       required
@@ -265,17 +282,16 @@ const UpdateQuestion = () => {
                       <div>
                         <label className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg">
                           <FiBook className="text-[#16745f]" />
-                          ক্যাটাগরি নির্বাচন করুন
+                          {t("updateQuestionPage.categoryLabel")}
                         </label>
                         <p className="mt-1 text-xs leading-5 text-[#7b8983] sm:text-sm">
-                          প্রশ্নের সঙ্গে সবচেয়ে প্রাসঙ্গিক একটি ক্যাটাগরি
-                          নির্বাচন করুন।
+                          {t("updateQuestionPage.categoryHelp")}
                         </p>
                       </div>
 
                       {selectedCategory && (
                         <span className="w-fit rounded-full bg-[#e5f4ee] px-3 py-1 text-xs font-bold text-[#16745f]">
-                          নির্বাচিত
+                          {t("updateQuestionPage.selected")}
                         </span>
                       )}
                     </div>
@@ -330,11 +346,10 @@ const UpdateQuestion = () => {
                     <div className="mb-3">
                       <label className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg">
                         <FiEdit3 className="text-[#7865c9]" />
-                        প্রশ্নের বিস্তারিত
+                        {t("updateQuestionPage.detailsLabel")}
                       </label>
                       <p className="mt-1 text-xs leading-5 text-[#7b8983] sm:text-sm">
-                        প্রশ্নের প্রেক্ষাপট, তথ্য ও ভাষা প্রয়োজন অনুযায়ী সংশোধন
-                        করুন।
+                        {t("updateQuestionPage.detailsHelp")}
                       </p>
                     </div>
 
@@ -349,8 +364,7 @@ const UpdateQuestion = () => {
                       <FiInfo />
                     </div>
                     <p className="text-xs leading-6 text-[#665d82] sm:text-sm">
-                      পরিবর্তন সংরক্ষণ করার আগে প্রশ্নের ভাষা, ক্যাটাগরি ও
-                      বিস্তারিত তথ্য পুনরায় যাচাই করুন।
+                      {t("updateQuestionPage.notice")}
                     </p>
                   </div>
 
@@ -365,12 +379,12 @@ const UpdateQuestion = () => {
                     {localLoading ? (
                       <>
                         <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                        সংরক্ষণ করা হচ্ছে...
+                        {t("updateQuestionPage.saving")}
                       </>
                     ) : (
                       <>
                         <FiSave />
-                        পরিবর্তন সংরক্ষণ করুন
+                        {t("updateQuestionPage.save")}
                       </>
                     )}
                   </motion.button>
@@ -390,10 +404,10 @@ const UpdateQuestion = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8b77ce]">
-                        Guidelines
+                        {t("updateQuestionPage.guidelinesBadge")}
                       </p>
                       <h3 className="mt-1 text-lg font-extrabold text-[#263c35]">
-                        সম্পাদনার নির্দেশনা
+                        {t("updateQuestionPage.guidelinesTitle")}
                       </h3>
                     </div>
 
@@ -432,7 +446,7 @@ const UpdateQuestion = () => {
                     </div>
 
                     <h3 className="mt-5 text-xl font-extrabold">
-                      মানসম্মত প্রশ্নের টিপস
+                      {t("updateQuestionPage.tipsTitle")}
                     </h3>
 
                     <div className="mt-4 space-y-3">
@@ -462,10 +476,10 @@ const UpdateQuestion = () => {
 
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d9704b]">
-                        Update Status
+                        {t("updateQuestionPage.statusBadge")}
                       </p>
                       <h3 className="mt-1 font-extrabold text-[#263c35]">
-                        পরিবর্তন সংরক্ষণ
+                        {t("updateQuestionPage.statusTitle")}
                       </h3>
                     </div>
                   </div>
@@ -478,10 +492,10 @@ const UpdateQuestion = () => {
 
                       <div>
                         <p className="text-sm font-extrabold text-[#263c35]">
-                          Ready to update
+                          {t("updateQuestionPage.readyTitle")}
                         </p>
                         <p className="mt-0.5 text-xs text-[#71817b]">
-                          Save করলে admin questions page-এ ফিরে যাবে।
+                          {t("updateQuestionPage.readyNote")}
                         </p>
                       </div>
                     </div>

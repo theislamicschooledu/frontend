@@ -19,6 +19,7 @@ import {
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,6 +35,7 @@ const SignUp = () => {
   const [errors, setErrors] = useState({});
 
   const { signup, loading } = useAuth();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -58,35 +60,35 @@ const SignUp = () => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = t("signupPage.validation.nameRequired");
     }
 
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("signupPage.validation.emailRequired");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = t("signupPage.validation.invalidEmail");
     }
 
     if (!formData.phone) {
-      newErrors.phone = "Phone number is required";
+      newErrors.phone = t("signupPage.validation.phoneRequired");
     } else if (!/^01[0-9]{9}$/.test(formData.phone)) {
-      newErrors.phone = "Phone must be 11 digits and start with 01";
+      newErrors.phone = t("signupPage.validation.invalidPhone");
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t("signupPage.validation.passwordRequired");
     } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+      newErrors.password = t("signupPage.validation.passwordLength");
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Confirm Password is required";
+      newErrors.confirmPassword = t("signupPage.validation.confirmRequired");
     } else if (formData.confirmPassword !== formData.password) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = t("signupPage.validation.passwordMismatch");
     }
 
     if (!formData.agreeToTerms) {
-      newErrors.agreeToTerms = "You must agree to the terms";
+      newErrors.agreeToTerms = t("signupPage.validation.termsRequired");
     }
 
     setErrors(newErrors);
@@ -103,30 +105,45 @@ const SignUp = () => {
     if (response?.success) {
       navigate("/verify-otp");
     } else {
-      alert(response?.message || "Signup failed");
+      alert(response?.message || t("signupPage.signupFailed"));
     }
   };
 
   const benefits = [
     {
       icon: FiBookOpen,
-      title: "সমৃদ্ধ কোর্স লাইব্রেরি",
-      text: "বয়স ও দক্ষতা অনুযায়ী সাজানো ইসলামিক কোর্স ও উপকরণ।",
+      title: t("signupPage.benefits.libraryTitle"),
+      text: t("signupPage.benefits.libraryText"),
     },
     {
       icon: FiBarChart2,
-      title: "অগ্রগতি পর্যবেক্ষণ",
-      text: "শেখার অগ্রগতি, সম্পন্ন পাঠ এবং অর্জন সহজে দেখুন।",
+      title: t("signupPage.benefits.progressTitle"),
+      text: t("signupPage.benefits.progressText"),
     },
     {
       icon: FiUsers,
-      title: "অভিজ্ঞ শিক্ষক",
-      text: "যোগ্য শিক্ষক ও আলেমদের কাছ থেকে নির্ভরযোগ্য শিক্ষা নিন।",
+      title: t("signupPage.benefits.teachersTitle"),
+      text: t("signupPage.benefits.teachersText"),
     },
     {
       icon: FiAward,
-      title: "ইন্টার‌্যাক্টিভ লার্নিং",
-      text: "কুইজ, অ্যাক্টিভিটি ও অনুশীলনের মাধ্যমে আনন্দে শিখুন।",
+      title: t("signupPage.benefits.interactiveTitle"),
+      text: t("signupPage.benefits.interactiveText"),
+    },
+  ];
+
+  const stats = [
+    {
+      value: language === "bn" ? "৪২+" : "42+",
+      label: t("signupPage.stats.courses"),
+    },
+    {
+      value: language === "bn" ? "১১৪+" : "114+",
+      label: t("signupPage.stats.teachers"),
+    },
+    {
+      value: language === "bn" ? "১ লক্ষ+" : "100K+",
+      label: t("signupPage.stats.students"),
     },
   ];
 
@@ -160,14 +177,14 @@ const SignUp = () => {
               className="inline-flex items-center gap-2 rounded-full border border-[#dce5df] bg-white px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:border-[#8bcdbd] hover:bg-[#f1f8f5]"
             >
               <FiArrowLeft />
-              হোমে ফিরে যান
+              {t("signupPage.backHome")}
             </Link>
 
             <Link
               to="/login"
               className="inline-flex items-center gap-2 rounded-full bg-[#eef8f4] px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:bg-[#e2f2ec]"
             >
-              সাইন ইন
+              {t("signupPage.signIn")}
               <FiArrowRight />
             </Link>
           </div>
@@ -175,20 +192,19 @@ const SignUp = () => {
           <div className="mt-7">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#eeeafd] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
               <FiShield />
-              Secure Registration
+              {t("signupPage.badge")}
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold leading-tight text-[#263c35] sm:text-4xl">
-              নতুন অ্যাকাউন্ট
+              {t("signupPage.headingPrefix")}
               <span className="relative ml-2 inline-block text-[#16745f]">
-                তৈরি করুন
+                {t("signupPage.headingAccent")}
                 <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
               </span>
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-7 text-[#71817b]">
-              ইসলামিক শিক্ষা, কোর্স ও শেখার অগ্রগতি ব্যবস্থাপনার জন্য আপনার
-              অ্যাকাউন্ট তৈরি করুন।
+              {t("signupPage.description")}
             </p>
           </div>
 
@@ -201,7 +217,7 @@ const SignUp = () => {
                   className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                 >
                   <FiUser className="text-[#16745f]" />
-                  আপনার নাম
+                  {t("signupPage.nameLabel")}
                   <span className="text-[#d9704b]">*</span>
                 </label>
 
@@ -214,7 +230,7 @@ const SignUp = () => {
                     value={formData.name}
                     onChange={handleChange}
                     className={getInputClass("name")}
-                    placeholder="আপনার পুরো নাম"
+                    placeholder={t("signupPage.namePlaceholder")}
                     required
                   />
                 </div>
@@ -233,7 +249,7 @@ const SignUp = () => {
                   className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                 >
                   <FiPhone className="text-[#16745f]" />
-                  মোবাইল নম্বর
+                  {t("signupPage.phoneLabel")}
                   <span className="text-[#d9704b]">*</span>
                 </label>
 
@@ -258,7 +274,7 @@ const SignUp = () => {
                   </p>
                 ) : (
                   <p className="mt-1.5 text-[11px] font-medium text-[#8a9691]">
-                    ১১ ডিজিটের বাংলাদেশি নম্বর দিন
+                    {t("signupPage.phoneHint")}
                   </p>
                 )}
               </div>
@@ -271,7 +287,7 @@ const SignUp = () => {
                 className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
               >
                 <FiMail className="text-[#7865c9]" />
-                ইমেইল ঠিকানা
+                {t("signupPage.emailLabel")}
                 <span className="text-[#d9704b]">*</span>
               </label>
 
@@ -304,7 +320,7 @@ const SignUp = () => {
                   className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                 >
                   <FiLock className="text-[#d9704b]" />
-                  পাসওয়ার্ড
+                  {t("signupPage.passwordLabel")}
                   <span className="text-[#d9704b]">*</span>
                 </label>
 
@@ -317,7 +333,7 @@ const SignUp = () => {
                     value={formData.password}
                     onChange={handleChange}
                     className={getInputClass("password", "pr-11")}
-                    placeholder="কমপক্ষে ৮ অক্ষর"
+                    placeholder={t("signupPage.passwordPlaceholder")}
                     required
                   />
 
@@ -326,7 +342,9 @@ const SignUp = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#8b9893] transition hover:bg-[#eef3ef] hover:text-[#16745f]"
                     aria-label={
-                      showPassword ? "Hide password" : "Show password"
+                      showPassword
+                        ? t("signupPage.hidePassword")
+                        : t("signupPage.showPassword")
                     }
                   >
                     {showPassword ? <FiEyeOff /> : <FiEye />}
@@ -339,7 +357,7 @@ const SignUp = () => {
                   </p>
                 ) : (
                   <p className="mt-1.5 text-[11px] font-medium text-[#8a9691]">
-                    কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড দিন
+                    {t("signupPage.passwordHint")}
                   </p>
                 )}
               </div>
@@ -351,7 +369,7 @@ const SignUp = () => {
                   className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                 >
                   <FiLock className="text-[#d9704b]" />
-                  পাসওয়ার্ড নিশ্চিত করুন
+                  {t("signupPage.confirmPasswordLabel")}
                   <span className="text-[#d9704b]">*</span>
                 </label>
 
@@ -364,7 +382,7 @@ const SignUp = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className={getInputClass("confirmPassword", "pr-11")}
-                    placeholder="পাসওয়ার্ড আবার লিখুন"
+                    placeholder={t("signupPage.confirmPasswordPlaceholder")}
                     required
                   />
 
@@ -374,8 +392,8 @@ const SignUp = () => {
                     className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#8b9893] transition hover:bg-[#eef3ef] hover:text-[#16745f]"
                     aria-label={
                       showConfirmPassword
-                        ? "Hide confirmed password"
-                        : "Show confirmed password"
+                        ? t("signupPage.hideConfirmPassword")
+                        : t("signupPage.showConfirmPassword")
                     }
                   >
                     {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
@@ -409,21 +427,21 @@ const SignUp = () => {
                 />
 
                 <span className="text-xs leading-6 text-[#63736c] sm:text-sm">
-                  আমি{" "}
+                  {t("signupPage.agreePrefix")}{" "}
                   <a
                     href="#"
                     className="font-extrabold text-[#16745f] hover:text-[#115f4e]"
                   >
-                    Terms of Service
+                    {t("signupPage.terms")}
                   </a>{" "}
-                  এবং{" "}
+                  {t("signupPage.and")}{" "}
                   <a
                     href="#"
                     className="font-extrabold text-[#16745f] hover:text-[#115f4e]"
                   >
-                    Privacy Policy
+                    {t("signupPage.privacy")}
                   </a>{" "}
-                  মেনে নিচ্ছি।
+                  {t("signupPage.agreeSuffix")}
                 </span>
               </label>
 
@@ -444,11 +462,11 @@ const SignUp = () => {
               {loading ? (
                 <>
                   <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                  অ্যাকাউন্ট তৈরি হচ্ছে...
+                  {t("signupPage.creatingAccount")}
                 </>
               ) : (
                 <>
-                  অ্যাকাউন্ট তৈরি করুন
+                  {t("signupPage.createAccount")}
                   <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                 </>
               )}
@@ -457,12 +475,12 @@ const SignUp = () => {
 
           <div className="mt-6 border-t border-[#ece5d8] pt-5 text-center">
             <p className="text-sm text-[#71817b]">
-              ইতোমধ্যে অ্যাকাউন্ট আছে?{" "}
+              {t("signupPage.haveAccount")}{" "}
               <Link
                 to="/login"
                 className="font-extrabold text-[#16745f] transition hover:text-[#115f4e]"
               >
-                সাইন ইন করুন
+                {t("signupPage.signIn")}
               </Link>
             </p>
           </div>
@@ -484,7 +502,7 @@ const SignUp = () => {
               <div className="flex items-center justify-between gap-4">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#f7c969]">
                   <FiUsers />
-                  Join Our Community
+                  {t("signupPage.asideBadge")}
                 </span>
 
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#9de2c9]">
@@ -493,12 +511,11 @@ const SignUp = () => {
               </div>
 
               <h2 className="mt-7 text-3xl font-extrabold leading-tight sm:text-4xl">
-                একটি সুন্দর ইসলামিক শেখার পরিবেশে যুক্ত হোন
+                {t("signupPage.asideTitle")}
               </h2>
 
               <p className="mt-4 max-w-lg text-sm leading-7 text-white/68 sm:text-base">
-                পরিবার ও শিশুদের ইসলামিক শিক্ষা সহজ, আকর্ষণীয় এবং নিয়মিত করার
-                জন্য তৈরি আমাদের ডিজিটাল লার্নিং কমিউনিটি।
+                {t("signupPage.asideDescription")}
               </p>
 
               <div className="mt-8 space-y-3">
@@ -536,11 +553,7 @@ const SignUp = () => {
 
             <div className="mt-8 border-t border-white/10 pt-6">
               <div className="grid grid-cols-3 gap-3">
-                {[
-                  { value: "৪২+", label: "কোর্স" },
-                  { value: "১১৪+", label: "শিক্ষক" },
-                  { value: "১ লক্ষ+", label: "শিক্ষার্থী" },
-                ].map((stat) => (
+                {stats.map((stat) => (
                   <div
                     key={stat.label}
                     className="rounded-xl bg-white/[0.07] p-3 text-center"
@@ -557,7 +570,7 @@ const SignUp = () => {
 
               <p className="mt-5 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-white/45">
                 <FiShield className="text-[#9de2c9]" />
-                নিরাপদ নিবন্ধন ও ব্যক্তিগত তথ্যের সুরক্ষা
+                {t("signupPage.secureRegistration")}
               </p>
             </div>
           </div>

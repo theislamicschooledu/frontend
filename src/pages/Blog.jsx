@@ -17,6 +17,7 @@ import { FaFeatherAlt, FaQuoteLeft } from "react-icons/fa";
 import { useParams, Link } from "react-router";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
 const roleColors = {
   admin: "border-[#ded2ff] bg-[#f2edff] text-[#7654c8]",
@@ -33,6 +34,9 @@ const floatingDecorations = [
 ];
 
 const Blog = () => {
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [blog, setBlog] = useState(null);
@@ -50,7 +54,7 @@ const Blog = () => {
         }
       } catch (error) {
         console.error("Error fetching blog:", error);
-        toast.error("Failed to load blog");
+        toast.error(t("blogDetailsPage.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -71,6 +75,7 @@ const Blog = () => {
       fetchBlog();
       incrementView();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -104,10 +109,10 @@ const Blog = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-xl font-extrabold text-slate-800"
           >
-            Loading Article
+            {t("blogDetailsPage.loadingTitle")}
           </motion.h3>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Please wait while we prepare the article for you.
+            {t("blogDetailsPage.loadingDescription")}
           </p>
 
           <div className="mt-5 flex justify-center gap-1.5">
@@ -142,17 +147,17 @@ const Blog = () => {
             <FiBookOpen className="text-4xl text-orange-400" />
           </div>
           <h2 className="relative text-2xl font-extrabold text-slate-800">
-            Blog Post Not Found
+            {t("blogDetailsPage.notFoundTitle")}
           </h2>
           <p className="relative mt-3 text-sm leading-6 text-slate-500">
-            The article may have been removed or is no longer available.
+            {t("blogDetailsPage.notFoundDescription")}
           </p>
           <Link
             to="/blogs"
             className="relative mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
           >
             <FiArrowLeft />
-            Back to Blogs
+            {t("blogDetailsPage.backToBlogs")}
           </Link>
         </motion.div>
       </div>
@@ -160,7 +165,7 @@ const Blog = () => {
   }
 
   const authorRole = blog.author?.role;
-  const formattedDate = new Date(blog.createdAt).toLocaleString("en-US", {
+  const formattedDate = new Date(blog.createdAt).toLocaleString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -212,16 +217,16 @@ const Blog = () => {
               className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/75 px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur transition hover:bg-white hover:text-emerald-800"
             >
               <FiArrowLeft />
-              Back to Blogs
+              {t("blogDetailsPage.backToBlogs")}
             </Link>
 
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-sm">
                 <FaFeatherAlt />
-                {blog.category?.name || "Article"}
+                {blog.category?.name || t("blogDetailsPage.article")}
               </span>
               <span className="rounded-full border border-white bg-white/70 px-3 py-1.5 text-xs font-semibold text-slate-600 backdrop-blur">
-                Islamic Parenting Blog
+                {t("blogDetailsPage.blogBadge")}
               </span>
             </div>
 
@@ -232,7 +237,7 @@ const Blog = () => {
             <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600 sm:text-sm">
               <div className="inline-flex items-center gap-2 rounded-full border border-white bg-white/70 px-3 py-2 backdrop-blur">
                 <FiUser className="text-emerald-700" />
-                {blog.author?.name || "Unknown Author"}
+                {blog.author?.name || t("blogDetailsPage.unknownAuthor")}
               </div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white bg-white/70 px-3 py-2 backdrop-blur">
                 <FiCalendar className="text-[#d95635]" />
@@ -240,11 +245,15 @@ const Blog = () => {
               </div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white bg-white/70 px-3 py-2 backdrop-blur">
                 <FiClock className="text-[#7654c8]" />
-                {readTime} min read
+                {t("blogDetailsPage.minRead", {
+                  count: formatNumber(readTime),
+                })}
               </div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white bg-white/70 px-3 py-2 backdrop-blur">
                 <FiEye className="text-amber-600" />
-                {blog.views / 2 || 0} views
+                {t("blogDetailsPage.views", {
+                  count: formatNumber(blog.views / 2 || 0),
+                })}
               </div>
             </div>
           </motion.div>
@@ -280,7 +289,7 @@ const Blog = () => {
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950/25 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-slate-950/35 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md sm:bottom-5 sm:left-5">
                   <FiBookOpen />
-                  Featured Article
+                  {t("blogDetailsPage.featuredArticle")}
                 </div>
               </div>
 
@@ -293,7 +302,8 @@ const Blog = () => {
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-extrabold text-slate-800">
-                        {blog.author?.name || "Unknown Author"}
+                        {blog.author?.name ||
+                          t("blogDetailsPage.unknownAuthor")}
                       </p>
                       <span
                         className={`mt-1 inline-flex rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
@@ -301,7 +311,7 @@ const Blog = () => {
                           "border-slate-200 bg-slate-100 text-slate-600"
                         }`}
                       >
-                        {authorRole || "Author"}
+                        {t(`blogDetailsPage.roles.${authorRole || "author"}`)}
                       </span>
                     </div>
                   </div>
@@ -310,14 +320,14 @@ const Blog = () => {
                     <button
                       type="button"
                       className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                      aria-label="Bookmark article"
+                      aria-label={t("blogDetailsPage.bookmarkArticle")}
                     >
                       <FiBookmark />
                     </button>
                     <button
                       type="button"
                       className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                      aria-label="Share article"
+                      aria-label={t("blogDetailsPage.shareArticle")}
                     >
                       <FiShare2 />
                     </button>
@@ -326,11 +336,7 @@ const Blog = () => {
 
                 <div className="mb-8 flex gap-3 rounded-2xl border border-[#e4dafd] bg-[#f7f3ff] p-4 text-sm leading-6 text-slate-600 sm:p-5">
                   <FaQuoteLeft className="mt-1 shrink-0 text-lg text-[#7654c8]" />
-                  <p>
-                    Explore this article carefully and reflect on the practical
-                    lessons that can support meaningful learning and family
-                    life.
-                  </p>
+                  <p>{t("blogDetailsPage.reflectionNote")}</p>
                 </div>
 
                 <div
@@ -341,17 +347,17 @@ const Blog = () => {
                 <div className="mt-10 flex flex-col gap-4 rounded-2xl border border-emerald-100 bg-[#f1faf6] p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
-                      Continue Exploring
+                      {t("blogDetailsPage.continueExploring")}
                     </p>
                     <h3 className="mt-1 text-lg font-extrabold text-slate-800">
-                      Read more thoughtful articles
+                      {t("blogDetailsPage.readMoreThoughtful")}
                     </h3>
                   </div>
                   <Link
                     to="/blogs"
                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-800"
                   >
-                    Browse Blogs
+                    {t("blogDetailsPage.browseBlogs")}
                     <FiArrowUpRight />
                   </Link>
                 </div>
@@ -371,7 +377,7 @@ const Blog = () => {
               <div className="relative">
                 <div className="mb-5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
                   <FiUser />
-                  About the Author
+                  {t("blogDetailsPage.aboutAuthor")}
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -380,7 +386,7 @@ const Blog = () => {
                   </div>
                   <div className="min-w-0">
                     <h3 className="truncate text-lg font-extrabold text-slate-800">
-                      {blog.author?.name || "Unknown Author"}
+                      {blog.author?.name || t("blogDetailsPage.unknownAuthor")}
                     </h3>
                     <span
                       className={`mt-1 inline-flex rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
@@ -388,15 +394,13 @@ const Blog = () => {
                         "border-slate-200 bg-slate-100 text-slate-600"
                       }`}
                     >
-                      {authorRole || "Author"}
+                      {t(`blogDetailsPage.roles.${authorRole || "author"}`)}
                     </span>
                   </div>
                 </div>
 
                 <p className="mt-5 text-sm leading-7 text-slate-600">
-                  Passionate about Islamic parenting and child development.
-                  Sharing insights and experiences to help parents nurture their
-                  children with Islamic values.
+                  {t("blogDetailsPage.authorDescription")}
                 </p>
               </div>
             </motion.div>
@@ -409,24 +413,26 @@ const Blog = () => {
             >
               <div className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-[#7654c8]">
                 <FiBookOpen />
-                Article Details
+                {t("blogDetailsPage.articleDetails")}
               </div>
               <div className="space-y-2.5">
                 {[
                   {
                     icon: FiCalendar,
-                    label: "Published",
+                    label: t("blogDetailsPage.published"),
                     value: formattedDate,
                   },
                   {
                     icon: FiClock,
-                    label: "Read time",
-                    value: `${readTime} min`,
+                    label: t("blogDetailsPage.readTime"),
+                    value: t("blogDetailsPage.minutes", {
+                      count: formatNumber(readTime),
+                    }),
                   },
                   {
                     icon: FiEye,
-                    label: "Views",
-                    value: `${blog.views / 2 || 0}`,
+                    label: t("blogDetailsPage.viewsLabel"),
+                    value: formatNumber(blog.views / 2 || 0),
                   },
                 ].map((item) => (
                   <div
@@ -458,23 +464,22 @@ const Blog = () => {
                   <FiMail className="text-xl" />
                 </div>
                 <h3 className="text-xl font-extrabold">
-                  Enjoying this article?
+                  {t("blogDetailsPage.subscribeTitle")}
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-emerald-50/85">
-                  Subscribe to receive more thoughtful parenting insights and
-                  educational articles.
+                  {t("blogDetailsPage.subscribeDescription")}
                 </p>
                 <div className="mt-5 space-y-2.5">
                   <input
                     type="email"
-                    placeholder="Your email address"
+                    placeholder={t("blogDetailsPage.emailPlaceholder")}
                     className="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-[#ffd2b8]"
                   />
                   <button
                     type="button"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ffb88f] px-4 py-3 text-sm font-black text-[#66301d] transition hover:bg-[#ffc7a6]"
                   >
-                    Subscribe
+                    {t("blogDetailsPage.subscribeButton")}
                     <FiArrowUpRight />
                   </button>
                 </div>

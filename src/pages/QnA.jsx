@@ -19,8 +19,12 @@ import {
 import { Link } from "react-router";
 import api from "../utils/axios";
 import toast from "react-hot-toast";
+import { useLanguage } from "../hooks/useLanguage";
 
 const QnA = () => {
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -40,7 +44,7 @@ const QnA = () => {
         setQuestions(res.data.questions);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(error?.response?.data?.message || t("qnaPage.loadFailed"));
     }
   };
 
@@ -49,7 +53,9 @@ const QnA = () => {
       const res = await api.get("/qna/questionCategory");
       setCategories(res.data.categories);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(
+        error?.response?.data?.message || t("qnaPage.categoriesLoadFailed"),
+      );
     }
   };
 
@@ -123,10 +129,10 @@ const QnA = () => {
         </div>
 
         <h3 className="text-xl font-bold text-[#263c35]">
-          প্রশ্নগুলো লোড হচ্ছে
+          {t("qnaPage.loadingTitle")}
         </h3>
         <p className="mt-2 text-sm leading-6 text-[#6d7c76]">
-          আমাদের আলেমদের উত্তরসহ প্রকাশিত প্রশ্নগুলো প্রস্তুত করা হচ্ছে।
+          {t("qnaPage.loadingDescription")}
         </p>
 
         <div className="mt-5 flex justify-center gap-1.5">
@@ -171,12 +177,12 @@ const QnA = () => {
           </div>
 
           <h2 className="text-2xl font-extrabold text-[#263c35]">
-            কোনো প্রশ্ন পাওয়া যায়নি
+            {t("qnaPage.emptyTitle")}
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#6d7c76] sm:text-base">
             {hasActiveFilters
-              ? "আপনার সার্চ বা নির্বাচিত ক্যাটাগরির সঙ্গে মিলছে এমন কোনো প্রশ্ন পাওয়া যায়নি।"
-              : "এখনো কোনো প্রকাশিত প্রশ্ন নেই। আপনি চাইলে প্রথম প্রশ্নটি করতে পারেন।"}
+              ? t("qnaPage.emptyFiltered")
+              : t("qnaPage.emptyPublished")}
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -186,7 +192,7 @@ const QnA = () => {
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d8dfd9] bg-white px-5 py-3 font-semibold text-[#40554d] transition hover:border-[#ef8f6d] hover:text-[#d96f4a]"
               >
                 <FiX />
-                ফিল্টার মুছুন
+                {t("qnaPage.clearFilters")}
               </button>
             )}
 
@@ -195,15 +201,16 @@ const QnA = () => {
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 py-3 font-semibold text-white shadow-[0_12px_30px_rgba(22,116,95,0.22)] transition hover:-translate-y-0.5 hover:bg-[#115f4e]"
             >
               <FiMessageSquare />
-              প্রশ্ন করুন
+              {t("qnaPage.askQuestion")}
             </Link>
           </div>
 
           {hasActiveFilters && (
             <p className="mt-5 text-xs leading-5 text-[#8a9691]">
-              {searchTerm && `সার্চ: “${searchTerm}”`}
+              {searchTerm && t("qnaPage.searchFilter", { value: searchTerm })}
               {searchTerm && selectedCategoryName && " • "}
-              {selectedCategoryName && `ক্যাটাগরি: “${selectedCategoryName}”`}
+              {selectedCategoryName &&
+                t("qnaPage.categoryFilter", { value: selectedCategoryName })}
             </p>
           )}
         </div>
@@ -247,20 +254,19 @@ const QnA = () => {
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-[#d7e9e2] bg-white/80 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-[#16745f] shadow-sm backdrop-blur">
                 <FiBookOpen />
-                Islamic Knowledge Hub
+                {t("qnaPage.heroBadge")}
               </span>
 
               <h1 className="mt-4 max-w-3xl text-3xl font-extrabold leading-[1.15] text-[#263c35] sm:text-4xl lg:text-[3.15rem]">
-                প্রশ্ন করুন, নির্ভরযোগ্য
+                {t("qnaPage.headingPrefix")}
                 <span className="relative ml-2 inline-block text-[#16745f]">
-                  উত্তর জানুন
+                  {t("qnaPage.headingAccent")}
                   <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
                 </span>
               </h1>
 
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[#687a73] sm:text-base">
-                ইসলাম, ইবাদত, পরিবার ও দৈনন্দিন জীবনের গুরুত্বপূর্ণ বিষয়ে
-                প্রকাশিত প্রশ্ন ও আলেমদের উত্তর খুঁজে দেখুন।
+                {t("qnaPage.heroDescription")}
               </p>
             </motion.div>
 
@@ -274,7 +280,7 @@ const QnA = () => {
                 <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-[#7d8c86]" />
                 <input
                   type="text"
-                  placeholder="প্রশ্ন বা বিষয় লিখে খুঁজুন..."
+                  placeholder={t("qnaPage.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="h-12 w-full rounded-[1.1rem] bg-[#f8faf7] pl-11 pr-11 text-sm text-[#263c35] outline-none transition placeholder:text-[#9aa6a1] focus:bg-white focus:ring-2 focus:ring-[#8bcdbd]/45"
@@ -284,7 +290,7 @@ const QnA = () => {
                   <button
                     onClick={() => setSearchTerm("")}
                     className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#7d8c86] transition hover:bg-[#f0ebe2] hover:text-[#d96f4a]"
-                    aria-label="Clear search"
+                    aria-label={t("qnaPage.clearSearch")}
                   >
                     <FiX />
                   </button>
@@ -307,16 +313,18 @@ const QnA = () => {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d97853]">
-                      Question Collection
+                      {t("qnaPage.collection")}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <h2 className="text-xl font-extrabold text-[#263c35] sm:text-2xl">
                         {sortBy === "most-read"
-                          ? "সর্বাধিক পাঠিত প্রশ্ন"
-                          : "সাম্প্রতিক প্রশ্ন"}
+                          ? t("qnaPage.mostReadTitle")
+                          : t("qnaPage.latestTitle")}
                       </h2>
                       <span className="rounded-full bg-[#eef8f4] px-2.5 py-1 text-xs font-bold text-[#16745f]">
-                        {filteredQuestion?.length || 0}টি
+                        {t("qnaPage.questionCount", {
+                          count: formatNumber(filteredQuestion?.length || 0),
+                        })}
                       </span>
                     </div>
                   </div>
@@ -329,8 +337,12 @@ const QnA = () => {
                         onChange={(e) => setSortBy(e.target.value)}
                         className="h-10 w-full appearance-none rounded-xl border border-[#dde4df] bg-[#f8faf7] py-2 pl-9 pr-9 text-sm font-semibold text-[#40554d] outline-none transition focus:border-[#8bcdbd] focus:ring-2 focus:ring-[#8bcdbd]/25 sm:w-auto"
                       >
-                        <option value="latest">সর্বশেষ</option>
-                        <option value="most-read">সর্বাধিক পাঠিত</option>
+                        <option value="latest">
+                          {t("qnaPage.sort.latest")}
+                        </option>
+                        <option value="most-read">
+                          {t("qnaPage.sort.mostRead")}
+                        </option>
                       </select>
                     </div>
 
@@ -338,7 +350,7 @@ const QnA = () => {
                       to="/qa/ask-question"
                       className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#16745f] px-4 text-sm font-bold text-white shadow-[0_10px_24px_rgba(22,116,95,0.20)] transition hover:-translate-y-0.5 hover:bg-[#115f4e]"
                     >
-                      প্রশ্ন করুন
+                      {t("qnaPage.askQuestion")}
                       <FiMessageSquare />
                     </Link>
                   </div>
@@ -347,12 +359,12 @@ const QnA = () => {
                 {hasActiveFilters && (
                   <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#eee8dc] pt-3">
                     <span className="text-xs font-semibold text-[#7a8882]">
-                      Active filters:
+                      {t("qnaPage.activeFilters")}
                     </span>
 
                     {searchTerm && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-[#fff2e9] px-3 py-1 text-xs font-semibold text-[#cc6d48]">
-                        Search: {searchTerm}
+                        {t("qnaPage.searchLabel")}: {searchTerm}
                       </span>
                     )}
 
@@ -367,7 +379,7 @@ const QnA = () => {
                       className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-[#d46c49] transition hover:text-[#b94f2d]"
                     >
                       <FiX />
-                      Clear
+                      {t("qnaPage.clear")}
                     </button>
                   </div>
                 )}
@@ -383,11 +395,10 @@ const QnA = () => {
                     <FiHelpCircle className="text-3xl" />
                   </div>
                   <h3 className="mt-5 text-xl font-extrabold text-[#263c35]">
-                    মিলছে এমন প্রশ্ন নেই
+                    {t("qnaPage.noMatchTitle")}
                   </h3>
                   <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-[#6d7c76]">
-                    সার্চ শব্দ বা ক্যাটাগরি পরিবর্তন করে আবার চেষ্টা করুন, অথবা
-                    নতুন একটি প্রশ্ন পাঠান।
+                    {t("qnaPage.noMatchDescription")}
                   </p>
 
                   <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
@@ -396,14 +407,14 @@ const QnA = () => {
                       className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d8dfd9] px-5 py-2.5 font-semibold text-[#40554d] transition hover:border-[#ef8f6d] hover:text-[#d96f4a]"
                     >
                       <FiX />
-                      ফিল্টার রিসেট
+                      {t("qnaPage.resetFilters")}
                     </button>
 
                     <Link
                       to="/qa/ask-question"
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#115f4e]"
                     >
-                      নতুন প্রশ্ন করুন
+                      {t("qnaPage.newQuestion")}
                       <FiArrowRight />
                     </Link>
                   </div>
@@ -428,13 +439,13 @@ const QnA = () => {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#eef8f4] px-3 py-1 text-xs font-bold text-[#16745f]">
                             <FiBookOpen />
-                            {qna.category?.name || "N/A"}
+                            {qna.category?.name || t("qnaPage.uncategorized")}
                           </span>
 
                           <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-[#7e8c86]">
                             <span className="inline-flex items-center gap-1.5">
                               <FiCalendar />
-                              {new Date(qna.createdAt).toLocaleString("en-US", {
+                              {new Date(qna.createdAt).toLocaleString(locale, {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
@@ -443,7 +454,9 @@ const QnA = () => {
 
                             <span className="inline-flex items-center gap-1.5">
                               <FiEye />
-                              {qna.views / 2 || 0} views
+                              {t("qnaPage.views", {
+                                count: formatNumber(qna.views / 2 || 0),
+                              })}
                             </span>
                           </div>
                         </div>
@@ -469,7 +482,7 @@ const QnA = () => {
                                 dangerouslySetInnerHTML={{
                                   __html:
                                     qna.answers[0]?.text?.slice(0, 120) ||
-                                    "No answer yet",
+                                    t("qnaPage.noAnswer"),
                                 }}
                               />
                             </div>
@@ -485,14 +498,14 @@ const QnA = () => {
                             <span>
                               {qna.answers[0] ? (
                                 <>
-                                  উত্তর দিয়েছেন{" "}
+                                  {t("qnaPage.answeredBy")}{" "}
                                   <strong className="font-bold text-[#16745f]">
                                     {qna.answers[0]?.answeredBy?.name ||
-                                      "Scholar"}
+                                      t("qnaPage.scholar")}
                                   </strong>
                                 </>
                               ) : (
-                                "আলেমের উত্তরের অপেক্ষায়"
+                                t("qnaPage.waitingAnswer")
                               )}
                             </span>
                           </div>
@@ -501,7 +514,7 @@ const QnA = () => {
                             to={`/qa/${qna._id}`}
                             className="inline-flex items-center gap-2 self-start text-sm font-extrabold text-[#d9704b] transition hover:gap-3 hover:text-[#b95434] sm:self-auto"
                           >
-                            বিস্তারিত পড়ুন
+                            {t("qnaPage.readMore")}
                             <FiArrowUpRight />
                           </Link>
                         </div>
@@ -522,10 +535,10 @@ const QnA = () => {
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8b77ce]">
-                      Browse Topics
+                      {t("qnaPage.browseTopics")}
                     </p>
                     <h3 className="mt-1 text-lg font-extrabold text-[#263c35]">
-                      ক্যাটাগরি
+                      {t("qnaPage.categories")}
                     </h3>
                   </div>
 
@@ -543,7 +556,7 @@ const QnA = () => {
                         : "text-[#53665e] hover:bg-[#f3f7f4] hover:text-[#16745f]"
                     }`}
                   >
-                    <span>সব প্রশ্ন</span>
+                    <span>{t("qnaPage.allQuestions")}</span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs ${
                         selectedCategory === null
@@ -551,7 +564,7 @@ const QnA = () => {
                           : "bg-[#edf1ee] text-[#708078]"
                       }`}
                     >
-                      {questions?.length || 0}
+                      {formatNumber(questions?.length || 0)}
                     </span>
                   </button>
 
@@ -573,7 +586,7 @@ const QnA = () => {
                             : "bg-[#edf1ee] text-[#708078]"
                         }`}
                       >
-                        {categoryCounts[category._id] || 0}
+                        {formatNumber(categoryCounts[category._id] || 0)}
                       </span>
                     </button>
                   ))}
@@ -585,7 +598,7 @@ const QnA = () => {
                     className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#e0ded5] py-2.5 text-sm font-bold text-[#d46c49] transition hover:border-[#ef8f6d] hover:bg-[#fff7f2]"
                   >
                     <FiX />
-                    ক্যাটাগরি মুছুন
+                    {t("qnaPage.clearCategory")}
                   </button>
                 )}
               </motion.div>
@@ -605,18 +618,17 @@ const QnA = () => {
                   </div>
 
                   <h3 className="mt-5 text-xl font-extrabold">
-                    আপনার প্রশ্নটি খুঁজে পাচ্ছেন না?
+                    {t("qnaPage.ctaTitle")}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-white/70">
-                    আপনার প্রশ্নটি পাঠান। যাচাইয়ের পর আমাদের আলেমরা উত্তর প্রদান
-                    করবেন।
+                    {t("qnaPage.ctaDescription")}
                   </p>
 
                   <Link
                     to="/qa/ask-question"
                     className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f7c969] px-4 py-3 text-sm font-extrabold text-[#263c35] transition hover:-translate-y-0.5 hover:bg-[#ffda7f]"
                   >
-                    এখনই প্রশ্ন করুন
+                    {t("qnaPage.askNow")}
                     <FiArrowRight />
                   </Link>
                 </div>

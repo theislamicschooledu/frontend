@@ -20,6 +20,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +31,7 @@ const Login = () => {
   });
 
   const { login, loading } = useAuth();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -45,7 +47,7 @@ const Login = () => {
     e.preventDefault();
 
     if (!formData.identifier || !formData.password) {
-      toast.error("Email/Phone and Password are required");
+      toast.error(t("loginPage.validationRequired"));
       return;
     }
 
@@ -54,25 +56,40 @@ const Login = () => {
     if (response?.success) {
       navigate("/");
     } else {
-      toast.error(response?.message || "Login failed");
+      toast.error(response?.message || t("loginPage.loginFailed"));
     }
   };
 
   const benefits = [
     {
       icon: FiBarChart2,
-      title: "ব্যক্তিগত ড্যাশবোর্ড",
-      text: "আপনার সব কোর্স, অগ্রগতি ও শেখার তথ্য এক জায়গায় দেখুন।",
+      title: t("loginPage.benefits.dashboardTitle"),
+      text: t("loginPage.benefits.dashboardText"),
     },
     {
       icon: FiTarget,
-      title: "শেখার অগ্রগতি",
-      text: "শেষ করা পাঠ, বাকি অধ্যায় ও অর্জন নিয়মিত পর্যবেক্ষণ করুন।",
+      title: t("loginPage.benefits.progressTitle"),
+      text: t("loginPage.benefits.progressText"),
     },
     {
       icon: FiPlayCircle,
-      title: "যেখান থেকে শেষ করেছিলেন",
-      text: "পূর্বের অবস্থান থেকেই সহজে আবার শেখা শুরু করুন।",
+      title: t("loginPage.benefits.resumeTitle"),
+      text: t("loginPage.benefits.resumeText"),
+    },
+  ];
+
+  const stats = [
+    {
+      value: language === "bn" ? "৪২+" : "42+",
+      label: t("loginPage.stats.courses"),
+    },
+    {
+      value: language === "bn" ? "১১৪+" : "114+",
+      label: t("loginPage.stats.teachers"),
+    },
+    {
+      value: language === "bn" ? "১ লক্ষ+" : "100K+",
+      label: t("loginPage.stats.students"),
     },
   ];
 
@@ -99,14 +116,14 @@ const Login = () => {
               className="inline-flex items-center gap-2 rounded-full border border-[#dce5df] bg-white px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:border-[#8bcdbd] hover:bg-[#f1f8f5]"
             >
               <FiArrowLeft />
-              হোমে ফিরে যান
+              {t("loginPage.backHome")}
             </Link>
 
             <Link
               to="/signup"
               className="inline-flex items-center gap-2 rounded-full bg-[#eef8f4] px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:bg-[#e2f2ec]"
             >
-              সাইন আপ
+              {t("loginPage.signUp")}
               <FiArrowRight />
             </Link>
           </div>
@@ -114,20 +131,19 @@ const Login = () => {
           <div className="mt-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#eeeafd] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
               <FiShield />
-              Secure Login
+              {t("loginPage.badge")}
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold leading-tight text-[#263c35] sm:text-4xl">
-              আপনার অ্যাকাউন্টে
+              {t("loginPage.headingPrefix")}
               <span className="relative ml-2 inline-block text-[#16745f]">
-                সাইন ইন করুন
+                {t("loginPage.headingAccent")}
                 <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
               </span>
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-7 text-[#71817b]">
-              আপনার কোর্স, শেখার অগ্রগতি ও ব্যক্তিগত ড্যাশবোর্ডে প্রবেশ করতে
-              ইমেইল অথবা মোবাইল নম্বর ব্যবহার করুন।
+              {t("loginPage.description")}
             </p>
           </div>
 
@@ -139,7 +155,7 @@ const Login = () => {
                 className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
               >
                 <FiMail className="text-[#16745f]" />
-                ইমেইল অথবা মোবাইল নম্বর
+                {t("loginPage.identifierLabel")}
                 <span className="text-[#d9704b]">*</span>
               </label>
 
@@ -153,7 +169,7 @@ const Login = () => {
                   value={formData.identifier}
                   onChange={handleChange}
                   className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-white pl-11 pr-4 text-sm font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:ring-4 focus:ring-[#8bcdbd]/15"
-                  placeholder="name@example.com অথবা 01XXXXXXXXX"
+                  placeholder={t("loginPage.identifierPlaceholder")}
                   required
                   autoComplete="username"
                 />
@@ -168,7 +184,7 @@ const Login = () => {
                   className="flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                 >
                   <FiLock className="text-[#d9704b]" />
-                  পাসওয়ার্ড
+                  {t("loginPage.passwordLabel")}
                   <span className="text-[#d9704b]">*</span>
                 </label>
 
@@ -176,7 +192,7 @@ const Login = () => {
                   to="/forget-password"
                   className="text-xs font-extrabold text-[#16745f] transition hover:text-[#115f4e]"
                 >
-                  পাসওয়ার্ড ভুলে গেছেন?
+                  {t("loginPage.forgotPassword")}
                 </Link>
               </div>
 
@@ -190,7 +206,7 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-white pl-11 pr-12 text-sm font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:ring-4 focus:ring-[#8bcdbd]/15"
-                  placeholder="আপনার পাসওয়ার্ড লিখুন"
+                  placeholder={t("loginPage.passwordPlaceholder")}
                   required
                   autoComplete="current-password"
                 />
@@ -199,7 +215,11 @@ const Login = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#8b9893] transition hover:bg-[#eef3ef] hover:text-[#16745f]"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword
+                      ? t("loginPage.hidePassword")
+                      : t("loginPage.showPassword")
+                  }
                 >
                   {showPassword ? <FiEyeOff /> : <FiEye />}
                 </button>
@@ -218,7 +238,7 @@ const Login = () => {
                 />
 
                 <span className="text-sm font-medium leading-6 text-[#63736c]">
-                  এই ডিভাইসে আমাকে মনে রাখুন
+                  {t("loginPage.rememberMe")}
                 </span>
               </label>
             </div>
@@ -233,11 +253,11 @@ const Login = () => {
               {loading ? (
                 <>
                   <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                  সাইন ইন হচ্ছে...
+                  {t("loginPage.signingIn")}
                 </>
               ) : (
                 <>
-                  সাইন ইন করুন
+                  {t("loginPage.signIn")}
                   <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                 </>
               )}
@@ -246,12 +266,12 @@ const Login = () => {
 
           <div className="mt-7 border-t border-[#ece5d8] pt-5 text-center">
             <p className="text-sm text-[#71817b]">
-              অ্যাকাউন্ট নেই?{" "}
+              {t("loginPage.noAccount")}{" "}
               <Link
                 to="/signup"
                 className="inline-flex items-center gap-1 font-extrabold text-[#16745f] transition hover:text-[#115f4e]"
               >
-                নতুন অ্যাকাউন্ট তৈরি করুন
+                {t("loginPage.createAccount")}
                 <FiUserPlus />
               </Link>
             </p>
@@ -259,7 +279,7 @@ const Login = () => {
 
           <p className="mt-5 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-[#8a9691]">
             <FiShield className="text-[#16745f]" />
-            আপনার লগইন তথ্য নিরাপদভাবে সংরক্ষিত থাকে
+            {t("loginPage.secureInfo")}
           </p>
         </section>
 
@@ -279,7 +299,7 @@ const Login = () => {
               <div className="flex items-center justify-between gap-4">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#f7c969]">
                   <FiBookOpen />
-                  Welcome Back
+                  {t("loginPage.asideBadge")}
                 </span>
 
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#9de2c9]">
@@ -288,12 +308,11 @@ const Login = () => {
               </div>
 
               <h2 className="mt-7 text-3xl font-extrabold leading-tight sm:text-4xl">
-                আপনার ইসলামিক শেখার যাত্রা আবার শুরু করুন
+                {t("loginPage.asideTitle")}
               </h2>
 
               <p className="mt-4 max-w-lg text-sm leading-7 text-white/68 sm:text-base">
-                যেখানে শেষ করেছিলেন সেখান থেকেই কোর্স চালিয়ে যান এবং আপনার শেখার
-                অগ্রগতি নিয়মিত অনুসরণ করুন।
+                {t("loginPage.asideDescription")}
               </p>
 
               <div className="mt-8 space-y-3">
@@ -331,11 +350,7 @@ const Login = () => {
 
             <div className="mt-8 border-t border-white/10 pt-6">
               <div className="grid grid-cols-3 gap-3">
-                {[
-                  { value: "৪২+", label: "কোর্স" },
-                  { value: "১১৪+", label: "শিক্ষক" },
-                  { value: "১ লক্ষ+", label: "শিক্ষার্থী" },
-                ].map((stat) => (
+                {stats.map((stat) => (
                   <div
                     key={stat.label}
                     className="rounded-xl bg-white/[0.07] p-3 text-center"
@@ -369,7 +384,7 @@ const Login = () => {
 
               <p className="mt-3 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-white/45">
                 <FiUsers className="text-[#9de2c9]" />
-                হাজারো শিক্ষার্থীর বিশ্বস্ত লার্নিং প্ল্যাটফর্ম
+                {t("loginPage.trustedPlatform")}
               </p>
             </div>
           </div>

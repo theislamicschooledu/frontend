@@ -21,8 +21,12 @@ import { FaFeatherAlt, FaRegLightbulb } from "react-icons/fa";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
 import { Link } from "react-router";
+import { useLanguage } from "../hooks/useLanguage";
 
 const Blogs = () => {
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
   const [loading, setLoading] = useState(true);
   const [blogPosts, setBlogPosts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -39,7 +43,7 @@ const Blogs = () => {
       });
       setBlogPosts(res.data.blogs);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(error?.response?.data?.message || t("blogsPage.loadFailed"));
     }
   };
 
@@ -48,7 +52,8 @@ const Blogs = () => {
       const res = await api.get("/blogs/blogCategory");
       setCategories(res.data.categories);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(t("blogsPage.categoriesLoadFailed"));
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -118,10 +123,10 @@ const Blogs = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-xl font-bold text-slate-800"
         >
-          Loading Articles
+          {t("blogsPage.loadingTitle")}
         </motion.h3>
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Please wait while we prepare the latest articles for you.
+          {t("blogsPage.loadingDescription")}
         </p>
 
         <div className="mt-5 flex justify-center gap-1.5">
@@ -162,12 +167,12 @@ const Blogs = () => {
         </div>
 
         <h2 className="relative text-2xl font-extrabold text-slate-800">
-          No Articles Found
+          {t("blogsPage.emptyTitle")}
         </h2>
         <p className="relative mt-3 text-sm leading-6 text-slate-500">
           {searchTerm || selectedCategory
-            ? "No articles match your current search and category filters."
-            : "There are no published articles available at the moment. Please check back later."}
+            ? t("blogsPage.noFilterMatch")
+            : t("blogsPage.emptyDescription")}
         </p>
 
         {(searchTerm || selectedCategory) && (
@@ -177,12 +182,13 @@ const Blogs = () => {
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
             >
               <FiX />
-              Clear Filters
+              {t("blogsPage.clearFilters")}
             </button>
             <p className="mt-3 text-xs text-slate-400">
-              {searchTerm && `Search: “${searchTerm}”`}
+              {searchTerm && `${t("blogsPage.searchLabel")}: “${searchTerm}”`}
               {searchTerm && activeCategoryName && " • "}
-              {activeCategoryName && `Category: “${activeCategoryName}”`}
+              {activeCategoryName &&
+                `${t("blogsPage.categoryLabel")}: “${activeCategoryName}”`}
             </p>
           </div>
         )}
@@ -216,15 +222,16 @@ const Blogs = () => {
           >
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
               <FaFeatherAlt />
-              Knowledge, Guidance & Inspiration
+              {t("blogsPage.heroBadge")}
             </div>
             <h1 className="max-w-2xl text-3xl font-black leading-tight text-slate-900 sm:text-4xl lg:text-[2.8rem]">
-              Islamic Parenting
-              <span className="ml-2 text-emerald-700">Blog</span>
+              {t("blogsPage.heroHeadingPrefix")}
+              <span className="ml-2 text-emerald-700">
+                {t("blogsPage.heroHeadingAccent")}
+              </span>
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
-              Thoughtful articles, practical guidance and meaningful lessons for
-              families, learners and the wider community.
+              {t("blogsPage.heroDescription")}
             </p>
           </motion.div>
 
@@ -239,7 +246,7 @@ const Blogs = () => {
                 <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search articles..."
+                  placeholder={t("blogsPage.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full rounded-[1.1rem] bg-slate-50 py-3.5 pl-12 pr-11 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
@@ -248,7 +255,7 @@ const Blogs = () => {
                   <button
                     onClick={() => setSearchTerm("")}
                     className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                    aria-label="Clear search"
+                    aria-label={t("blogsPage.clearSearch")}
                   >
                     <FiX />
                   </button>
@@ -276,11 +283,14 @@ const Blogs = () => {
               <div className="min-w-0">
                 <h2 className="truncate text-base font-extrabold text-slate-800 sm:text-lg">
                   {sortBy === "most-read"
-                    ? "Most Read Articles"
-                    : "Latest Articles"}
+                    ? t("blogsPage.mostReadArticles")
+                    : t("blogsPage.latestArticles")}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  {filteredBlogs.length} of {blogPosts.length} articles
+                  {t("blogsPage.articleCount", {
+                    shown: formatNumber(filteredBlogs.length),
+                    total: formatNumber(blogPosts.length),
+                  })}
                 </p>
               </div>
             </div>
@@ -292,7 +302,7 @@ const Blogs = () => {
                   className="inline-flex items-center gap-1.5 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2.5 text-xs font-bold text-orange-700 transition hover:bg-orange-100"
                 >
                   <FiX />
-                  Clear
+                  {t("blogsPage.clear")}
                 </button>
               )}
 
@@ -303,8 +313,10 @@ const Blogs = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="w-full min-w-40 appearance-none rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-9 text-sm font-semibold text-slate-700 outline-none transition hover:bg-white focus:ring-2 focus:ring-emerald-200"
                 >
-                  <option value="latest">সর্বশেষ</option>
-                  <option value="most-read">সর্বাধিক পাঠিত</option>
+                  <option value="latest">{t("blogsPage.sort.latest")}</option>
+                  <option value="most-read">
+                    {t("blogsPage.sort.mostRead")}
+                  </option>
                 </select>
                 <FiChevronRight className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-slate-400" />
               </div>
@@ -324,18 +336,17 @@ const Blogs = () => {
                     <FiInbox />
                   </div>
                   <h3 className="mt-5 text-xl font-extrabold text-slate-800">
-                    No Matching Articles
+                    {t("blogsPage.noMatchingTitle")}
                   </h3>
                   <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                    Try another search term or select a different category to
-                    explore more articles.
+                    {t("blogsPage.noMatchingDescription")}
                   </p>
                   <button
                     onClick={clearFilters}
                     className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
                   >
                     <FiFilter />
-                    Reset Filters
+                    {t("blogsPage.resetFilters")}
                   </button>
                 </motion.div>
               ) : (
@@ -357,7 +368,7 @@ const Blogs = () => {
                         />
                         <div className="absolute inset-0 bg-linear-to-t from-slate-950/45 via-transparent to-transparent" />
                         <span className="absolute left-3 top-3 rounded-full border border-white/50 bg-white/90 px-3 py-1 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
-                          {post.category?.name || "N/A"}
+                          {post.category?.name || t("blogsPage.uncategorized")}
                         </span>
                       </div>
 
@@ -365,7 +376,7 @@ const Blogs = () => {
                         <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500">
                           <span className="inline-flex items-center gap-1.5">
                             <FiCalendar className="text-orange-500" />
-                            {new Date(post.createdAt).toLocaleString("en-US", {
+                            {new Date(post.createdAt).toLocaleString(locale, {
                               year: "numeric",
                               month: "short",
                               day: "numeric",
@@ -373,7 +384,9 @@ const Blogs = () => {
                           </span>
                           <span className="inline-flex items-center gap-1.5">
                             <FiEye className="text-purple-500" />
-                            {post.views / 2 || 0} views
+                            {t("blogsPage.views", {
+                              count: formatNumber(post.views / 2 || 0),
+                            })}
                           </span>
                         </div>
 
@@ -394,7 +407,8 @@ const Blogs = () => {
                               <FiUser />
                             </span>
                             <span className="truncate">
-                              {post.author?.name || "Unknown Author"}
+                              {post.author?.name ||
+                                t("blogsPage.unknownAuthor")}
                             </span>
                           </div>
 
@@ -402,7 +416,7 @@ const Blogs = () => {
                             to={`/blogs/${post._id}`}
                             className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-extrabold text-emerald-700 transition hover:bg-emerald-600 hover:text-white"
                           >
-                            Read More
+                            {t("blogsPage.readMore")}
                             <FiArrowUpRight />
                           </Link>
                         </div>
@@ -424,10 +438,10 @@ const Blogs = () => {
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600">
-                      Explore
+                      {t("blogsPage.explore")}
                     </p>
                     <h3 className="mt-1 text-lg font-extrabold text-slate-800">
-                      Categories
+                      {t("blogsPage.categories")}
                     </h3>
                   </div>
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
@@ -444,7 +458,7 @@ const Blogs = () => {
                         : "bg-slate-50 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
                     }`}
                   >
-                    <span>All Articles</span>
+                    <span>{t("blogsPage.allArticles")}</span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs ${
                         selectedCategory === null
@@ -452,7 +466,7 @@ const Blogs = () => {
                           : "bg-white text-slate-500"
                       }`}
                     >
-                      {blogPosts.length}
+                      {formatNumber(blogPosts.length)}
                     </span>
                   </button>
 
@@ -474,7 +488,7 @@ const Blogs = () => {
                             : "bg-white text-slate-500"
                         }`}
                       >
-                        {categoryCounts[category._id] || 0}
+                        {formatNumber(categoryCounts[category._id] || 0)}
                       </span>
                     </button>
                   ))}
@@ -495,10 +509,10 @@ const Blogs = () => {
                     <FaRegLightbulb />
                   </div>
                   <h3 className="text-xl font-extrabold">
-                    Subscribe to Our Blog
+                    {t("blogsPage.subscribeTitle")}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-emerald-50/80">
-                    Receive useful articles and learning updates in your inbox.
+                    {t("blogsPage.subscribeDescription")}
                   </p>
 
                   <div className="mt-5 space-y-2.5">
@@ -506,18 +520,18 @@ const Blogs = () => {
                       <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-700" />
                       <input
                         type="email"
-                        placeholder="Your email address"
+                        placeholder={t("blogsPage.emailPlaceholder")}
                         className="w-full rounded-xl bg-white py-3 pl-10 pr-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#f8b48f]"
                       />
                     </div>
                     <button className="w-full rounded-xl bg-[#f8b48f] py-3 text-sm font-extrabold text-[#5f2d16] transition hover:bg-[#ffc5a6]">
-                      Subscribe
+                      {t("blogsPage.subscribeButton")}
                     </button>
                   </div>
 
                   <p className="mt-3 flex items-center gap-1.5 text-xs text-emerald-50/60">
                     <FiClock />
-                    Occasional updates. No spam.
+                    {t("blogsPage.noSpam")}
                   </p>
                 </div>
               </motion.div>

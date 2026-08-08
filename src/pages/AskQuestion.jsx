@@ -18,8 +18,12 @@ import {
 import toast from "react-hot-toast";
 import api from "../utils/axios";
 import { useNavigate } from "react-router";
+import { useLanguage } from "../hooks/useLanguage";
 
 const AskQuestion = () => {
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -36,7 +40,10 @@ const AskQuestion = () => {
       const res = await api.get("/qna/questionCategory");
       setCategories(res.data.categories);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(
+        error?.response?.data?.message ||
+          t("askQuestionPage.categoriesLoadFailed"),
+      );
     } finally {
       setLoading(false);
     }
@@ -44,27 +51,36 @@ const AskQuestion = () => {
 
   useEffect(() => {
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
-        placeholder:
-          "Provide more context about your situation, age of children, specific challenges, etc.",
+        placeholder: t("askQuestionPage.editorPlaceholder"),
         modules: {
           toolbar: [["bold", "italic", "underline", "strike"], ["clean"]],
         },
       });
     }
-  }, []);
+  }, [t]);
+
+  useEffect(() => {
+    if (quillRef.current?.root) {
+      quillRef.current.root.dataset.placeholder = t(
+        "askQuestionPage.editorPlaceholder",
+      );
+    }
+  }, [language, t]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const editorContent = quillRef.current.root.innerHTML;
+    const editorText = quillRef.current.getText().trim();
 
-    if (!title || editorContent.length === 0 || !selectedCategory) {
-      toast.error("Title, content and category are required!");
+    if (!title.trim() || !editorText || !selectedCategory) {
+      toast.error(t("askQuestionPage.validationRequired"));
       return;
     }
 
@@ -78,27 +94,29 @@ const AskQuestion = () => {
       const res = await api.post("/qna", formData);
 
       if (res.data.success) {
-        toast.success("Question submitted successfully!");
+        toast.success(t("askQuestionPage.submitted"));
         navigate("/qa");
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(
+        error?.response?.data?.message || t("askQuestionPage.submitFailed"),
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
   const guidelines = [
-    "আপনার পরিস্থিতি ও প্রয়োজনীয় প্রেক্ষাপট পরিষ্কারভাবে লিখুন",
-    "প্রশ্নের ভাষা সংক্ষিপ্ত, সম্মানজনক ও নির্দিষ্ট রাখুন",
-    "একটি প্রশ্নে একটি মূল বিষয়কে প্রাধান্য দিন",
-    "ব্যক্তিগত বা সংবেদনশীল তথ্য প্রকাশ করা থেকে বিরত থাকুন",
+    t("askQuestionPage.guidelines.context"),
+    t("askQuestionPage.guidelines.respectful"),
+    t("askQuestionPage.guidelines.oneTopic"),
+    t("askQuestionPage.guidelines.privacy"),
   ];
 
   const tips = [
-    "ঘটনার বয়স, সময় বা প্রাসঙ্গিক অবস্থা উল্লেখ করুন",
-    "আপনি ইতোমধ্যে কী চেষ্টা করেছেন তা লিখতে পারেন",
-    "প্রয়োজনে নির্দিষ্ট ইসলামী বিধান বা দিকনির্দেশনা জানতে চান",
+    t("askQuestionPage.tips.context"),
+    t("askQuestionPage.tips.attempts"),
+    t("askQuestionPage.tips.guidance"),
   ];
 
   return (
@@ -138,25 +156,24 @@ const AskQuestion = () => {
               className="inline-flex items-center gap-2 rounded-full border border-[#d7e9e2] bg-white/80 px-3 py-1.5 text-xs font-bold text-[#16745f] shadow-sm backdrop-blur transition hover:bg-white"
             >
               <FiArrowLeft />
-              সব প্রশ্নে ফিরে যান
+              {t("askQuestionPage.backAll")}
             </button>
 
             <div className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#16745f]">
               <FiHelpCircle />
-              Ask a Question
+              {t("askQuestionPage.badge")}
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold leading-[1.18] text-[#263c35] sm:text-4xl lg:text-[3.1rem]">
-              আপনার প্রশ্নটি
+              {t("askQuestionPage.headingPrefix")}
               <span className="relative ml-2 inline-block text-[#16745f]">
-                আলেমদের কাছে পাঠান
+                {t("askQuestionPage.headingAccent")}
                 <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
               </span>
             </h1>
 
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[#687a73] sm:text-base">
-              ইসলাম, পরিবার, শিক্ষা ও দৈনন্দিন জীবনের বিষয়ে আপনার প্রশ্ন
-              বিস্তারিতভাবে লিখুন। যাচাইয়ের পর উত্তর প্রকাশ করা হবে।
+              {t("askQuestionPage.heroDescription")}
             </p>
           </motion.div>
         </div>
@@ -182,10 +199,10 @@ const AskQuestion = () => {
 
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d9704b]">
-                        Question Form
+                        {t("askQuestionPage.formBadge")}
                       </p>
                       <h2 className="mt-1 text-xl font-extrabold text-[#263c35] sm:text-2xl">
-                        প্রশ্নের তথ্য পূরণ করুন
+                        {t("askQuestionPage.formTitle")}
                       </h2>
                     </div>
                   </div>
@@ -198,16 +215,16 @@ const AskQuestion = () => {
                       <div>
                         <label className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg">
                           <FiBook className="text-[#16745f]" />
-                          ক্যাটাগরি নির্বাচন করুন
+                          {t("askQuestionPage.categoryLabel")}
                         </label>
                         <p className="mt-1 text-xs leading-5 text-[#7b8983] sm:text-sm">
-                          প্রশ্নের সঙ্গে সবচেয়ে প্রাসঙ্গিক একটি বিষয় বেছে নিন।
+                          {t("askQuestionPage.categoryHelp")}
                         </p>
                       </div>
 
                       {selectedCategory && (
                         <span className="w-fit rounded-full bg-[#e5f4ee] px-3 py-1 text-xs font-bold text-[#16745f]">
-                          নির্বাচিত
+                          {t("askQuestionPage.selected")}
                         </span>
                       )}
                     </div>
@@ -258,7 +275,7 @@ const AskQuestion = () => {
                       </div>
                     ) : (
                       <div className="rounded-xl border border-dashed border-[#d9dfda] bg-[#fafbf8] p-5 text-center text-sm text-[#71817b]">
-                        কোনো ক্যাটাগরি পাওয়া যায়নি।
+                        {t("askQuestionPage.noCategories")}
                       </div>
                     )}
                   </div>
@@ -271,7 +288,7 @@ const AskQuestion = () => {
                         className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg"
                       >
                         <FiHelpCircle className="text-[#d9704b]" />
-                        আপনার প্রশ্ন
+                        {t("askQuestionPage.questionTitle")}
                       </label>
 
                       <span
@@ -281,14 +298,14 @@ const AskQuestion = () => {
                             : "text-[#8b9893]"
                         }`}
                       >
-                        {title.length}/200
+                        {formatNumber(title.length)}/{formatNumber(200)}
                       </span>
                     </div>
 
                     <input
                       id="question-title"
                       type="text"
-                      placeholder="সংক্ষেপে আপনার মূল প্রশ্নটি লিখুন..."
+                      placeholder={t("askQuestionPage.titlePlaceholder")}
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-[#fafbf8] px-4 text-base font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:bg-white focus:ring-4 focus:ring-[#8bcdbd]/15"
@@ -301,11 +318,10 @@ const AskQuestion = () => {
                     <div className="mb-3">
                       <label className="flex items-center gap-2 text-base font-extrabold text-[#263c35] sm:text-lg">
                         <FiEdit3 className="text-[#7865c9]" />
-                        প্রশ্নের বিস্তারিত
+                        {t("askQuestionPage.descriptionLabel")}
                       </label>
                       <p className="mt-1 text-xs leading-5 text-[#7b8983] sm:text-sm">
-                        প্রয়োজনীয় ঘটনা, সময়, বয়স বা প্রেক্ষাপট যুক্ত করলে উত্তর
-                        দেওয়া সহজ হবে।
+                        {t("askQuestionPage.descriptionHelp")}
                       </p>
                     </div>
 
@@ -320,8 +336,7 @@ const AskQuestion = () => {
                       <FiInfo />
                     </div>
                     <p className="text-xs leading-6 text-[#78694b] sm:text-sm">
-                      প্রশ্নটি সরাসরি প্রকাশ নাও হতে পারে। প্রয়োজনীয় যাচাই ও
-                      অনুমোদনের পর প্রশ্ন এবং উত্তর প্ল্যাটফর্মে প্রদর্শিত হবে।
+                      {t("askQuestionPage.notice")}
                     </p>
                   </div>
 
@@ -336,12 +351,12 @@ const AskQuestion = () => {
                     {submitting ? (
                       <>
                         <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                        প্রশ্ন পাঠানো হচ্ছে...
+                        {t("askQuestionPage.submitting")}
                       </>
                     ) : (
                       <>
                         <FiSend />
-                        প্রশ্ন জমা দিন
+                        {t("askQuestionPage.submit")}
                       </>
                     )}
                   </motion.button>
@@ -361,10 +376,10 @@ const AskQuestion = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8b77ce]">
-                        Guidelines
+                        {t("askQuestionPage.guidelinesBadge")}
                       </p>
                       <h3 className="mt-1 text-lg font-extrabold text-[#263c35]">
-                        প্রশ্ন করার নির্দেশনা
+                        {t("askQuestionPage.guidelinesTitle")}
                       </h3>
                     </div>
 
@@ -403,7 +418,7 @@ const AskQuestion = () => {
                     </div>
 
                     <h3 className="mt-5 text-xl font-extrabold">
-                      ভালো প্রশ্নের কিছু টিপস
+                      {t("askQuestionPage.tipsTitle")}
                     </h3>
 
                     <div className="mt-4 space-y-3">
@@ -433,26 +448,25 @@ const AskQuestion = () => {
 
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d9704b]">
-                        Response Time
+                        {t("askQuestionPage.responseTimeBadge")}
                       </p>
                       <h3 className="mt-1 font-extrabold text-[#263c35]">
-                        সম্ভাব্য উত্তর দেওয়ার সময়
+                        {t("askQuestionPage.responseTimeTitle")}
                       </h3>
                     </div>
                   </div>
 
                   <div className="mt-4 rounded-[1.15rem] bg-[#f8faf7] p-4 text-center">
                     <div className="text-3xl font-extrabold text-[#16745f]">
-                      24–48h
+                      {t("askQuestionPage.responseTimeValue")}
                     </div>
                     <p className="mt-1 text-xs font-semibold text-[#71817b]">
-                      গড় প্রতিক্রিয়ার সময়
+                      {t("askQuestionPage.averageResponseTime")}
                     </p>
                   </div>
 
                   <p className="mt-3 text-xs leading-6 text-[#7b8983]">
-                    প্রশ্নের ধরন ও যাচাইয়ের প্রয়োজন অনুযায়ী উত্তর পেতে কিছুটা
-                    বেশি সময় লাগতে পারে।
+                    {t("askQuestionPage.responseTimeNote")}
                   </p>
                 </motion.div>
               </div>
