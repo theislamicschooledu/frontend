@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 
 import { AuthProvider } from "./context/AuthContext";
+import { LanguageProvider } from "./context/LanguageContext";
 
 import ErrorPage from "./components/ErrorPage";
 import AdminLayout from "./layout/AdminLayout";
@@ -101,8 +102,11 @@ const router = createBrowserRouter([
           { path: "qa/ask-question", element: <AskQuestion /> },
           { path: "qa/update/:id", element: <UpdateQuestion /> },
           // Payment
-          { path: "/courses/:courseId/enroll/manual", element: <ManualEnrollmentForm />},
-          
+          {
+            path: "/courses/:courseId/enroll/manual",
+            element: <ManualEnrollmentForm />,
+          },
+
           { path: "/payment/success", element: <PaymentSuccess /> },
           { path: "/payment/cancel", element: <PaymentCancel /> },
           { path: "/my-courses", element: <MyCourses /> },
@@ -153,7 +157,7 @@ const router = createBrowserRouter([
               { path: "questions/category", element: <AddQuestionCategory /> },
               { path: "questions/:id", element: <QuestionDetailsAdmin /> },
               // Enrollment
-              { path: "enrollment", element: <AdminEnrollments />}
+              { path: "enrollment", element: <AdminEnrollments /> },
             ],
           },
         ],
@@ -198,9 +202,12 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-      <Toaster position="top-center" reverseOrder={false} />
-    </AuthProvider>
-  </React.StrictMode>
+    <LanguageProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+
+        <Toaster position="top-center" reverseOrder={false} />
+      </AuthProvider>
+    </LanguageProvider>
+  </React.StrictMode>,
 );

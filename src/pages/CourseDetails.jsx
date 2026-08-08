@@ -31,6 +31,7 @@ import { MdWorkspacePremium } from "react-icons/md";
 import api from "../utils/axios";
 import PaymentModal from "../components/PaymentModal";
 import { useAuth } from "../hooks/useAuth";
+import { useLanguage } from "../hooks/useLanguage";
 
 const floatingDecorations = [
   { left: "4%", top: "12%", size: 18, delay: 0.2, duration: 6.2 },
@@ -41,13 +42,14 @@ const floatingDecorations = [
   { left: "92%", top: "63%", size: 20, delay: 1.8, duration: 7.2 },
 ];
 
-// Course Status Badge Component
 const CourseStatusBadge = ({ status }) => {
+  const { t } = useLanguage();
+
   const getStatusConfig = (currentStatus) => {
     switch (currentStatus) {
       case "coming_soon":
         return {
-          text: "Coming Soon",
+          text: t("courseDetails.status.comingSoon"),
           bg: "bg-[#f1ebff]",
           textColor: "text-[#7654c8]",
           border: "border-[#d9ccff]",
@@ -55,7 +57,7 @@ const CourseStatusBadge = ({ status }) => {
         };
       case "upcoming":
         return {
-          text: "Upcoming",
+          text: t("courseDetails.status.upcoming"),
           bg: "bg-[#e9f5ff]",
           textColor: "text-[#2574a9]",
           border: "border-[#c7e5fb]",
@@ -63,7 +65,7 @@ const CourseStatusBadge = ({ status }) => {
         };
       case "enrollment_open":
         return {
-          text: "Enrollment Open",
+          text: t("courseDetails.status.enrollmentOpen"),
           bg: "bg-[#e5f8f2]",
           textColor: "text-[#08736e]",
           border: "border-[#bde9dd]",
@@ -71,7 +73,7 @@ const CourseStatusBadge = ({ status }) => {
         };
       case "enrollment_closed":
         return {
-          text: "Enrollment Closed",
+          text: t("courseDetails.status.enrollmentClosed"),
           bg: "bg-[#fff0e9]",
           textColor: "text-[#d95635]",
           border: "border-[#ffd1c2]",
@@ -79,7 +81,7 @@ const CourseStatusBadge = ({ status }) => {
         };
       case "course_started":
         return {
-          text: "Course Started",
+          text: t("courseDetails.status.courseStarted"),
           bg: "bg-[#e6f7f6]",
           textColor: "text-[#08736e]",
           border: "border-[#bce8e3]",
@@ -87,7 +89,7 @@ const CourseStatusBadge = ({ status }) => {
         };
       default:
         return {
-          text: "Published",
+          text: t("courseDetails.status.published"),
           bg: "bg-slate-100",
           textColor: "text-slate-600",
           border: "border-slate-200",
@@ -124,11 +126,13 @@ const CourseDetails = () => {
   const [wishlisted, setWishlisted] = useState(false);
 
   const { user } = useAuth();
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value).toLocaleString(locale);
 
   const fetchCourseDetails = useCallback(async () => {
     setLoading(true);
     try {
-      // ফিক্সড: সঠিক API endpoint ব্যবহার করা হয়েছে
       const courseRes = await api.get(`/courses/details/${id}`);
 
       if (courseRes.data.success) {
@@ -138,7 +142,6 @@ const CourseDetails = () => {
         setLectures(courseData.lectures || []);
         setTeachers(courseData.teachers || []);
 
-        // লেকচার এক্সপান্ডেড স্টেট সেটআপ
         const expanded = {};
         (courseData.lectures || []).forEach((lec) => {
           expanded[lec._id] = false;
@@ -147,19 +150,18 @@ const CourseDetails = () => {
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to load course details",
+        error.response?.data?.message || t("courseDetails.loadFailed"),
       );
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   const fetchReviews = useCallback(async () => {
     try {
-      // ফিক্সড: রিভিউ API endpoint
-      const res = await api.get(`/reviews/course/${id}`);
+      const res = await api.get(`/courses/${id}/reviews`);
       if (res.data.success) {
-        setReviews(res.data.data || []);
+        setReviews(res.data.data?.reviews || []);
       }
     } catch (error) {
       console.error("Failed to fetch reviews:", error);
@@ -197,25 +199,29 @@ const CourseDetails = () => {
   };
 
   const getTimeRemaining = (enrollmentEnd) => {
-    if (!enrollmentEnd) return "Enrollment Open";
+    if (!enrollmentEnd) return t("courseDetails.enrollmentOpen");
 
     const now = new Date();
     const end = new Date(enrollmentEnd);
     const diff = end - now;
 
-    if (diff <= 0) return "Enrollment Closed";
+    if (diff <= 0) return t("courseDetails.enrollmentClosed");
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days > 0) return `${days} days left`;
+    if (days > 0)
+      return t("courseDetails.daysLeft", { count: formatNumber(days) });
 
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    return `${hours} hours left`;
+    return t("courseDetails.hoursLeft", { count: formatNumber(hours) });
   };
 
   const formatDuration = (weeks) => {
-    if (!weeks) return "Not specified";
-    if (weeks < 1) return `${Math.round(weeks * 7)} days`;
-    return `${weeks} week${weeks > 1 ? "s" : ""}`;
+    if (!weeks) return t("courseDetails.durationNotSpecified");
+    if (weeks < 1)
+      return t("courseDetails.durationDays", {
+        count: formatNumber(Math.round(weeks * 7)),
+      });
+    return t("courseDetails.durationWeeks", { count: formatNumber(weeks) });
   };
 
   const handleEnrollClick = (e) => {
@@ -223,21 +229,20 @@ const CourseDetails = () => {
     e.stopPropagation();
 
     if (!user) {
-      toast.error("Please login to enroll");
+      toast.error(t("courseDetails.loginToEnroll"));
       navigate("/login", { state: { from: `/course/${id}` } });
       return;
     }
 
-    // Check if enrollment is open
     if (course.currentStatus !== "enrollment_open") {
       toast(
         course.currentStatus === "coming_soon"
-          ? "This course is coming soon! Enrollment will open when dates are announced."
+          ? t("courseDetails.comingSoonEnrollMessage")
           : course.currentStatus === "enrollment_closed"
-            ? "Enrollment for this course is closed."
+            ? t("courseDetails.enrollmentClosedMessage")
             : course.currentStatus === "course_started"
-              ? "This course has already started. You can enroll in the next batch."
-              : "Enrollment is not available at this time.",
+              ? t("courseDetails.courseStartedMessage")
+              : t("courseDetails.enrollmentUnavailable"),
       );
       return;
     }
@@ -250,7 +255,7 @@ const CourseDetails = () => {
     e.stopPropagation();
 
     if (!user) {
-      toast.error("Please login to add to wishlist");
+      toast.error(t("courseDetails.loginToWishlist"));
       navigate("/login", { state: { from: `/course/${id}` } });
       return;
     }
@@ -260,12 +265,14 @@ const CourseDetails = () => {
       if (res.data.success) {
         setWishlisted(res.data.isInWishlist);
         toast.success(
-          res.data.isInWishlist ? "Added to wishlist" : "Removed from wishlist",
+          res.data.isInWishlist
+            ? t("courseDetails.addedToWishlist")
+            : t("courseDetails.removedFromWishlist"),
         );
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update wishlist");
+      toast.error(t("courseDetails.wishlistFailed"));
     }
   };
 
@@ -295,18 +302,17 @@ const CourseDetails = () => {
     );
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
-    if (!dateString) return "Not Set";
+    if (!dateString) return t("courseDetails.notSet");
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
+      return date.toLocaleDateString(locale, {
         month: "short",
         day: "numeric",
         year: "numeric",
       });
     } catch {
-      return "Invalid Date";
+      return t("courseDetails.invalidDate");
     }
   };
 
@@ -332,10 +338,10 @@ const CourseDetails = () => {
             </div>
           </div>
           <h2 className="text-2xl font-black text-[#073b46]">
-            Loading course details...
+            {t("courseDetails.loadingTitle")}
           </h2>
           <p className="mt-2 text-sm font-medium text-slate-500">
-            Your learning journey is being prepared.
+            {t("courseDetails.loadingDescription")}
           </p>
         </motion.div>
       </div>
@@ -357,16 +363,16 @@ const CourseDetails = () => {
             <FiBookOpen size={34} />
           </div>
           <h3 className="text-2xl font-black text-[#073b46]">
-            Course not found
+            {t("courseDetails.notFoundTitle")}
           </h3>
           <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
-            The course may have been removed or is currently unavailable.
+            {t("courseDetails.notFoundDescription")}
           </p>
           <button
             onClick={() => navigate("/courses")}
             className="mt-6 rounded-2xl bg-[#073b46] px-6 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#0b505d]"
           >
-            Browse Courses
+            {t("courseDetails.browseCourses")}
           </button>
         </motion.div>
       </div>
@@ -379,27 +385,27 @@ const CourseDetails = () => {
   const tabs = [
     {
       id: "overview",
-      label: "Overview",
+      label: t("courseDetails.tabs.overview"),
       icon: FiBook,
-      mobileLabel: "Overview",
+      mobileLabel: t("courseDetails.tabs.overview"),
     },
     {
       id: "curriculum",
-      label: "Curriculum",
+      label: t("courseDetails.tabs.curriculum"),
       icon: FiPlay,
-      mobileLabel: "Lessons",
+      mobileLabel: t("courseDetails.tabs.curriculumMobile"),
     },
     {
       id: "instructors",
-      label: "Instructors",
+      label: t("courseDetails.tabs.instructors"),
       icon: FaChalkboardTeacher,
-      mobileLabel: "Teachers",
+      mobileLabel: t("courseDetails.tabs.instructorsMobile"),
     },
     {
       id: "reviews",
-      label: "Reviews",
+      label: t("courseDetails.tabs.reviews"),
       icon: FiStar,
-      mobileLabel: "Reviews",
+      mobileLabel: t("courseDetails.tabs.reviews"),
     },
   ];
 
@@ -471,11 +477,11 @@ const CourseDetails = () => {
                     onClick={() => navigate("/courses")}
                     className="transition hover:text-[#ff6542]"
                   >
-                    Courses
+                    {t("courseDetails.courses")}
                   </button>
                   <span className="text-[#ff6542]">/</span>
                   <span className="max-w-44 truncate text-slate-500 sm:max-w-64">
-                    {course.category?.name || "Uncategorized"}
+                    {course.category?.name || t("courseDetails.uncategorized")}
                   </span>
                 </div>
 
@@ -484,7 +490,7 @@ const CourseDetails = () => {
                   {course.featured && (
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-[#ffd36e] bg-[#fff7d8] px-3 py-1.5 text-xs font-black text-[#9a6500] shadow-sm">
                       <IoIosTrendingUp size={14} />
-                      Featured
+                      {t("courseDetails.featured")}
                     </span>
                   )}
                 </div>
@@ -521,7 +527,11 @@ const CourseDetails = () => {
                   <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#e5f8f2] text-[#08736e]">
                     <FiUsers size={16} />
                   </span>
-                  <span>{course.studentCount || 0} students</span>
+                  <span>
+                    {t("courseDetails.students", {
+                      count: formatNumber(course.studentCount || 0),
+                    })}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 rounded-2xl border-2 border-white bg-white/72 px-3 py-2.5 text-xs font-bold text-[#073b46] shadow-sm backdrop-blur-sm sm:text-sm">
@@ -535,7 +545,11 @@ const CourseDetails = () => {
                   <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#fff0e9] text-[#ff6542]">
                     <FiBook size={16} />
                   </span>
-                  <span>{lectures.length} lectures</span>
+                  <span>
+                    {t("courseDetails.lectures", {
+                      count: formatNumber(lectures.length),
+                    })}
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -579,7 +593,7 @@ const CourseDetails = () => {
                       ? "bg-[#ff6542] text-white"
                       : "bg-white/85 text-[#073b46] hover:text-[#ff6542]"
                   }`}
-                  aria-label="Toggle wishlist"
+                  aria-label={t("courseDetails.toggleWishlist")}
                 >
                   <FiHeart className={wishlisted ? "fill-current" : ""} />
                 </button>
@@ -597,10 +611,10 @@ const CourseDetails = () => {
                     </span>
                     <div>
                       <h4 className="text-sm font-black text-[#6544b4]">
-                        Coming Soon
+                        {t("courseDetails.status.comingSoon")}
                       </h4>
                       <p className="mt-0.5 text-xs font-medium leading-5 text-[#7654c8]">
-                        This course will be available soon.
+                        {t("courseDetails.comingSoonDescription")}
                       </p>
                     </div>
                   </div>
@@ -609,7 +623,7 @@ const CourseDetails = () => {
                 <div className="flex items-end justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
-                      Course Fee
+                      {t("courseDetails.courseFee")}
                     </p>
                     <p className="mt-1 text-3xl font-black text-[#073b46]">
                       ৳{course.price || 0}
@@ -634,10 +648,10 @@ const CourseDetails = () => {
                         onClick={() => navigate(`/learn/${course._id}`)}
                       >
                         <FiPlay />
-                        Continue Learning
+                        {t("courseDetails.continueLearning")}
                       </button>
                       <button className="w-full rounded-2xl border-2 border-[#073b46]/12 bg-[#f8fbfa] px-4 py-3 text-sm font-black text-[#073b46] transition hover:border-[#62d6c7] hover:bg-[#eef9f7]">
-                        Share Course
+                        {t("courseDetails.shareCourse")}
                       </button>
                     </>
                   ) : (
@@ -652,12 +666,12 @@ const CourseDetails = () => {
                         disabled={!canEnroll}
                       >
                         {isComingSoon
-                          ? "Coming Soon"
+                          ? t("courseDetails.status.comingSoon")
                           : course.currentStatus === "enrollment_closed"
-                            ? "Enrollment Closed"
+                            ? t("courseDetails.status.enrollmentClosed")
                             : course.currentStatus === "course_started"
-                              ? "Course Started"
-                              : "Enroll Now"}
+                              ? t("courseDetails.status.courseStarted")
+                              : t("courseDetails.enrollNow")}
                       </button>
 
                       <div className="grid grid-cols-2 gap-2.5">
@@ -672,11 +686,13 @@ const CourseDetails = () => {
                           <FiHeart
                             className={wishlisted ? "fill-current" : ""}
                           />
-                          {wishlisted ? "Wishlisted" : "Wishlist"}
+                          {wishlisted
+                            ? t("courseDetails.wishlisted")
+                            : t("courseDetails.wishlist")}
                         </button>
                         <button className="flex items-center justify-center gap-1.5 rounded-2xl border-2 border-[#073b46]/10 bg-[#f8fbfa] px-3 py-2.5 text-xs font-black text-[#073b46] transition hover:border-[#bce8e3] hover:text-[#08736e] sm:text-sm">
                           <FiShare2 />
-                          Share
+                          {t("courseDetails.share")}
                         </button>
                       </div>
                     </>
@@ -684,7 +700,7 @@ const CourseDetails = () => {
                 </div>
 
                 <div className="mt-3 rounded-2xl bg-[#fff8dc] px-3 py-2.5 text-center text-xs font-black text-[#8b6410]">
-                  🎯 30-Day Money-Back Guarantee
+                  {t("courseDetails.guarantee")}
                 </div>
               </div>
             </motion.aside>
@@ -738,17 +754,17 @@ const CourseDetails = () => {
                         <div>
                           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e5f8f2] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#08736e]">
                             <FiBookOpen />
-                            Course Overview
+                            {t("courseDetails.overviewBadge")}
                           </div>
                           <h2 className="text-2xl font-black text-[#073b46] sm:text-3xl">
-                            About This Course
+                            {t("courseDetails.aboutCourse")}
                           </h2>
                           <div
                             className="prose prose-sm mt-4 max-w-none leading-7 text-slate-600 sm:prose-base prose-headings:font-black prose-headings:text-[#073b46] prose-a:text-[#08736e] prose-strong:text-[#073b46]"
                             dangerouslySetInnerHTML={{
                               __html:
                                 course.description ||
-                                "<p>No description available.</p>",
+                                `<p>${t("courseDetails.noDescription")}</p>`,
                             }}
                           />
                         </div>
@@ -764,7 +780,7 @@ const CourseDetails = () => {
                                 <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#08736e] text-white shadow-md">
                                   <FiAward />
                                 </span>
-                                What You&apos;ll Learn
+                                {t("courseDetails.whatYouWillLearn")}
                               </h3>
 
                               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -801,16 +817,16 @@ const CourseDetails = () => {
                             </span>
                             <div>
                               <h4 className="text-lg font-black text-[#6544b4] sm:text-xl">
-                                Coming Soon
+                                {t("courseDetails.preparationNoticeTitle")}
                               </h4>
                               <p className="mt-1 text-sm font-medium leading-6 text-[#7654c8] sm:text-base">
-                                This course is currently in preparation.
-                                Enrollment will open once all content is ready
-                                and dates are announced.
+                                {t(
+                                  "courseDetails.preparationNoticeDescription",
+                                )}
                               </p>
                               <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black text-[#6544b4]">
-                                <span>Status:</span>
-                                <span>In Development</span>
+                                <span>{t("courseDetails.statusLabel")}</span>
+                                <span>{t("courseDetails.inDevelopment")}</span>
                               </div>
                             </div>
                           </motion.div>
@@ -829,10 +845,10 @@ const CourseDetails = () => {
                         <div className="mb-5">
                           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#f1ebff] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#7654c8]">
                             <FaChalkboardTeacher />
-                            Course Mentors
+                            {t("courseDetails.courseMentors")}
                           </div>
                           <h2 className="text-2xl font-black text-[#073b46] sm:text-3xl">
-                            Meet Your Instructors
+                            {t("courseDetails.meetInstructors")}
                           </h2>
                         </div>
 
@@ -870,11 +886,14 @@ const CourseDetails = () => {
                                       {teacher.name}
                                     </h3>
                                     <p className="mt-1 text-sm font-black text-[#7654c8] sm:text-base">
-                                      {teacher.expertise || "Expert Instructor"}
+                                      {teacher.expertise ||
+                                        t("courseDetails.expertInstructor")}
                                     </p>
                                     <p className="mt-2 text-sm font-medium leading-6 text-slate-600 sm:text-base">
                                       {teacher.bio ||
-                                        "Experienced instructor with passion for teaching."}
+                                        t(
+                                          "courseDetails.instructorBioFallback",
+                                        )}
                                     </p>
                                   </div>
                                 </div>
@@ -886,7 +905,7 @@ const CourseDetails = () => {
                                 <FaChalkboardTeacher size={30} />
                               </div>
                               <p className="mt-4 text-sm font-bold text-slate-500 sm:text-base">
-                                No instructors assigned yet
+                                {t("courseDetails.noInstructors")}
                               </p>
                             </div>
                           )}
@@ -906,10 +925,10 @@ const CourseDetails = () => {
                           <div>
                             <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#8b6410] shadow-sm">
                               <FiStar className="fill-current" />
-                              Learner Feedback
+                              {t("courseDetails.learnerFeedback")}
                             </div>
                             <h2 className="text-2xl font-black text-[#073b46] sm:text-3xl">
-                              Student Reviews
+                              {t("courseDetails.studentReviews")}
                             </h2>
                           </div>
 
@@ -920,7 +939,9 @@ const CourseDetails = () => {
                             <div>
                               {renderStars(course.averageRating || 0)}
                               <p className="mt-1 text-xs font-bold text-slate-400">
-                                {course.ratingCount || 0} reviews
+                                {t("courseDetails.reviewsCount", {
+                                  count: formatNumber(course.ratingCount || 0),
+                                })}
                               </p>
                             </div>
                           </div>
@@ -951,7 +972,8 @@ const CourseDetails = () => {
                                     />
                                     <div>
                                       <h3 className="font-black text-[#073b46]">
-                                        {review.user?.name || "Anonymous"}
+                                        {review.user?.name ||
+                                          t("courseDetails.anonymous")}
                                       </h3>
                                       <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                                         {renderStars(review.rating)}
@@ -959,7 +981,7 @@ const CourseDetails = () => {
                                           {review.createdAt
                                             ? new Date(
                                                 review.createdAt,
-                                              ).toLocaleDateString()
+                                              ).toLocaleDateString(locale)
                                             : ""}
                                         </span>
                                       </div>
@@ -969,7 +991,7 @@ const CourseDetails = () => {
                                   {review.rating >= 4 && (
                                     <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[#bde9dd] bg-[#e5f8f2] px-3 py-1.5 text-xs font-black text-[#08736e]">
                                       <MdWorkspacePremium />
-                                      Verified
+                                      {t("courseDetails.verified")}
                                     </span>
                                   )}
                                 </div>
@@ -985,10 +1007,10 @@ const CourseDetails = () => {
                                 <FiStar size={30} />
                               </div>
                               <h3 className="mt-4 text-lg font-black text-[#073b46]">
-                                No reviews yet
+                                {t("courseDetails.noReviews")}
                               </h3>
                               <p className="mt-1 text-sm font-medium text-slate-500">
-                                Student feedback will appear here.
+                                {t("courseDetails.feedbackPlaceholder")}
                               </p>
                             </div>
                           )}
@@ -1008,16 +1030,18 @@ const CourseDetails = () => {
                           <div>
                             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#fff0e9] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#d95635]">
                               <FiPlay />
-                              Course Lessons
+                              {t("courseDetails.courseLessons")}
                             </div>
                             <h2 className="text-2xl font-black text-[#073b46] sm:text-3xl">
-                              Course Curriculum
+                              {t("courseDetails.courseCurriculum")}
                             </h2>
                           </div>
 
                           <div className="flex flex-wrap gap-2">
                             <span className="rounded-full bg-[#e5f8f2] px-3 py-1.5 text-xs font-black text-[#08736e]">
-                              {lectures.length} lectures
+                              {t("courseDetails.lectures", {
+                                count: formatNumber(lectures.length),
+                              })}
                             </span>
                             <span className="rounded-full bg-[#f1ebff] px-3 py-1.5 text-xs font-black text-[#7654c8]">
                               {formatDuration(course.duration)}
@@ -1061,7 +1085,11 @@ const CourseDetails = () => {
                                       {lecture.duration && (
                                         <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-400">
                                           <FiClock />
-                                          {lecture.duration} min
+                                          {t("courseDetails.lectureMinutes", {
+                                            count: formatNumber(
+                                              lecture.duration,
+                                            ),
+                                          })}
                                         </p>
                                       )}
                                     </div>
@@ -1092,14 +1120,14 @@ const CourseDetails = () => {
                                       <div className="mx-3.5 border-t border-slate-100 pb-4 pt-4 sm:mx-4">
                                         <p className="text-sm font-medium leading-7 text-slate-600 sm:text-base">
                                           {lecture.description ||
-                                            "No description available."}
+                                            t("courseDetails.noDescription")}
                                         </p>
 
                                         {lecture.resources &&
                                           lecture.resources.length > 0 && (
                                             <div className="mt-4 rounded-2xl bg-[#f8fbfa] p-3">
                                               <h4 className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
-                                                Resources
+                                                {t("courseDetails.resources")}
                                               </h4>
                                               <div className="flex flex-wrap gap-2">
                                                 {lecture.resources.map(
@@ -1132,8 +1160,8 @@ const CourseDetails = () => {
                               </div>
                               <p className="mt-4 text-sm font-bold text-slate-500 sm:text-base">
                                 {isComingSoon
-                                  ? "Course content is being prepared. Check back soon!"
-                                  : "No lectures added yet"}
+                                  ? t("courseDetails.contentPreparing")
+                                  : t("courseDetails.noLectures")}
                               </p>
                             </div>
                           )}
@@ -1160,10 +1188,10 @@ const CourseDetails = () => {
                     </span>
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">
-                        Learning Benefits
+                        {t("courseDetails.learningBenefits")}
                       </p>
                       <h3 className="text-xl font-black text-[#073b46]">
-                        Course Includes
+                        {t("courseDetails.courseIncludes")}
                       </h3>
                     </div>
                   </div>
@@ -1172,32 +1200,34 @@ const CourseDetails = () => {
                     {[
                       {
                         icon: FiPlay,
-                        text: `${formatDuration(course.duration)} video content`,
+                        text: t("courseDetails.videoContent", {
+                          duration: formatDuration(course.duration),
+                        }),
                         iconClass: "bg-[#fff0e9] text-[#d95635]",
                       },
                       {
                         icon: FiDownload,
-                        text: "Downloadable resources",
+                        text: t("courseDetails.downloadableResources"),
                         iconClass: "bg-[#e5f8f2] text-[#08736e]",
                       },
                       {
                         icon: FiBook,
-                        text: "Full lifetime access",
+                        text: t("courseDetails.lifetimeAccess"),
                         iconClass: "bg-[#f1ebff] text-[#7654c8]",
                       },
                       {
                         icon: FiCalendar,
-                        text: "Access on mobile and TV",
+                        text: t("courseDetails.mobileTvAccess"),
                         iconClass: "bg-[#e9f5ff] text-[#2574a9]",
                       },
                       {
                         icon: FiAward,
-                        text: "Certificate of completion",
+                        text: t("courseDetails.certificate"),
                         iconClass: "bg-[#fff8dc] text-[#a17400]",
                       },
                       {
                         icon: FiUsers,
-                        text: "Direct instructor support",
+                        text: t("courseDetails.instructorSupport"),
                         iconClass: "bg-[#e5f8f2] text-[#08736e]",
                       },
                     ].map((feature, index) => {
@@ -1238,10 +1268,10 @@ const CourseDetails = () => {
                         </span>
                         <div>
                           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">
-                            Important Dates
+                            {t("courseDetails.importantDates")}
                           </p>
                           <h3 className="text-xl font-black text-[#073b46]">
-                            Course Timeline
+                            {t("courseDetails.courseTimeline")}
                           </h3>
                         </div>
                       </div>
@@ -1249,19 +1279,19 @@ const CourseDetails = () => {
                       <div className="space-y-2.5">
                         {[
                           {
-                            label: "Enrollment Starts",
+                            label: t("courseDetails.enrollmentStarts"),
                             date: course.enrollmentStart,
                             dot: "bg-[#62d6c7]",
                             value: "text-[#08736e]",
                           },
                           {
-                            label: "Enrollment Ends",
+                            label: t("courseDetails.enrollmentEnds"),
                             date: course.enrollmentEnd,
                             dot: "bg-[#ffd36e]",
                             value: "text-[#9a6500]",
                           },
                           {
-                            label: "Course Starts",
+                            label: t("courseDetails.courseStarts"),
                             date: course.courseStart,
                             dot: "bg-[#8b6fe8]",
                             value: "text-[#7654c8]",
@@ -1303,7 +1333,7 @@ const CourseDetails = () => {
           setShowPaymentModal(false);
           setEnrolled(true);
           fetchCourseDetails();
-          toast.success("Successfully enrolled in the course!");
+          toast.success(t("courseDetails.enrolledSuccess"));
         }}
       />
     </main>

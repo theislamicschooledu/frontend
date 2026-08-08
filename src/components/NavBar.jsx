@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { FiMenu, FiUser, FiX } from "react-icons/fi";
+import { FiGlobe, FiMenu, FiUser, FiX } from "react-icons/fi";
 import { Link, NavLink, useNavigate } from "react-router";
 import { Nav_Item } from "../../public/assist";
 import { useAuth } from "../hooks/useAuth.js";
+import { useLanguage } from "../hooks/useLanguage.js";
 import toast from "react-hot-toast";
 import logoWhite from "./../../public/Logo-white.png";
 import logoBlue from "./../../public/Logo-blue.png";
@@ -47,6 +48,7 @@ const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, logout } = useAuth();
+  const { language, toggleLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   // Scroll Effect
@@ -79,7 +81,7 @@ const NavBar = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success("Logged out — see you soon! 👋");
+      toast.success(t("common.loggedOut"));
       navigate("/login");
     } catch (error) {
       toast.error(error);
@@ -108,23 +110,23 @@ const NavBar = () => {
             <p className="flex items-center gap-2">
               <MdOutlineLocalPhone className="text-white animate-[wiggle_2s_ease-in-out_infinite]" />
               <span className="text-xs font-medium text-white sm:text-sm">
-                Call us
+                {t("common.callUs")}
               </span>
             </p>
             {user ? (
-             <Link to={`/profile`} className="flex items-center gap-2 group">
-              <FaPerson className="text-white text-lg group-hover:translate-x-1 transition-transform" />
-              <span className="text-xs font-medium text-white sm:text-sm">
-                {user?.name}
-              </span>
-            </Link>
+              <Link to={`/profile`} className="flex items-center gap-2 group">
+                <FaPerson className="text-white text-lg group-hover:translate-x-1 transition-transform" />
+                <span className="text-xs font-medium text-white sm:text-sm">
+                  {user?.name}
+                </span>
+              </Link>
             ) : (
               <Link to={"/login"} className="flex items-center gap-2 group">
-              <CiLogin className="text-white text-lg group-hover:translate-x-1 transition-transform" />
-              <span className="text-xs font-medium text-white sm:text-sm">
-                Student Login
-              </span>
-            </Link>
+                <CiLogin className="text-white text-lg group-hover:translate-x-1 transition-transform" />
+                <span className="text-xs font-medium text-white sm:text-sm">
+                  {t("common.studentLogin")}
+                </span>
+              </Link>
             )}
           </div>
         </div>
@@ -145,10 +147,10 @@ const NavBar = () => {
                 />
                 <div className="flex flex-col gap-0">
                   <p className="truncate whitespace-nowrap text-sm font-extrabold tracking-wide text-white min-[390px]:text-base sm:text-lg md:text-xl">
-                    THE ISLAMIC SCHOOL
+                    {t("common.siteName")}
                   </p>
                   <span className="hidden text-[10px] font-medium leading-tight tracking-widest text-sky-100 sm:block md:text-[11px]">
-                    Learn - Light - Lead with Islam
+                    {t("common.tagline")}
                   </span>
                 </div>
               </>
@@ -161,10 +163,10 @@ const NavBar = () => {
                 />
                 <div className="flex flex-col gap-0">
                   <p className="truncate whitespace-nowrap text-sm font-extrabold tracking-wide text-indigo-900 min-[390px]:text-base sm:text-lg md:text-xl">
-                    THE ISLAMIC SCHOOL
+                    {t("common.siteName")}
                   </p>
                   <span className="hidden text-[10px] font-medium leading-tight tracking-widest text-emerald-600 sm:block md:text-[11px]">
-                    Learn - Light - Lead with Islam
+                    {t("common.tagline")}
                   </span>
                 </div>
               </>
@@ -193,7 +195,7 @@ const NavBar = () => {
                     }`
                   }
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                   {/* animated underline dot */}
                   <span
                     className={`absolute left-1/2 -bottom-0.5 h-1 w-1 -translate-x-1/2 rounded-full opacity-0 scale-0 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 ${palette.dot}`}
@@ -205,6 +207,29 @@ const NavBar = () => {
 
           {/* Right actions */}
           <div className="hidden lg:flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              aria-label={
+                language === "bn"
+                  ? t("common.switchToEnglish")
+                  : t("common.switchToBangla")
+              }
+              title={
+                language === "bn"
+                  ? t("common.switchToEnglish")
+                  : t("common.switchToBangla")
+              }
+              className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${
+                scrolled
+                  ? "border-white/30 bg-white/15 text-white hover:bg-white/25"
+                  : "border-indigo-100 bg-indigo-50 text-indigo-700 hover:border-indigo-200 hover:bg-indigo-100"
+              }`}
+            >
+              <FiGlobe className="text-base transition-transform duration-300 group-hover:rotate-12" />
+              <span>{language === "bn" ? "EN" : "বাংলা"}</span>
+            </button>
+
             {user ? (
               <>
                 {user.role !== "admin" && (
@@ -222,7 +247,7 @@ const NavBar = () => {
                       }`
                     }
                   >
-                    My Courses
+                    {t("common.myCourses")}
                   </NavLink>
                 )}
                 {user.role !== "student" && (
@@ -234,7 +259,7 @@ const NavBar = () => {
                         : "text-gray-600 hover:bg-indigo-50 hover:text-indigo-700"
                     }`}
                   >
-                    Dashboard
+                    {t("common.dashboard")}
                   </Link>
                 )}
                 <Link
@@ -255,7 +280,7 @@ const NavBar = () => {
                       : "bg-indigo-600 text-white hover:bg-indigo-700"
                   }`}
                 >
-                  Log Out
+                  {t("common.logout")}
                 </button>
               </>
             ) : (
@@ -267,7 +292,7 @@ const NavBar = () => {
                     : "bg-linear-to-r from-indigo-600 to-sky-500 text-white hover:shadow-indigo-200"
                 }`}
               >
-                Join Now
+                {t("common.joinNow")}
               </NavLink>
             )}
           </div>
@@ -275,9 +300,7 @@ const NavBar = () => {
           {/* Mobile Menu Button */}
           <button
             type="button"
-            aria-label={
-              isOpen ? "Close navigation menu" : "Open navigation menu"
-            }
+            aria-label={isOpen ? t("common.closeMenu") : t("common.openMenu")}
             aria-expanded={isOpen}
             aria-controls="mobile-navigation"
             onClick={() => setIsOpen((open) => !open)}
@@ -328,10 +351,33 @@ const NavBar = () => {
                     }`
                   }
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </NavLink>
               );
             })}
+
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className={`flex w-full items-center justify-between rounded-xl px-4 py-3 font-semibold transition active:scale-[0.99] ${
+                scrolled
+                  ? "bg-white/10 text-white hover:bg-white/15"
+                  : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+              }`}
+              aria-label={
+                language === "bn"
+                  ? t("common.switchToEnglish")
+                  : t("common.switchToBangla")
+              }
+            >
+              <span className="flex items-center gap-3">
+                <FiGlobe className="text-xl" />
+                {t("common.language")}
+              </span>
+              <span className="rounded-full bg-white/80 px-2.5 py-1 text-xs font-black text-indigo-700 shadow-sm">
+                {language === "bn" ? "EN" : "বাংলা"}
+              </span>
+            </button>
 
             <div className="border-t border-white/20 pt-3 mt-2">
               {user ? (
@@ -345,7 +391,7 @@ const NavBar = () => {
                         : "hover:bg-indigo-50 hover:text-indigo-700"
                     }`}
                   >
-                    Dashboard
+                    {t("common.dashboard")}
                   </Link>
                   <Link
                     to={"/profile"}
@@ -357,7 +403,7 @@ const NavBar = () => {
                     }`}
                   >
                     <FiUser className="text-xl" />
-                    <span>Profile</span>
+                    <span>{t("common.profile")}</span>
                   </Link>
                   <button
                     onClick={() => {
@@ -370,7 +416,7 @@ const NavBar = () => {
                         : "bg-indigo-600 text-white hover:bg-indigo-700"
                     }`}
                   >
-                    Log Out
+                    {t("common.logout")}
                   </button>
                 </div>
               ) : (
@@ -383,7 +429,7 @@ const NavBar = () => {
                       : "bg-linear-to-r from-indigo-600 to-sky-500 text-white hover:shadow-md"
                   }`}
                 >
-                  Join Now
+                  {t("common.joinNow")}
                 </NavLink>
               )}
             </div>
@@ -409,10 +455,7 @@ const NavBar = () => {
         }
       `}</style>
       </nav>
-      <div
-        aria-hidden="true"
-        className="h-21 shrink-0 sm:h-23 lg:h-24"
-      />
+      <div aria-hidden="true" className="h-21 shrink-0 sm:h-23 lg:h-24" />
     </>
   );
 };

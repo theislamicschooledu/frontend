@@ -1,28 +1,38 @@
 import React from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import { FiBook, FiBookOpen, FiClock, FiEye, FiHeart, FiStar } from "react-icons/fi";
+import {
+  FiBook,
+  FiBookOpen,
+  FiClock,
+  FiEye,
+  FiHeart,
+  FiStar,
+} from "react-icons/fi";
 import { FaChalkboardTeacher, FaRocket } from "react-icons/fa";
 import { Link } from "react-router";
+import { useLanguage } from "../hooks/useLanguage";
 
 const stripHtml = (html) => (html ? String(html).replace(/<[^>]*>/g, "") : "");
-const formatPrice = (val) =>
-  val || val === 0 ? Number(val).toLocaleString() : "0";
-
 const CourseListItem = ({ course, index }) => {
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+
+  const formatPrice = (val) =>
+    val || val === 0 ? Number(val).toLocaleString(locale) : "0";
   const getTimeRemaining = (enrollmentEnd) => {
-    if (!enrollmentEnd) return "No deadline";
+    if (!enrollmentEnd) return t("coursesPage.listItem.noDeadline");
     const now = new Date();
     const end = new Date(enrollmentEnd);
     const diff = end - now;
-    if (Number.isNaN(diff)) return "Invalid date";
-    if (diff <= 0) return "Enrollment Closed";
+    if (Number.isNaN(diff)) return t("coursesPage.listItem.invalidDate");
+    if (diff <= 0) return t("coursesPage.listItem.enrollmentClosed");
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} left`;
+    if (days > 0) return t("coursesPage.listItem.daysLeft", { count: days });
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} left`;
+    if (hours > 0) return t("coursesPage.listItem.hoursLeft", { count: hours });
     const minutes = Math.floor(diff / (1000 * 60));
-    return `${minutes} min left`;
+    return t("coursesPage.listItem.minutesLeft", { count: minutes });
   };
 
   return (
@@ -57,7 +67,11 @@ const CourseListItem = ({ course, index }) => {
             </div>
           </div>
 
-          <button className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2.5 rounded-full text-gray-600 hover:text-red-500 transition-all duration-300 hover:scale-110 shadow-lg">
+          <button
+            type="button"
+            aria-label={t("coursesPage.listItem.wishlist")}
+            className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2.5 rounded-full text-gray-600 hover:text-red-500 transition-all duration-300 hover:scale-110 shadow-lg"
+          >
             <FiHeart size={16} />
           </button>
         </div>
@@ -70,7 +84,8 @@ const CourseListItem = ({ course, index }) => {
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-4">
                 <div className="flex items-center gap-3 mb-3 lg:mb-0">
                   <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
-                    {course.category?.name || "Uncategorized"}
+                    {course.category?.name ||
+                      t("coursesPage.listItem.uncategorized")}
                   </span>
                   <div className="flex items-center text-amber-500 text-sm bg-amber-50 px-3 py-1.5 rounded-full">
                     <FiStar size={14} />
@@ -90,7 +105,8 @@ const CourseListItem = ({ course, index }) => {
               </h3>
 
               <p className="text-gray-600 mb-5 line-clamp-2 text-sm leading-relaxed">
-                {stripHtml(course.description) || "No description available"}
+                {stripHtml(course.description) ||
+                  t("coursesPage.listItem.noDescription")}
               </p>
 
               {/* Course stats */}
@@ -98,19 +114,31 @@ const CourseListItem = ({ course, index }) => {
                 <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-2xl">
                   <FiClock className="text-blue-500" size={16} />
                   <span className="text-sm font-semibold text-gray-700">
-                    {course.duration ?? 0}h
+                    {t("coursesPage.listItem.durationHours", {
+                      count: Number(course.duration ?? 0).toLocaleString(
+                        locale,
+                      ),
+                    })}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-2xl">
                   <FiBook className="text-green-500" size={16} />
                   <span className="text-sm font-semibold text-gray-700">
-                    {course.lectures?.length ?? 0} lectures
+                    {t("coursesPage.listItem.lectures", {
+                      count: Number(
+                        course.lectures?.length ?? 0,
+                      ).toLocaleString(locale),
+                    })}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-2xl">
                   <FaChalkboardTeacher className="text-purple-500" size={16} />
                   <span className="text-sm font-semibold text-gray-700">
-                    {course.teachers?.length ?? 1} instructors
+                    {t("coursesPage.listItem.instructors", {
+                      count: Number(
+                        course.teachers?.length ?? 1,
+                      ).toLocaleString(locale),
+                    })}
                   </span>
                 </div>
               </div>
@@ -122,7 +150,9 @@ const CourseListItem = ({ course, index }) => {
                 <span className="text-3xl font-bold text-gray-900">
                   {formatPrice(course.price)}
                 </span>
-                <span className="text-gray-500 text-sm ml-1 mt-1">TK</span>
+                <span className="text-gray-500 text-sm ml-1 mt-1">
+                  {t("coursesPage.listItem.currency")}
+                </span>
               </div>
 
               <div className="flex gap-3">
@@ -130,8 +160,11 @@ const CourseListItem = ({ course, index }) => {
                   to={`/course/${course._id}`}
                   className="flex items-center gap-2 px-6 py-2.5 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold hover:shadow-xl transition-all duration-300 shadow-lg group/btn"
                 >
-                  <FiEye size={16} className="group-hover/btn:scale-110 transition-transform duration-300" />
-                  Preview
+                  <FiEye
+                    size={16}
+                    className="group-hover/btn:scale-110 transition-transform duration-300"
+                  />
+                  {t("coursesPage.listItem.preview")}
                 </Link>
               </div>
             </div>

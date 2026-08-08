@@ -24,6 +24,7 @@ import api from "../utils/axios";
 import SkeletonCard from "../components/SkeletonCard";
 import CourseCard from "../components/CourseCard";
 import CourseListItem from "../components/CourseListItem";
+import { useLanguage } from "../hooks/useLanguage";
 
 // Utility: safely strip HTML
 const stripHtml = (html) => (html ? String(html).replace(/<[^>]*>/g, "") : "");
@@ -40,6 +41,8 @@ const floatingDecorations = [
 ];
 
 const Courses = () => {
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
@@ -53,14 +56,30 @@ const Courses = () => {
 
   // Status options for filtering
   const statusOptions = [
-    { value: "all", label: "All Courses", icon: FiBookOpen },
-    { value: "coming_soon", label: "Coming Soon", icon: FiClock },
-    { value: "upcoming", label: "Upcoming", icon: FiCalendar },
-    { value: "enrollment_open", label: "Enrollment Open", icon: FiUsers },
-    { value: "enrollment_closed", label: "Enrollment Closed", icon: FiX },
+    { value: "all", label: t("coursesPage.status.all"), icon: FiBookOpen },
+    {
+      value: "coming_soon",
+      label: t("coursesPage.status.comingSoon"),
+      icon: FiClock,
+    },
+    {
+      value: "upcoming",
+      label: t("coursesPage.status.upcoming"),
+      icon: FiCalendar,
+    },
+    {
+      value: "enrollment_open",
+      label: t("coursesPage.status.enrollmentOpen"),
+      icon: FiUsers,
+    },
+    {
+      value: "enrollment_closed",
+      label: t("coursesPage.status.enrollmentClosed"),
+      icon: FiX,
+    },
     {
       value: "course_started",
-      label: "Course Started",
+      label: t("coursesPage.status.courseStarted"),
       icon: FaGraduationCap,
     },
   ];
@@ -92,7 +111,7 @@ const Courses = () => {
       const msg =
         error?.response?.data?.message ||
         error?.message ||
-        "Failed to load courses";
+        t("coursesPage.loadFailed");
       toast.error(msg);
       console.error("Courses fetch error:", error);
     } finally {
@@ -115,7 +134,7 @@ const Courses = () => {
       const msg =
         error?.response?.data?.message ||
         error?.message ||
-        "Failed to load categories";
+        t("coursesPage.categoriesLoadFailed");
       toast.error(msg);
       console.error("Categories fetch error:", error);
     }
@@ -124,6 +143,7 @@ const Courses = () => {
   useEffect(() => {
     fetchCourses();
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Filter / search / sort logic
@@ -221,10 +241,10 @@ const Courses = () => {
           </div>
 
           <h2 className="text-2xl font-black text-[#073b46]">
-            Loading courses...
+            {t("coursesPage.loadingTitle")}
           </h2>
           <p className="mt-2 text-sm font-medium text-slate-500 sm:text-base">
-            A wonderful learning journey is almost ready.
+            {t("coursesPage.loadingDescription")}
           </p>
         </motion.div>
       </div>
@@ -302,13 +322,13 @@ const Courses = () => {
               <span className="grid h-6 w-6 place-items-center rounded-full bg-[#ff6542] text-white">
                 <HiSparkles size={14} />
               </span>
-              Explore Our Courses
+              {t("coursesPage.badge")}
             </div>
 
             <h1 className="text-3xl font-black leading-[1.08] tracking-tight text-[#073b46] sm:text-4xl lg:text-5xl">
-              Discover Learning That Feels
+              {t("coursesPage.headingPrefix")}
               <span className="relative ml-2 inline-block text-[#ff6542]">
-                Joyful
+                {t("coursesPage.headingAccent")}
                 <svg
                   viewBox="0 0 220 18"
                   aria-hidden="true"
@@ -327,8 +347,7 @@ const Courses = () => {
             </h1>
 
             <p className="mx-auto mt-4 max-w-2xl text-sm font-medium leading-6 text-slate-600 sm:text-base sm:leading-7">
-              Learn Quran, Islamic manners and more through engaging courses
-              designed to build knowledge, confidence and character.
+              {t("coursesPage.description")}
             </p>
           </motion.div>
 
@@ -352,7 +371,7 @@ const Courses = () => {
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by course title or topic..."
+                  placeholder={t("coursesPage.searchPlaceholder")}
                   className="w-full rounded-2xl bg-[#f8fbfa] py-3.5 pl-16 pr-12 text-sm font-semibold text-[#073b46] outline-none transition placeholder:font-medium placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-[#62d6c7]/20 sm:py-4 sm:pl-18 sm:text-base"
                 />
 
@@ -360,7 +379,7 @@ const Courses = () => {
                   <button
                     type="button"
                     onClick={() => setSearchTerm("")}
-                    aria-label="Clear search"
+                    aria-label={t("coursesPage.clearSearch")}
                     className="absolute right-4 grid h-9 w-9 place-items-center rounded-full bg-[#fff0eb] text-[#ff6542] transition hover:rotate-90 hover:bg-[#ff6542] hover:text-white"
                   >
                     <FiX size={17} />
@@ -401,10 +420,10 @@ const Courses = () => {
               </span>
               <div>
                 <h2 className="text-base font-black text-[#073b46] sm:text-lg">
-                  Find Your Perfect Course
+                  {t("coursesPage.filterTitle")}
                 </h2>
                 <p className="mt-0.5 hidden text-xs font-medium text-slate-500 sm:block">
-                  Filter, sort and explore the complete course collection.
+                  {t("coursesPage.filterDescription")}
                 </p>
               </div>
             </div>
@@ -412,13 +431,19 @@ const Courses = () => {
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-2 rounded-full bg-[#eef9f7] px-3 py-2 text-xs font-extrabold text-[#08736e]">
                 <FiBookOpen size={14} />
-                {filteredCourses.length} courses found
+                {t("coursesPage.coursesFound", {
+                  count: Number(filteredCourses.length).toLocaleString(locale),
+                })}
               </span>
 
               {getActiveFilterCount() > 0 && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fff0eb] px-3 py-2 text-xs font-extrabold text-[#e85031]">
                   <FiStar size={13} />
-                  {getActiveFilterCount()} active
+                  {t("coursesPage.activeFilters", {
+                    count: Number(getActiveFilterCount()).toLocaleString(
+                      locale,
+                    ),
+                  })}
                 </span>
               )}
             </div>
@@ -433,7 +458,7 @@ const Courses = () => {
             >
               <span className="flex items-center gap-2.5">
                 <FiFilter className="text-[#08736e]" size={18} />
-                Filters & Sort
+                {t("coursesPage.filtersAndSort")}
                 {getActiveFilterCount() > 0 && (
                   <span className="grid h-6 min-w-6 place-items-center rounded-full bg-[#ff6542] px-1.5 text-xs text-white">
                     {getActiveFilterCount()}
@@ -453,7 +478,7 @@ const Courses = () => {
                   <div className="mb-2 flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-[#ff6542]" />
                     <h3 className="text-xs font-black uppercase tracking-[0.14em] text-[#073b46]">
-                      Categories
+                      {t("coursesPage.categories")}
                     </h3>
                   </div>
 
@@ -470,7 +495,7 @@ const Courses = () => {
                       }`}
                     >
                       <FaRegLaughBeam size={14} />
-                      All
+                      {t("coursesPage.all")}
                     </motion.button>
 
                     {categories.map((category) => (
@@ -496,7 +521,7 @@ const Courses = () => {
                   <div className="mb-2 flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-[#08736e]" />
                     <h3 className="text-xs font-black uppercase tracking-[0.14em] text-[#073b46]">
-                      Course Status
+                      {t("coursesPage.courseStatus")}
                     </h3>
                   </div>
 
@@ -530,7 +555,7 @@ const Courses = () => {
               <div className="flex flex-col gap-3 border-t border-[#073b46]/10 pt-4 lg:min-w-60 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
                 <div>
                   <p className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-[#073b46]">
-                    View Style
+                    {t("coursesPage.viewStyle")}
                   </p>
                   <div className="grid grid-cols-2 rounded-xl border border-[#073b46]/10 bg-[#f4f8f7] p-1">
                     <button
@@ -541,10 +566,10 @@ const Courses = () => {
                           ? "bg-white text-[#ff6542] shadow-sm"
                           : "text-slate-500 hover:text-[#073b46]"
                       }`}
-                      title="Grid view"
+                      title={t("coursesPage.gridView")}
                     >
                       <FiGrid size={17} />
-                      Grid
+                      {t("coursesPage.grid")}
                     </button>
 
                     <button
@@ -555,10 +580,10 @@ const Courses = () => {
                           ? "bg-white text-[#ff6542] shadow-sm"
                           : "text-slate-500 hover:text-[#073b46]"
                       }`}
-                      title="List view"
+                      title={t("coursesPage.listView")}
                     >
                       <FiList size={17} />
-                      List
+                      {t("coursesPage.list")}
                     </button>
                   </div>
                 </div>
@@ -568,7 +593,7 @@ const Courses = () => {
                     htmlFor="course-sort"
                     className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-[#073b46]"
                   >
-                    Sort Courses
+                    {t("coursesPage.sortCourses")}
                   </label>
                   <div className="relative">
                     <select
@@ -577,13 +602,27 @@ const Courses = () => {
                       onChange={(e) => setSortBy(e.target.value)}
                       className="w-full cursor-pointer appearance-none rounded-xl border border-[#073b46]/10 bg-[#fff9e7] px-3.5 py-2.5 pr-9 text-xs font-extrabold text-[#073b46] outline-none transition focus:border-[#ffd36e] focus:ring-4 focus:ring-[#ffd36e]/25"
                     >
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
-                      <option value="price-low">Price: Low to High</option>
-                      <option value="price-high">Price: High to Low</option>
-                      <option value="rating">Highest Rated</option>
-                      <option value="duration">Longest Duration</option>
-                      <option value="enrollment-start">Enrollment Start</option>
+                      <option value="newest">
+                        {t("coursesPage.sort.newest")}
+                      </option>
+                      <option value="oldest">
+                        {t("coursesPage.sort.oldest")}
+                      </option>
+                      <option value="price-low">
+                        {t("coursesPage.sort.priceLow")}
+                      </option>
+                      <option value="price-high">
+                        {t("coursesPage.sort.priceHigh")}
+                      </option>
+                      <option value="rating">
+                        {t("coursesPage.sort.rating")}
+                      </option>
+                      <option value="duration">
+                        {t("coursesPage.sort.duration")}
+                      </option>
+                      <option value="enrollment-start">
+                        {t("coursesPage.sort.enrollmentStart")}
+                      </option>
                     </select>
                     <FiChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#073b46]" />
                   </div>
@@ -600,7 +639,7 @@ const Courses = () => {
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6542] px-4 py-2.5 text-xs font-extrabold text-white shadow-[0_8px_18px_rgba(255,101,66,0.22)] transition hover:bg-[#ed5738]"
                   >
                     <FiX size={17} />
-                    Clear All Filters
+                    {t("coursesPage.clearAllFilters")}
                   </motion.button>
                 )}
               </div>
@@ -633,12 +672,12 @@ const Courses = () => {
               </motion.div>
 
               <h3 className="relative mt-7 text-2xl font-black text-[#073b46] sm:text-3xl">
-                No courses found
+                {t("coursesPage.noCoursesFound")}
               </h3>
               <p className="relative mx-auto mt-3 max-w-lg text-sm font-medium leading-7 text-slate-500 sm:text-base">
                 {getActiveFilterCount() > 0
-                  ? "No course matches the selected filters. Try changing or clearing the filters."
-                  : "We are preparing wonderful courses for you. Please check back again soon."}
+                  ? t("coursesPage.noMatch")
+                  : t("coursesPage.preparingCourses")}
               </p>
 
               {getActiveFilterCount() > 0 && (
@@ -649,7 +688,7 @@ const Courses = () => {
                   whileTap={{ scale: 0.97 }}
                   className="relative mt-7 inline-flex items-center gap-2 rounded-2xl bg-[#ff6542] px-6 py-3.5 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(255,101,66,0.25)]"
                 >
-                  Clear All Filters
+                  {t("coursesPage.clearAllFilters")}
                   <FiArrowRight size={17} />
                 </motion.button>
               )}
@@ -691,7 +730,9 @@ const Courses = () => {
                         <Icon size={12} />
                       </span>
                       {statusOption?.label}
-                      <strong className="text-[#073b46]">{count}</strong>
+                      <strong className="text-[#073b46]">
+                        {Number(count).toLocaleString(locale)}
+                      </strong>
                     </span>
                   );
                 })}
@@ -740,7 +781,7 @@ const Courses = () => {
       >
         <button
           type="button"
-          aria-label="Trending courses"
+          aria-label={t("coursesPage.trendingCourses")}
           className="group grid h-14 w-14 place-items-center rounded-2xl border-4 border-white bg-[#073b46] text-white shadow-[0_16px_35px_rgba(7,59,70,0.28)] transition hover:bg-[#ff6542] sm:h-16 sm:w-16"
         >
           <FiTrendingUp

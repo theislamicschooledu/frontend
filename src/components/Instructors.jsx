@@ -11,6 +11,7 @@ import {
 import { FaChalkboardTeacher, FaExclamationCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
 const cardThemes = [
   {
@@ -69,6 +70,8 @@ const sectionTransition = {
 };
 
 const Instructors = ({ limit = 3, onViewProfile }) => {
+  const { t } = useLanguage();
+
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -86,24 +89,21 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
         const teachersData = res.data?.teachers || [];
         setTeachers(limit ? teachersData.slice(0, limit) : teachersData);
       } else {
-        setError(
-          "শিক্ষকদের তথ্য এই মুহূর্তে লোড করা যাচ্ছে না। অনুগ্রহ করে আবার চেষ্টা করুন।",
-        );
-        toast.error("শিক্ষকদের তথ্য লোড করা যায়নি");
+        setError(true);
+        toast.error(t("home.instructors.loadToast"));
       }
     } catch (fetchError) {
       console.error("Error fetching teachers:", fetchError);
 
-      setError(
-        "সার্ভারের সঙ্গে সংযোগ করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।",
-      );
+      setError(true);
 
       if (!fetchError?.response?.status || fetchError.response.status >= 500) {
-        toast.error("নেটওয়ার্ক সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।");
+        toast.error(t("home.instructors.networkError"));
       }
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limit]);
 
   useEffect(() => {
@@ -195,11 +195,11 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
       </motion.div>
 
       <h3 className="relative mt-6 text-2xl font-black text-[#073b46]">
-        শিক্ষকদের তথ্য লোড করা যায়নি
+        {t("home.instructors.errorTitle")}
       </h3>
 
       <p className="relative mx-auto mt-3 max-w-lg leading-7 text-slate-500">
-        {error}
+        {t("home.instructors.serverError")}
       </p>
 
       <motion.button
@@ -210,7 +210,7 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
         className="relative mt-7 inline-flex items-center gap-2 rounded-2xl bg-[#073b46] px-6 py-3.5 font-bold text-white shadow-[0_12px_30px_rgba(7,59,70,0.22)] transition hover:bg-[#0b4d59] focus:outline-none focus:ring-4 focus:ring-[#073b46]/15"
       >
         <FiRefreshCw />
-        আবার চেষ্টা করুন
+        {t("common.tryAgain")}
       </motion.button>
     </motion.div>
   );
@@ -245,12 +245,11 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
       </motion.div>
 
       <h3 className="relative mt-6 text-2xl font-black text-[#073b46]">
-        বর্তমানে কোনো শিক্ষক পাওয়া যায়নি
+        {t("home.instructors.emptyTitle")}
       </h3>
 
       <p className="relative mx-auto mt-3 max-w-lg leading-7 text-slate-500">
-        নতুন শিক্ষক যুক্ত হলে এখানে তাঁদের তথ্য দেখা যাবে। অনুগ্রহ করে পরে আবার
-        দেখুন।
+        {t("home.instructors.emptyDescription")}
       </p>
     </motion.div>
   );
@@ -274,8 +273,11 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
     >
       {teachers.map((teacher, index) => {
         const theme = cardThemes[index % cardThemes.length];
-        const teacherName = teacher?.name || "সম্মানিত উস্তাদ";
-        const teacherRole = teacher?.role;
+        const teacherName = teacher?.name || t("home.instructors.fallbackName");
+        const teacherRole =
+          teacher?.role && teacher.role !== "teacher"
+            ? teacher.role
+            : t("home.instructors.defaultRole");
 
         return (
           <motion.article
@@ -352,7 +354,7 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
 
               <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/60 bg-white/75 px-3.5 py-2 text-xs font-black text-[#073b46] shadow-sm backdrop-blur-md">
                 <span className={`h-2 w-2 rounded-full ${theme.accent}`} />
-                নিবেদিত উস্তাদ
+                {t("home.instructors.dedicatedTeacher")}
               </div>
 
               <motion.div
@@ -431,7 +433,7 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
                 <FiMapPin className="mt-0.5 shrink-0 text-[#ff6542]" />
 
                 <p className="text-sm leading-6 text-slate-600">
-                  {teacher?.address || "ঠিকানা আপাতত যুক্ত করা হয়নি"}
+                  {teacher?.address || t("home.instructors.noAddress")}
                 </p>
               </div>
 
@@ -454,7 +456,7 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
                 }
                 className={`mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-linear-to-r ${theme.button} px-5 py-3.5 text-sm font-black text-white shadow-[0_12px_28px_rgba(7,59,70,0.15)] transition duration-300 hover:shadow-[0_16px_35px_rgba(7,59,70,0.22)] focus:outline-none focus:ring-4 focus:ring-orange-100`}
               >
-                বিস্তারিত পরিচিতি
+                {t("home.instructors.viewProfile")}
                 <motion.span
                   className="inline-flex"
                   animate={
@@ -518,13 +520,13 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#fff3bd]">
                 <FaChalkboardTeacher className="text-[#ff6542]" />
               </span>
-              আমাদের সম্মানিত উস্তাদগণ
+              {t("home.instructors.badge")}
             </div>
 
             <h2 className="font-baloo mt-5 max-w-4xl text-4xl font-black leading-[1.2] tracking-tight text-[#073b46] sm:text-5xl lg:text-[56px]">
-              যত্নশীল উস্তাদদের কাছ থেকে শিখুন,
+              {t("home.instructors.headingPrefix")}
               <span className="relative mt-1 inline-block text-[#ff6542] sm:ml-3 sm:mt-0">
-                আত্মবিশ্বাসে এগিয়ে যান
+                {t("home.instructors.headingAccent")}
                 <motion.span
                   initial={{ scaleX: 0 }}
                   whileInView={{ scaleX: 1 }}
@@ -536,12 +538,15 @@ const Instructors = ({ limit = 3, onViewProfile }) => {
             </h2>
 
             <p className="mt-7 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-              অভিজ্ঞ, আন্তরিক ও নিবেদিত উস্তাদগণ প্রতিটি পাঠকে সহজ, প্রাণবন্ত ও
-              অর্থবহ করে শিক্ষার্থীদের জ্ঞান ও আদর্শে এগিয়ে নেন।
+              {t("home.instructors.description")}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-2.5">
-              {["অভিজ্ঞ", "আন্তরিক", "নিবেদিত"].map((item) => (
+              {[
+                t("home.instructors.quality1"),
+                t("home.instructors.quality2"),
+                t("home.instructors.quality3"),
+              ].map((item) => (
                 <span
                   key={item}
                   className="inline-flex items-center gap-1.5 rounded-full border border-[#073b46]/10 bg-white/75 px-3.5 py-2 text-sm font-bold text-[#073b46] shadow-sm backdrop-blur-sm"

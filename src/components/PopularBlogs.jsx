@@ -13,6 +13,7 @@ import {
 import { FaExclamationCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
 const cardThemes = [
   {
@@ -76,31 +77,34 @@ const calculateReadTime = (content) => {
   }
 };
 
-const formatDate = (date) => {
-  if (!date) return "সাম্প্রতিক";
+const formatDate = (date, language, t) => {
+  if (!date) return t("home.blogs.recent");
 
   try {
     const parsedDate = new Date(date);
 
     if (Number.isNaN(parsedDate.getTime())) {
-      return "সাম্প্রতিক";
+      return t("home.blogs.recent");
     }
 
-    return parsedDate.toLocaleDateString("bn-BD", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    return parsedDate.toLocaleDateString(
+      language === "bn" ? "bn-BD" : "en-US",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      },
+    );
   } catch {
-    return "সাম্প্রতিক";
+    return t("home.blogs.recent");
   }
 };
 
-const createExcerpt = (content, length = 135) => {
+const createExcerpt = (content, t, length = 135) => {
   const plainText = stripHtml(content);
 
   if (!plainText) {
-    return "এই লেখাটির কোনো সংক্ষিপ্ত বিবরণ এখনো যোগ করা হয়নি।";
+    return t("home.blogs.noExcerpt");
   }
 
   if (plainText.length <= length) {
@@ -146,6 +150,8 @@ const BlogSkeleton = ({ index }) => {
 };
 
 const PopularBlogs = () => {
+  const { language, t } = useLanguage();
+
   const [loading, setLoading] = useState(true);
   const [blogs, setBlogs] = useState([]);
   const [error, setError] = useState(null);
@@ -163,28 +169,23 @@ const PopularBlogs = () => {
       if (res.data?.success || Array.isArray(blogsData)) {
         setBlogs(Array.isArray(blogsData) ? blogsData : []);
       } else {
-        setError("নির্বাচিত ব্লগগুলো লোড করা যায়নি।");
-        toast.error("নির্বাচিত ব্লগগুলো লোড করা সম্ভব হয়নি");
+        setError(true);
+        toast.error(t("home.blogs.featuredLoadFailed"));
       }
     } catch (fetchError) {
       console.error("Error fetching blogs:", fetchError);
 
-      const errorMessage =
-        fetchError?.response?.data?.message ||
-        fetchError?.message ||
-        "ব্লগগুলো লোড করা যায়নি";
-
-      setError(errorMessage);
+      setError(true);
 
       if (!fetchError?.response?.status || fetchError.response.status >= 500) {
         toast.error(
-          fetchError?.response?.data?.message ||
-            "নেটওয়ার্ক সমস্যা হয়েছে। অনুগ্রহ করে পরে আবার চেষ্টা করুন।",
+          fetchError?.response?.data?.message || t("home.blogs.networkError"),
         );
       }
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -280,13 +281,11 @@ const PopularBlogs = () => {
       </motion.div>
 
       <h3 className="relative mt-6 text-2xl font-black text-[#073b46]">
-        ব্লগগুলো লোড করা যায়নি
+        {t("home.blogs.errorTitle")}
       </h3>
 
       <p className="relative mx-auto mt-3 max-w-lg leading-7 text-slate-500">
-        {error?.toLowerCase().includes("network")
-          ? "ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"
-          : error || "নির্বাচিত ব্লগগুলো দেখাতে সাময়িক সমস্যা হচ্ছে।"}
+        {t("home.blogs.temporaryProblem")}
       </p>
 
       <motion.button
@@ -309,7 +308,7 @@ const PopularBlogs = () => {
         className="relative mt-7 inline-flex items-center gap-2 rounded-xl bg-[#073b46] px-6 py-3 font-bold text-white shadow-[0_12px_28px_rgba(7,59,70,0.22)] transition-colors hover:bg-[#0b4d59] focus:outline-none focus:ring-4 focus:ring-[#073b46]/15"
       >
         <FiRefreshCw />
-        আবার চেষ্টা করুন
+        {t("common.tryAgain")}
       </motion.button>
     </motion.div>
   );
@@ -354,11 +353,11 @@ const PopularBlogs = () => {
       </motion.div>
 
       <h3 className="relative mt-6 text-2xl font-black text-[#073b46]">
-        এখনো কোনো ব্লগ পাওয়া যায়নি
+        {t("home.blogs.emptyTitle")}
       </h3>
 
       <p className="relative mx-auto mt-3 max-w-lg leading-7 text-slate-500">
-        এই মুহূর্তে দেখানোর মতো কোনো নির্বাচিত ব্লগ নেই। নতুন লেখা ও শিক্ষামূলক উপকরণের জন্য পরে আবার দেখুন।
+        {t("home.blogs.emptyDescription")}
       </p>
     </motion.div>
   );
@@ -378,9 +377,10 @@ const PopularBlogs = () => {
       {blogs.map((blog, index) => {
         const theme = cardThemes[index % cardThemes.length];
         const blogId = blog?._id || blog?.id;
-        const blogTitle = blog?.title || "শিরোনামহীন ব্লগ";
-        const authorName = blog?.author?.name || "অজানা লেখক";
-        const categoryName = blog?.category?.name || "নির্বাচিত লেখা";
+        const blogTitle = blog?.title || t("home.blogs.fallbackTitle");
+        const authorName = blog?.author?.name || t("home.blogs.fallbackAuthor");
+        const categoryName =
+          blog?.category?.name || t("home.blogs.fallbackCategory");
 
         return (
           <motion.article
@@ -456,14 +456,16 @@ const PopularBlogs = () => {
               </motion.div>
 
               <span className="absolute bottom-4 left-5 rounded-full border border-white/20 bg-[#073b46]/25 px-3 py-1 text-xs font-bold text-white/95 backdrop-blur-sm">
-                লেখা {String(index + 1).padStart(2, "0")}
+                {t("home.blogs.itemLabel", {
+                  number: String(index + 1).padStart(2, "0"),
+                })}
               </span>
             </div>
 
             {/* Blog content */}
             <div className="relative flex flex-1 flex-col p-6">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold text-slate-500">
-                <span>{formatDate(blog?.createdAt)}</span>
+                <span>{formatDate(blog?.createdAt, language, t)}</span>
 
                 <span
                   aria-hidden="true"
@@ -472,7 +474,9 @@ const PopularBlogs = () => {
 
                 <span className="inline-flex items-center gap-1.5">
                   <FiClock className="text-[#ff6542]" />
-                  {calculateReadTime(blog?.content)} মিনিটে পড়ুন
+                  {t("home.blogs.readMinutes", {
+                    count: calculateReadTime(blog?.content),
+                  })}
                 </span>
               </div>
 
@@ -481,7 +485,7 @@ const PopularBlogs = () => {
               </h3>
 
               <p className="mt-3 line-clamp-3 text-[15px] leading-7 text-slate-600">
-                {createExcerpt(blog?.content)}
+                {createExcerpt(blog?.content, t)}
               </p>
 
               <div className="mt-auto pt-6">
@@ -495,7 +499,7 @@ const PopularBlogs = () => {
 
                     <div className="min-w-0">
                       <span className="block text-[11px] font-semibold text-slate-400">
-                        লেখক
+                        {t("home.blogs.author")}
                       </span>
 
                       <span className="block truncate text-sm font-bold text-[#073b46]">
@@ -507,10 +511,12 @@ const PopularBlogs = () => {
                   {blogId ? (
                     <Link
                       to={`/blogs/${blogId}`}
-                      aria-label={`${blogTitle} পড়ুন`}
+                      aria-label={t("home.blogs.readAria", {
+                        title: blogTitle,
+                      })}
                       className="flex shrink-0 items-center gap-1.5 rounded-xl border-2 border-[#ff6542] bg-[#fff7f4] px-3.5 py-2.5 text-xs font-black text-[#ef5739] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#ff6542] hover:text-white hover:shadow-md focus:outline-none focus:ring-4 focus:ring-orange-100"
                     >
-                      বিস্তারিত পড়ুন
+                      {t("home.blogs.readMore")}
                       <motion.span
                         className="inline-flex"
                         animate={
@@ -532,7 +538,7 @@ const PopularBlogs = () => {
                     </Link>
                   ) : (
                     <span className="rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs font-bold text-slate-400">
-                      অনুপলভ্য
+                      {t("common.unavailable")}
                     </span>
                   )}
                 </div>
@@ -599,13 +605,13 @@ const PopularBlogs = () => {
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-[#073b46]/8 bg-[#fff3bd] px-4 py-2 text-sm font-extrabold text-[#073b46] shadow-sm">
               <FiBookOpen className="text-[#ff6542]" />
-              নির্বাচিত ব্লগ
+              {t("home.blogs.badge")}
             </div>
 
             <h2 className="font-baloo mt-5 max-w-3xl text-4xl font-black leading-[1.2] tracking-tight text-[#073b46] sm:text-5xl lg:text-[56px]">
-              যে গল্পগুলো অনুপ্রেরণা জাগায়
+              {t("home.blogs.headingPrefix")}
               <span className="relative mt-1 inline-block text-[#ff6542] sm:ml-3 sm:mt-0">
-                কোমল হৃদয়ে।
+                {t("home.blogs.headingAccent")}
                 <motion.span
                   initial={{ scaleX: 0 }}
                   whileInView={{ scaleX: 1 }}
@@ -620,7 +626,7 @@ const PopularBlogs = () => {
             </h2>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-              শিক্ষার্থী, অভিভাবক ও পরিবারের জন্য তৈরি উপকারী নিবন্ধ, ইসলামি শিক্ষামূলক উপকরণ এবং অর্থবহ গল্পগুলো ঘুরে দেখুন।
+              {t("home.blogs.description")}
             </p>
           </motion.div>
 
@@ -683,11 +689,11 @@ const PopularBlogs = () => {
               className="absolute left-0 top-4 rounded-3xl border-2 border-[#073b46] bg-[#fff3bd] px-5 py-4 shadow-[7px_7px_0_#073b46]"
             >
               <p className="text-sm font-extrabold text-[#ff6542]">
-                পড়ুন ও আবিষ্কার করুন
+                {t("home.blogs.discover")}
               </p>
 
               <p className="mt-1 text-xl font-black text-[#073b46]">
-                নতুন কিছু শিখুন
+                {t("home.blogs.learnSomethingNew")}
               </p>
             </motion.div>
 
@@ -741,7 +747,7 @@ const PopularBlogs = () => {
               to="/blogs"
               className="group inline-flex items-center gap-2 rounded-xl bg-[#073b46] px-7 py-3.5 text-sm font-black text-white shadow-[0_12px_30px_rgba(7,59,70,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#0b4d59] hover:shadow-[0_18px_38px_rgba(7,59,70,0.25)] focus:outline-none focus:ring-4 focus:ring-[#073b46]/15"
             >
-              সব ব্লগ দেখুন
+              {t("home.blogs.viewAll")}
               <FiArrowUpRight className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </Link>
           </motion.div>

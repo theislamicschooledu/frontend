@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
 import CourseCard from "./CourseCard";
+import { useLanguage } from "../hooks/useLanguage";
 
 const FeaturedCourses = () => {
+  const { t } = useLanguage();
+
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState([]);
   const [error, setError] = useState(null);
@@ -16,20 +19,15 @@ const FeaturedCourses = () => {
       if (res.data.success) {
         setCourses(res.data.data || []);
       } else {
-        setError("Failed to load courses");
-        toast.error("Failed to load featured courses");
+        setError(true);
+        toast.error(t("home.courses.featuredLoadFailed"));
       }
     } catch (error) {
       console.error("Error fetching courses:", error);
-      setError(
-        error?.response?.data?.message ||
-          error.message ||
-          "Failed to load courses"
-      );
+      setError(true);
       if (!error?.response?.status || error.response.status >= 500) {
         toast.error(
-          error?.response?.data?.message ||
-            "Network error. Please try again later."
+          error?.response?.data?.message || t("home.courses.networkError"),
         );
       }
     } finally {
@@ -39,6 +37,7 @@ const FeaturedCourses = () => {
 
   useEffect(() => {
     fetchCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
@@ -52,12 +51,12 @@ const FeaturedCourses = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 mb-4">Unable to load featured courses</p>
+        <p className="text-gray-500 mb-4">{t("home.courses.unableToLoad")}</p>
         <button
           onClick={fetchCourses}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
         >
-          Try Again
+          {t("common.tryAgain")}
         </button>
       </div>
     );
@@ -66,9 +65,9 @@ const FeaturedCourses = () => {
   if (!courses || courses.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">No featured courses available at the moment</p>
+        <p className="text-gray-500">{t("home.courses.noCourses")}</p>
         <p className="text-gray-400 text-sm mt-2">
-          Check back later for new courses
+          {t("home.courses.checkLater")}
         </p>
       </div>
     );

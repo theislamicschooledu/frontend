@@ -13,14 +13,17 @@ import {
   FaYoutube,
 } from "react-icons/fa6";
 import { MdEmail, MdLocationCity } from "react-icons/md";
+import { useLanguage } from "../hooks/useLanguage";
 
 const Footer = () => {
+  const { t } = useLanguage();
+
   const [documentation, setDocumentation] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDocumentation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDocumentation = async () => {
@@ -30,13 +33,11 @@ const Footer = () => {
       if (res.data.success) {
         setDocumentation(res.data.data);
       } else {
-        setError("Failed to load documentation");
-        toast.error(error);
+        toast.error(t("footer.loadFailed"));
       }
     } catch (err) {
       console.error("Error fetching documentation:", err);
-      setError("Network error. Please try again.");
-      toast.error("Failed to fetch documentation");
+      toast.error(t("footer.networkError"));
     } finally {
       setLoading(false);
     }
@@ -56,8 +57,6 @@ const Footer = () => {
     return `https://${trimmedUrl}`;
   };
 
-  console.log(documentation?.contact);
-
   return (
     <footer className="bg-linear-to-b from-emerald-700 to-green-900 text-white py-12 px-6 md:px-20">
       <div className="max-w-7xl mx-auto">
@@ -67,25 +66,23 @@ const Footer = () => {
             <div className="mb-4 flex items-center gap-2">
               <img
                 src={logoWhite}
-                alt="Website Logo"
+                alt={t("footer.logoAlt")}
                 className="h-6 w-auto md:h-8 lg:h-10 object-contain transition-all duration-300"
               />
               <div className="flex flex-col gap-0">
                 <p className="text-xl font-bold text-white">
-                  THE ISLAMIC SCHOOL
+                  {t("common.siteName")}
                 </p>
                 <span className="text-xs text-gray-300 leading-2 tracking-widest">
-                  Learn - Light - Lead with Islam
+                  {t("common.tagline")}
                 </span>
               </div>
             </div>
             <p className="text-green-100 mb-4 max-w-md">
-              Making Islamic education fun, engaging and accessible for
-              children. We help build a strong foundation of faith and knowledge
-              from an early age.
+              {t("footer.description")}
             </p>
             {loading ? (
-              <div>loading</div>
+              <div>{t("footer.loading")}</div>
             ) : (
               <div className="flex space-x-4">
                 <motion.a
@@ -140,14 +137,16 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+            <h4 className="text-lg font-semibold mb-4">
+              {t("footer.quickLinks")}
+            </h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   to={"/"}
                   className="text-green-100 hover:text-white transition"
                 >
-                  Home
+                  {t("nav.home")}
                 </Link>
               </li>
               <li>
@@ -155,7 +154,7 @@ const Footer = () => {
                   to={"/courses"}
                   className="text-green-100 hover:text-white transition"
                 >
-                  Courses
+                  {t("nav.courses")}
                 </Link>
               </li>
               <li>
@@ -163,7 +162,7 @@ const Footer = () => {
                   to={"/about"}
                   className="text-green-100 hover:text-white transition"
                 >
-                  About Us
+                  {t("nav.about")}
                 </Link>
               </li>
               <li>
@@ -171,7 +170,7 @@ const Footer = () => {
                   to={"/blogs"}
                   className="text-green-100 hover:text-white transition"
                 >
-                  Blogs
+                  {t("nav.blogs")}
                 </Link>
               </li>
               <li>
@@ -179,7 +178,7 @@ const Footer = () => {
                   to={"/qa"}
                   className="text-green-100 hover:text-white transition"
                 >
-                  Q&A
+                  {t("nav.qna")}
                 </Link>
               </li>
             </ul>
@@ -187,7 +186,9 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
+            <h4 className="text-lg font-semibold mb-4">
+              {t("footer.contactUs")}
+            </h4>
             <ul className="space-y-2 text-green-100">
               <li className="flex items-center">
                 <MdEmail size={5} className="w-4 h-4 mr-2 mt-1 text-white" />
@@ -207,23 +208,22 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="border-t border-green-600 pt-8 text-center text-green-200">
-          <p>
-            © {new Date().getFullYear()} Islamic Kids Learning. All rights
-            reserved.
-          </p>
+          <p>{t("footer.copyright", { year: new Date().getFullYear() })}</p>
           <div className="mt-2 flex justify-center space-x-6 text-sm">
             <a href="#" className="hover:text-white transition">
-              Privacy Policy
+              {t("footer.privacyPolicy")}
             </a>
             <a href="#" className="hover:text-white transition">
-              Terms of Service
+              {t("footer.terms")}
             </a>
             <a href="#" className="hover:text-white transition">
-              FAQ
+              {t("footer.faq")}
             </a>
           </div>
           <div className="pt-3">
-            <a href="https://alamin-portfolio.web.app/">Contact Developer</a>
+            <a href="https://alamin-portfolio.web.app/">
+              {t("footer.contactDeveloper")}
+            </a>
           </div>
         </div>
       </div>

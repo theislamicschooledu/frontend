@@ -14,77 +14,78 @@ import {
 import { FaChalkboardTeacher, FaGraduationCap } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi2";
 import { Link } from "react-router";
+import { useLanguage } from "../hooks/useLanguage";
 
-const formatPrice = (value) => {
+const formatPrice = (value, language) => {
   if (value === null || value === undefined || value === "") return "0";
-  return Number(value).toLocaleString("en-US");
+  return Number(value).toLocaleString(language === "bn" ? "bn-BD" : "en-US");
 };
 
-const formatDate = (date) => {
-  if (!date) return "TBD";
+const formatDate = (date, language, t) => {
+  if (!date) return t("home.courses.tbd");
 
   const parsedDate = new Date(date);
-  if (Number.isNaN(parsedDate.getTime())) return "TBD";
+  if (Number.isNaN(parsedDate.getTime())) return t("home.courses.tbd");
 
-  return parsedDate.toLocaleDateString("en-US", {
-    month: "short",
+  return parsedDate.toLocaleDateString(language === "bn" ? "bn-BD" : "en-US", {
+    month: language === "bn" ? "long" : "short",
     day: "numeric",
     year: "numeric",
   });
 };
 
-const getTimeRemaining = (enrollmentEnd) => {
-  if (!enrollmentEnd) return "No deadline";
+const getTimeRemaining = (enrollmentEnd, t) => {
+  if (!enrollmentEnd) return t("home.courses.noDeadline");
 
   const end = new Date(enrollmentEnd);
   const difference = end.getTime() - Date.now();
 
-  if (Number.isNaN(end.getTime())) return "Date coming soon";
-  if (difference <= 0) return "Enrollment closed";
+  if (Number.isNaN(end.getTime())) return t("home.courses.dateComingSoon");
+  if (difference <= 0) return t("home.courses.enrollmentClosed");
 
   const days = Math.floor(difference / 86_400_000);
-  if (days > 0) return `${days} day${days > 1 ? "s" : ""} left`;
+  if (days > 0) return t("home.courses.daysLeft", { count: days });
 
   const hours = Math.floor(difference / 3_600_000);
-  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} left`;
+  if (hours > 0) return t("home.courses.hoursLeft", { count: hours });
 
   const minutes = Math.max(1, Math.floor(difference / 60_000));
-  return `${minutes} min left`;
+  return t("home.courses.minutesLeft", { count: minutes });
 };
 
 const STATUS_STYLES = {
   coming_soon: {
-    label: "Coming Soon",
+    labelKey: "home.courses.status.comingSoon",
     Icon: FiClock,
     badge: "border-purple-200 bg-purple-100/95 text-purple-700",
     dot: "bg-purple-500",
   },
   upcoming: {
-    label: "Upcoming",
+    labelKey: "home.courses.status.upcoming",
     Icon: FiCalendar,
     badge: "border-sky-200 bg-sky-100/95 text-sky-700",
     dot: "bg-sky-500",
   },
   enrollment_open: {
-    label: "Enrollment Open",
+    labelKey: "home.courses.status.enrollmentOpen",
     Icon: FiCheckCircle,
     badge: "border-emerald-200 bg-emerald-100/95 text-emerald-700",
     dot: "bg-emerald-500",
   },
   enrollment_closed: {
-    label: "Enrollment Closed",
+    labelKey: "home.courses.status.enrollmentClosed",
     Icon: FiX,
     badge: "border-orange-200 bg-orange-100/95 text-orange-700",
     dot: "bg-orange-500",
   },
   course_started: {
-    label: "Course Started",
+    labelKey: "home.courses.status.courseStarted",
     Icon: FaGraduationCap,
     badge: "border-teal-200 bg-teal-100/95 text-teal-700",
     dot: "bg-teal-500",
   },
   published: {
-    label: "Published",
+    labelKey: "home.courses.status.published",
     Icon: FiBookOpen,
     badge: "border-indigo-200 bg-indigo-100/95 text-indigo-700",
     dot: "bg-indigo-500",
@@ -93,24 +94,25 @@ const STATUS_STYLES = {
 
 const DIFFICULTY_STYLES = {
   beginner: {
-    label: "Beginner",
+    labelKey: "home.courses.difficulty.beginner",
     className: "border-emerald-200 bg-emerald-50 text-emerald-700",
   },
   intermediate: {
-    label: "Intermediate",
+    labelKey: "home.courses.difficulty.intermediate",
     className: "border-amber-200 bg-amber-50 text-amber-700",
   },
   advanced: {
-    label: "Advanced",
+    labelKey: "home.courses.difficulty.advanced",
     className: "border-rose-200 bg-rose-50 text-rose-700",
   },
   expert: {
-    label: "Expert",
+    labelKey: "home.courses.difficulty.expert",
     className: "border-violet-200 bg-violet-50 text-violet-700",
   },
 };
 
 const CourseStatusBadge = ({ status }) => {
+  const { t } = useLanguage();
   const config = STATUS_STYLES[status] || STATUS_STYLES.published;
   const { Icon } = config;
 
@@ -120,17 +122,18 @@ const CourseStatusBadge = ({ status }) => {
     >
       <span className={`h-2 w-2 rounded-full ${config.dot}`} />
       <Icon aria-hidden="true" className="shrink-0" size={14} />
-      <span>{config.label}</span>
+      <span>{t(config.labelKey)}</span>
     </span>
   );
 };
 
 const CourseCard = ({ course = {}, index = 0 }) => {
+  const { language, t } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
 
   const {
     _id,
-    title = "Amazing Islamic Course",
+    title,
     thumbnail,
     price,
     duration,
@@ -149,6 +152,8 @@ const CourseCard = ({ course = {}, index = 0 }) => {
     originalPrice,
   } = course;
 
+  const courseTitle = title || t("home.courses.fallbackTitle");
+
   const effectiveStatus =
     currentStatus || status || (isComingSoon ? "coming_soon" : "published");
 
@@ -156,7 +161,7 @@ const CourseCard = ({ course = {}, index = 0 }) => {
   const difficulty =
     DIFFICULTY_STYLES[difficultyKey] || DIFFICULTY_STYLES.beginner;
 
-  const categoryName = category?.name || "Islamic Learning";
+  const categoryName = category?.name || t("home.courses.fallbackCategory");
   const teacherCount = teachers.length;
   const lectureCount = lectures.length;
   const reviewCount = Number(ratingCount) || 0;
@@ -169,7 +174,9 @@ const CourseCard = ({ course = {}, index = 0 }) => {
     !["course_started", "enrollment_closed"].includes(effectiveStatus);
 
   const ctaText =
-    effectiveStatus === "enrollment_open" ? "Enroll Now" : "View Course";
+    effectiveStatus === "enrollment_open"
+      ? t("home.courses.enrollNow")
+      : t("home.courses.viewCourse");
 
   const motionProps = shouldReduceMotion
     ? {}
@@ -206,7 +213,7 @@ const CourseCard = ({ course = {}, index = 0 }) => {
         {thumbnail ? (
           <img
             src={thumbnail}
-            alt={title}
+            alt={courseTitle}
             loading="lazy"
             decoding="async"
             className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
@@ -236,7 +243,7 @@ const CourseCard = ({ course = {}, index = 0 }) => {
           <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-yellow-200 bg-[#ffcb3b] px-3 py-1.5 text-[11px] font-extrabold text-[#7b4c00] shadow-md sm:text-xs">
               <FiStar className="fill-current" size={13} />
-              Kids’ Favorite
+              {t("home.courses.favorite")}
             </span>
           </div>
         )}
@@ -246,7 +253,7 @@ const CourseCard = ({ course = {}, index = 0 }) => {
             <span className="inline-flex min-w-0 items-center gap-1.5 rounded-xl border border-white/25 bg-[#fa7478]/95 px-3 py-2 text-xs font-extrabold text-white shadow-lg backdrop-blur-sm">
               <FiClock className="shrink-0" size={14} />
               <span className="truncate">
-                {getTimeRemaining(enrollmentEnd)}
+                {getTimeRemaining(enrollmentEnd, t)}
               </span>
             </span>
           ) : (
@@ -285,12 +292,12 @@ const CourseCard = ({ course = {}, index = 0 }) => {
           <span
             className={`rounded-full border px-3 py-1 text-[11px] font-extrabold ${difficulty.className}`}
           >
-            {difficulty.label}
+            {t(difficulty.labelKey)}
           </span>
         </div>
 
         <h3 className="font-baloo line-clamp-2 min-h-13 text-xl font-black leading-tight text-[#342244] transition-colors duration-300 group-hover:text-[#e85e61] sm:text-[1.35rem]">
-          {title}
+          {courseTitle}
         </h3>
 
         {/* Stats */}
@@ -301,10 +308,10 @@ const CourseCard = ({ course = {}, index = 0 }) => {
             </span>
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-wide text-sky-600">
-                Duration
+                {t("home.courses.duration")}
               </p>
               <p className="truncate text-sm font-black text-slate-800">
-                {duration || 0} weeks
+                {duration || 0} {t("home.courses.weeks")}
               </p>
             </div>
           </div>
@@ -315,7 +322,7 @@ const CourseCard = ({ course = {}, index = 0 }) => {
             </span>
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-600">
-                Lessons
+                {t("home.courses.lessons")}
               </p>
               <p className="truncate text-sm font-black text-slate-800">
                 {lectureCount}
@@ -334,7 +341,7 @@ const CourseCard = ({ course = {}, index = 0 }) => {
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[10px] font-extrabold uppercase tracking-wide text-purple-500">
-                  Your Teacher
+                  {t("home.courses.yourTeacher")}
                 </p>
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-500">
                   <FiUsers size={12} />
@@ -342,7 +349,8 @@ const CourseCard = ({ course = {}, index = 0 }) => {
                 </span>
               </div>
               <p className="truncate text-sm font-black text-[#493059]">
-                {teacherNames.join(", ") || "Friendly Instructor"}
+                {teacherNames.join(", ") ||
+                  t("home.courses.friendlyInstructor")}
               </p>
             </div>
           </div>
@@ -358,7 +366,8 @@ const CourseCard = ({ course = {}, index = 0 }) => {
                   size={14}
                 />
                 <span className="font-semibold">
-                  Class starts: <strong>{formatDate(courseStart)}</strong>
+                  {t("home.courses.classStarts")}:{" "}
+                  <strong>{formatDate(courseStart, language, t)}</strong>
                 </span>
               </div>
             )}
@@ -367,8 +376,9 @@ const CourseCard = ({ course = {}, index = 0 }) => {
               <div className="flex items-center gap-2 rounded-xl bg-teal-50 px-3 py-2">
                 <FiCalendar className="shrink-0 text-teal-600" size={14} />
                 <span className="min-w-0 truncate font-semibold">
-                  Enrollment: {formatDate(enrollmentStart)} –{" "}
-                  {formatDate(enrollmentEnd)}
+                  {t("home.courses.enrollment")}:{" "}
+                  {formatDate(enrollmentStart, language, t)} –{" "}
+                  {formatDate(enrollmentEnd, language, t)}
                 </span>
               </div>
             )}
@@ -382,20 +392,21 @@ const CourseCard = ({ course = {}, index = 0 }) => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                Course fee
+                {t("home.courses.courseFee")}
               </p>
               <div className="flex items-end gap-1.5">
                 <span className="text-3xl font-black leading-none text-[#5b3677]">
-                  {formatPrice(price)}
+                  {formatPrice(price, language)}
                 </span>
                 <span className="pb-0.5 text-sm font-extrabold text-[#e85e61]">
-                  TK
+                  {t("home.courses.currency")}
                 </span>
               </div>
 
               {originalPrice && Number(originalPrice) > Number(price) && (
                 <span className="mt-1 block text-xs font-semibold text-slate-400 line-through">
-                  {formatPrice(originalPrice)} TK
+                  {formatPrice(originalPrice, language)}{" "}
+                  {t("home.courses.currency")}
                 </span>
               )}
             </div>
@@ -406,7 +417,7 @@ const CourseCard = ({ course = {}, index = 0 }) => {
             >
               <Link
                 to={`/course/${_id}`}
-                aria-label={`${ctaText}: ${title}`}
+                aria-label={`${ctaText}: ${courseTitle}`}
                 className="group/button relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 border-[#e9a900] bg-[#ffcb3b] px-5 py-3 text-sm font-black text-[#7b3d18] shadow-[0_6px_0_#e6a414] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffd75e] hover:shadow-[0_8px_0_#e6a414] active:translate-y-1 active:shadow-[0_2px_0_#e6a414] sm:w-auto"
               >
                 <span className="absolute inset-y-0 -left-12 w-8 rotate-12 bg-white/45 blur-sm transition-transform duration-700 group-hover/button:translate-x-48" />

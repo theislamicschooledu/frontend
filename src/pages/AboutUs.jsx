@@ -30,6 +30,7 @@ import { GiTeacher } from "react-icons/gi";
 import { HiSparkles } from "react-icons/hi2";
 import { MdSecurity, MdWorkspacePremium } from "react-icons/md";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
 const floatingDecorations = [
   { left: "4%", top: "13%", size: 18, delay: 0.2, duration: 6.2 },
@@ -68,12 +69,14 @@ const SectionHeading = ({ badge, title, description, align = "center" }) => (
 );
 
 const AboutUs = () => {
+  const { t } = useLanguage();
   const [documentation, setDocumentation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDocumentation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDocumentation = async () => {
@@ -83,53 +86,49 @@ const AboutUs = () => {
       if (res.data.success) {
         setDocumentation(res.data.data);
       } else {
-        setError("Failed to load documentation");
-        toast.error("Failed to load documentation data");
+        setError("loadFailed");
+        toast.error(t("aboutPage.errors.loadFailedToast"));
       }
     } catch (err) {
       console.error("Error fetching documentation:", err);
-      setError("Network error. Please try again.");
-      toast.error("Failed to fetch documentation");
+      setError("network");
+      toast.error(t("aboutPage.errors.fetchFailedToast"));
     } finally {
       setLoading(false);
     }
   };
 
   // যদি API ডেটা না থাকে, ডিফল্ট ডেটা ব্যবহার করা
-  const mission =
-    documentation?.ourMission ||
-    "প্রযুক্তির মাধ্যমে সঠিক ইসলামী জ্ঞান সহজলভ্য করা। আমরা ঘরে ঘরে দাঈ, হাফেজ ও আলেম গড়ে তুলতে এবং বিশ্বব্যাপী ইসলামের বাণী ছড়িয়ে দিতে নিবেদিত।";
-  const vision =
-    documentation?.ourVision ||
-    "আন্তর্জাতিক মানের একটি অনলাইন শিক্ষা প্ল্যাটফর্ম হিসেবে আত্মপ্রকাশ করা, যা হাটহাজারি কওমি বোর্ড কর্তৃক স্বীকৃত ও সনদপ্রাপ্ত, যেখান থেকে পৃথিবীর যেকোনো প্রান্তের মুসলিম মানসম্মত ইলম অর্জন করতে পারবেন।";
+  const mission = documentation?.ourMission || t("aboutPage.fallback.mission");
+  const vision = documentation?.ourVision || t("aboutPage.fallback.vision");
 
   // Core Values (এটি ডাটাবেস থেকে আসবে না, স্ট্যাটিক রাখছি)
   const coreValues = [
     {
       icon: FaQuran,
-      title: "কুরআন-সুন্নাহ ভিত্তিক",
-      desc: "সমস্ত শিক্ষা কুরআন ও বিশুদ্ধ সুন্নাহর আলোকে পরিচালিত হয়",
+      title: t("aboutPage.coreValues.quran.title"),
+      desc: t("aboutPage.coreValues.quran.description"),
       accent: "bg-[#e9f8f5] text-[#08736e]",
       border: "hover:border-[#62d6c7]",
     },
     {
       icon: GiTeacher,
-      title: "প্রশিক্ষিত উস্তায",
-      desc: "মাদ্রাসা ও বিশ্ববিদ্যালয় শিক্ষিত অভিজ্ঞ আলেম দ্বারা পাঠদান",
+      title: t("aboutPage.coreValues.teachers.title"),
+      desc: t("aboutPage.coreValues.teachers.description"),
       accent: "bg-[#f2ecff] text-[#7654c8]",
       border: "hover:border-[#cbbdff]",
     },
     {
       icon: MdSecurity,
-      title: "নিরাপদ পরিবেশ",
-      desc: "শরীয়ত সম্মত ও আদব-কায়দা রক্ষা করে অনলাইন ক্লাস পরিচালনা",
+      title: t("aboutPage.coreValues.safe.title"),
+      desc: t("aboutPage.coreValues.safe.description"),
       accent: "bg-[#fff0eb] text-[#e85031]",
       border: "hover:border-[#ffc4b2]",
     },
     {
       icon: FaGraduationCap,
-      title: "আন্তর্জাতিক মান",
-      desc: "আন্তর্জাতিক কারিকুলাম ও আধুনিক পদ্ধতিতে শিক্ষাদান",
+      title: t("aboutPage.coreValues.international.title"),
+      desc: t("aboutPage.coreValues.international.description"),
       accent: "bg-[#fff5cc] text-[#9a6900]",
       border: "hover:border-[#f2ce63]",
     },
@@ -139,29 +138,29 @@ const AboutUs = () => {
   const stats = [
     {
       icon: FiUsers,
-      value: "১,২৯,০৩২+",
-      label: "মোট শিক্ষার্থী",
+      value: t("aboutPage.stats.students.value"),
+      label: t("aboutPage.stats.students.label"),
       color: "bg-[#08736e]",
       soft: "bg-[#e9f8f5]",
     },
     {
       icon: FaChalkboardTeacher,
-      value: "১১৪+",
-      label: "উস্তায ও স্টাফ",
+      value: t("aboutPage.stats.staff.value"),
+      label: t("aboutPage.stats.staff.label"),
       color: "bg-[#7654c8]",
       soft: "bg-[#f2ecff]",
     },
     {
       icon: FiBook,
-      value: "৪২+",
-      label: "ইসলামিক কোর্স",
+      value: t("aboutPage.stats.courses.value"),
+      label: t("aboutPage.stats.courses.label"),
       color: "bg-[#ff6542]",
       soft: "bg-[#fff0eb]",
     },
     {
       icon: FiAward,
-      value: "৯৭%",
-      label: "সন্তুষ্টি হার",
+      value: t("aboutPage.stats.satisfaction.value"),
+      label: t("aboutPage.stats.satisfaction.label"),
       color: "bg-[#e2a318]",
       soft: "bg-[#fff5cc]",
     },
@@ -169,60 +168,63 @@ const AboutUs = () => {
 
   // Teaching Methodology (ডাটাবেস থেকে আসবে)
   const methodologies = documentation?.onlineFeatures || [
-    "লাইভ ইন্টারেক্টিভ ক্লাসের মাধ্যমে সরাসরি শিক্ষক-শিক্ষার্থী সংযোগ",
-    "প্রতিটি ক্লাস রেকর্ডেড ভিডিও হিসেবে সংরক্ষণ (লাইফটাইম এক্সেস)",
-    "সাপ্তাহিক অ্যাসাইনমেন্ট ও মাসিক মূল্যায়ন পরীক্ষা",
-    "প্রাইভেট ডাউট ক্লিয়ারিং সেশন ও মেন্টরশিপ প্রোগ্রাম",
-    "মোবাইল অ্যাপের মাধ্যমে যেকোনো সময় পড়াশোনার সুযোগ",
+    t("aboutPage.fallback.methodologies.liveClass"),
+    t("aboutPage.fallback.methodologies.recorded"),
+    t("aboutPage.fallback.methodologies.assessment"),
+    t("aboutPage.fallback.methodologies.mentorship"),
+    t("aboutPage.fallback.methodologies.mobile"),
   ];
 
   // Accreditation & Recognition (ডাটাবেস থেকে আসবে)
   const accreditations = documentation?.ourAchievement || [
-    "হাটহাজারি কওমি বোর্ড কর্তৃক অনুমোদিত",
-    "আল-জামিয়াতুল আহলিয়া দারুল উলুম মঈনুল ইসলাম কর্তৃক স্বীকৃত",
-    "বেফাকুল মাদারিসিল আরাবিয়া বাংলাদেশের সাথে অধিভুক্ত",
-    "আন্তর্জাতিক ইসলামী বিশ্ববিদ্যালয় মালয়েশিয়া (IIUM) এর সাথে সহযোগিতা",
+    t("aboutPage.fallback.accreditations.hathazari"),
+    t("aboutPage.fallback.accreditations.jamia"),
+    t("aboutPage.fallback.accreditations.befaq"),
+    t("aboutPage.fallback.accreditations.iium"),
   ];
 
   // Contact Information (ডাটাবেস থেকে আসবে)
   const contactInfo = [
     {
       icon: FiPhone,
-      title: "হেল্পলাইন",
+      title: t("aboutPage.contact.cards.helpline.title"),
       details: documentation?.contact?.helpline || [
-        "+৮৮০১৭০০-১২৩৪৫৬",
-        "+৮৮০১৯১১-৯৮৭৬৫৪",
+        t("aboutPage.contact.cards.helpline.phone1"),
+        t("aboutPage.contact.cards.helpline.phone2"),
       ],
-      desc: "সকাল ৯টা - রাত ১০টা (শুক্রবার ব্যতীত)",
+      desc: t("aboutPage.contact.cards.helpline.description"),
       accent: "bg-[#e9f8f5] text-[#08736e]",
     },
     {
       icon: FiMail,
-      title: "ইমেইল",
+      title: t("aboutPage.contact.cards.email.title"),
       details: documentation?.contact?.email || [
         "support@islamicacademy.com",
         "admission@islamicacademy.com",
       ],
-      desc: "২৪ ঘন্টার মধ্যে উত্তর প্রদান",
+      desc: t("aboutPage.contact.cards.email.description"),
       accent: "bg-[#f2ecff] text-[#7654c8]",
     },
     {
       icon: FiMapPin,
-      title: "হেড অফিস",
+      title: t("aboutPage.contact.cards.office.title"),
       details: documentation?.contact?.headOffice
         ? [documentation.contact.headOffice]
-        : ["১২৩ ইসলামিক টাওয়ার, বিজয়নগর", "ঢাকা-১২১২, বাংলাদেশ"],
-      desc: "সোম-বৃহঃ সকাল ১০টা - সন্ধ্যা ৬টা",
+        : [
+            t("aboutPage.contact.cards.office.address1"),
+            t("aboutPage.contact.cards.office.address2"),
+          ],
+      desc: t("aboutPage.contact.cards.office.description"),
       accent: "bg-[#fff0eb] text-[#e85031]",
     },
     {
       icon: FiGlobe,
-      title: "ওয়েবসাইট",
+      title: t("aboutPage.contact.cards.website.title"),
       details: documentation?.contact?.website || [
         "www.islamicacademy.com",
         "www.learnislam.tv",
       ],
-      desc: "২৪/৭ লাইভ সাপোর্ট",
+      desc: t("aboutPage.contact.cards.website.description"),
       accent: "bg-[#fff5cc] text-[#9a6900]",
     },
   ];
@@ -231,7 +233,7 @@ const AboutUs = () => {
   const socialMedia = documentation?.socialMedia
     ? [
         {
-          name: "ফেসবুক পেজ",
+          name: t("aboutPage.social.facebook"),
           link:
             documentation.socialMedia.facebook || "facebook.com/islamicacademy",
           icon: "fb",
@@ -240,17 +242,17 @@ const AboutUs = () => {
           bgColor: "bg-blue-100",
         },
         {
-          name: "ইউটিউব চ্যানেল",
+          name: t("aboutPage.social.youtube"),
           link:
             documentation.socialMedia.youtube || "youtube.com/@islamicacademy",
           icon: "yt",
           iconComponent: FiVideo,
           color: "text-red-600",
           bgColor: "bg-red-100",
-          subscribers: "৫০০K+",
+          subscribers: t("aboutPage.social.youtubeCount"),
         },
         {
-          name: "হোয়াটসঅ্যাপ গ্রুপ",
+          name: t("aboutPage.social.whatsapp"),
           link: `https://wa.me/${
             documentation.socialMedia.whatsapp || "8801700123456"
           }`,
@@ -260,7 +262,7 @@ const AboutUs = () => {
           bgColor: "bg-green-100",
         },
         {
-          name: "টেলিগ্রাম চ্যানেল",
+          name: t("aboutPage.social.telegram"),
           link: `https://t.me/${(
             documentation.socialMedia.telegram || "islamicacademy"
           ).replace("@", "")}`,
@@ -268,12 +270,12 @@ const AboutUs = () => {
           iconComponent: FiSend,
           color: "text-blue-500",
           bgColor: "bg-blue-100",
-          members: "১০০K+",
+          members: t("aboutPage.social.telegramCount"),
         },
       ]
     : [
         {
-          name: "ফেসবুক পেজ",
+          name: t("aboutPage.social.facebook"),
           link: "facebook.com/islamicacademy",
           icon: "fb",
           iconComponent: FiMessageSquare,
@@ -281,16 +283,16 @@ const AboutUs = () => {
           bgColor: "bg-blue-100",
         },
         {
-          name: "ইউটিউব চ্যানেল",
+          name: t("aboutPage.social.youtube"),
           link: "youtube.com/@islamicacademy",
           icon: "yt",
           iconComponent: FiVideo,
           color: "text-red-600",
           bgColor: "bg-red-100",
-          subscribers: "৫০০K+",
+          subscribers: t("aboutPage.social.youtubeCount"),
         },
         {
-          name: "হোয়াটসঅ্যাপ গ্রুপ",
+          name: t("aboutPage.social.whatsapp"),
           link: "wa.me/8801700123456",
           icon: "wa",
           iconComponent: FiMessageCircle,
@@ -298,13 +300,13 @@ const AboutUs = () => {
           bgColor: "bg-green-100",
         },
         {
-          name: "টেলিগ্রাম চ্যানেল",
+          name: t("aboutPage.social.telegram"),
           link: "t.me/islamicacademy",
           icon: "tg",
           iconComponent: FiSend,
           color: "text-blue-500",
           bgColor: "bg-blue-100",
-          members: "১০০K+",
+          members: t("aboutPage.social.telegramCount"),
         },
       ];
 
@@ -328,9 +330,11 @@ const AboutUs = () => {
               <FaMosque size={25} />
             </div>
           </div>
-          <h2 className="text-2xl font-black text-[#073b46]">লোড হচ্ছে...</h2>
+          <h2 className="text-2xl font-black text-[#073b46]">
+            {t("aboutPage.loading.title")}
+          </h2>
           <p className="mt-2 text-sm font-medium text-slate-500">
-            আমাদের সম্পর্কে তথ্য প্রস্তুত হচ্ছে।
+            {t("aboutPage.loading.description")}
           </p>
         </motion.div>
       </div>
@@ -408,13 +412,13 @@ const AboutUs = () => {
               <span className="grid h-6 w-6 place-items-center rounded-full bg-[#08736e] text-white">
                 <FaMosque size={13} />
               </span>
-              ২০০৫ সাল থেকে ইসলামী শিক্ষা বিস্তারে নিবেদিত
+              {t("aboutPage.hero.badge")}
             </div>
 
             <h1 className="text-3xl font-black leading-[1.1] tracking-tight text-[#073b46] sm:text-4xl lg:text-5xl">
-              ইসলামী জ্ঞানের যাত্রায়
+              {t("aboutPage.hero.headingPrefix")}
               <span className="relative ml-2 inline-block text-[#ff6542]">
-                আপনার বিশ্বস্ত সঙ্গী
+                {t("aboutPage.hero.headingAccent")}
                 <svg
                   viewBox="0 0 260 18"
                   aria-hidden="true"
@@ -433,20 +437,18 @@ const AboutUs = () => {
             </h1>
 
             <p className="mx-auto mt-5 max-w-3xl text-sm font-medium leading-7 text-slate-600 sm:text-base sm:leading-8">
-              এশিয়ার বৃহত্তম অনলাইন ইসলামিক লার্নিং প্ল্যাটফর্ম, যেখানে ১৮
-              বছরের অভিজ্ঞতায় আমরা তৈরি করেছি একটি সহজ, বিশ্বস্ত ও মানসম্মত
-              শিক্ষা পরিবেশ।
+              {t("aboutPage.hero.description")}
             </p>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
               <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-xs font-extrabold text-[#08736e] shadow-sm">
-                <FiUsers size={15} /> ১ লক্ষের বেশি শিক্ষার্থী
+                <FiUsers size={15} /> {t("aboutPage.hero.students")}
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-xs font-extrabold text-[#7654c8] shadow-sm">
-                <FiBook size={15} /> মানসম্মত ইসলামিক কোর্স
+                <FiBook size={15} /> {t("aboutPage.hero.courses")}
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-xs font-extrabold text-[#e85031] shadow-sm">
-                <FiAward size={15} /> অভিজ্ঞ উস্তায
+                <FiAward size={15} /> {t("aboutPage.hero.teachers")}
               </span>
             </div>
           </motion.div>
@@ -468,7 +470,8 @@ const AboutUs = () => {
       {error && (
         <section className="relative z-20 mx-auto -mt-5 max-w-3xl px-4 sm:px-6">
           <div className="rounded-2xl border border-[#ffd1c2] bg-[#fff0eb] px-4 py-3 text-center text-sm font-bold text-[#c9472b] shadow-sm">
-            {error} — ডিফল্ট তথ্য দেখানো হচ্ছে।
+            {t(`aboutPage.errors.${error}`)} —{" "}
+            {t("aboutPage.errors.fallbackNotice")}
           </div>
         </section>
       )}
@@ -493,10 +496,10 @@ const AboutUs = () => {
                 </span>
                 <div>
                   <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#aee9df]">
-                    Our Purpose
+                    {t("aboutPage.mission.eyebrow")}
                   </span>
                   <h2 className="text-2xl font-black sm:text-3xl">
-                    আমাদের মিশন
+                    {t("aboutPage.mission.title")}
                   </h2>
                 </div>
               </div>
@@ -506,7 +509,8 @@ const AboutUs = () => {
               </p>
 
               <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/12 px-3.5 py-2 text-xs font-extrabold text-white ring-1 ring-white/15">
-                <FiCheck className="text-[#ffd36e]" /> ১৮ বছরের সফল অভিজ্ঞতা
+                <FiCheck className="text-[#ffd36e]" />{" "}
+                {t("aboutPage.mission.badge")}
               </div>
             </div>
           </motion.article>
@@ -528,10 +532,10 @@ const AboutUs = () => {
                 </span>
                 <div>
                   <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#ded5ff]">
-                    Our Direction
+                    {t("aboutPage.vision.eyebrow")}
                   </span>
                   <h2 className="text-2xl font-black sm:text-3xl">
-                    আমাদের ভিশন
+                    {t("aboutPage.vision.title")}
                   </h2>
                 </div>
               </div>
@@ -541,7 +545,8 @@ const AboutUs = () => {
               </p>
 
               <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/12 px-3.5 py-2 text-xs font-extrabold text-white ring-1 ring-white/15">
-                <FiCheck className="text-[#ffd36e]" /> ৫টি দেশে আমাদের কার্যক্রম
+                <FiCheck className="text-[#ffd36e]" />{" "}
+                {t("aboutPage.vision.badge")}
               </div>
             </div>
           </motion.article>
@@ -551,9 +556,9 @@ const AboutUs = () => {
       {/* Core Values */}
       <section className="relative z-10 mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         <SectionHeading
-          badge="Our Foundation"
-          title="আমাদের মূল্যবোধ ও আদর্শ"
-          description="যে নীতি ও আদর্শের উপর ভিত্তি করে আমরা প্রতিটি শিক্ষা কার্যক্রম পরিচালনা করি।"
+          badge={t("aboutPage.values.badge")}
+          title={t("aboutPage.values.title")}
+          description={t("aboutPage.values.description")}
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -595,10 +600,10 @@ const AboutUs = () => {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-7 text-center sm:mb-9">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-[#aee9df] ring-1 ring-white/10">
-              <FiAward size={14} /> Our Impact
+              <FiAward size={14} /> {t("aboutPage.impact.badge")}
             </div>
             <h2 className="text-2xl font-black sm:text-3xl lg:text-4xl">
-              গর্বের অর্জন ও পরিসংখ্যান
+              {t("aboutPage.impact.title")}
             </h2>
           </div>
 
@@ -636,9 +641,9 @@ const AboutUs = () => {
       {/* Teaching Methodology & Accreditation */}
       <section className="relative z-10 mx-auto max-w-7xl px-4 py-11 sm:px-6 sm:py-14 lg:px-8">
         <SectionHeading
-          badge="How We Teach"
-          title="আমাদের শিক্ষা পদ্ধতি"
-          description="আধুনিক প্রযুক্তি ও প্রথাগত ইসলামী শিক্ষা পদ্ধতির সমন্বয়ে তৈরি একটি সহজ, কার্যকর ও মানবিক শিক্ষা ব্যবস্থা।"
+          badge={t("aboutPage.methodology.badge")}
+          title={t("aboutPage.methodology.title")}
+          description={t("aboutPage.methodology.description")}
         />
 
         <motion.div
@@ -656,10 +661,10 @@ const AboutUs = () => {
                 </span>
                 <div>
                   <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[#08736e]">
-                    Learning Experience
+                    {t("aboutPage.methodology.learningEyebrow")}
                   </span>
                   <h3 className="text-xl font-black text-[#073b46] sm:text-2xl">
-                    অনলাইন লার্নিং ফিচারস
+                    {t("aboutPage.methodology.learningTitle")}
                   </h3>
                 </div>
               </div>
@@ -685,7 +690,7 @@ const AboutUs = () => {
                   ))
                 ) : (
                   <li className="text-sm font-semibold text-slate-500">
-                    লোড হচ্ছে...
+                    {t("aboutPage.loading.short")}
                   </li>
                 )}
               </ul>
@@ -698,10 +703,10 @@ const AboutUs = () => {
                 </span>
                 <div>
                   <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[#7654c8]">
-                    Recognition
+                    {t("aboutPage.methodology.recognitionEyebrow")}
                   </span>
                   <h3 className="text-xl font-black text-[#073b46] sm:text-2xl">
-                    স্বীকৃতি ও অনুমোদন
+                    {t("aboutPage.methodology.recognitionTitle")}
                   </h3>
                 </div>
               </div>
@@ -727,7 +732,7 @@ const AboutUs = () => {
                   ))
                 ) : (
                   <li className="text-sm font-semibold text-slate-500">
-                    লোড হচ্ছে...
+                    {t("aboutPage.loading.short")}
                   </li>
                 )}
               </ul>
@@ -740,9 +745,9 @@ const AboutUs = () => {
       <section className="relative z-10 border-y border-[#073b46]/8 bg-[#fffdf5] py-11 sm:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Get In Touch"
-            title="যোগাযোগের ঠিকানা"
-            description="আপনার প্রশ্ন, ভর্তি সংক্রান্ত তথ্য বা যেকোনো সহযোগিতার জন্য আমাদের সাথে যোগাযোগ করুন।"
+            badge={t("aboutPage.contact.badge")}
+            title={t("aboutPage.contact.title")}
+            description={t("aboutPage.contact.description")}
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -807,15 +812,14 @@ const AboutUs = () => {
             <div className="mb-5 flex flex-col gap-2 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
               <div>
                 <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[#08736e]">
-                  Social Community
+                  {t("aboutPage.social.badge")}
                 </span>
                 <h3 className="mt-1 text-xl font-black text-[#073b46] sm:text-2xl">
-                  সামাজিক যোগাযোগ মাধ্যমে যুক্ত থাকুন
+                  {t("aboutPage.social.title")}
                 </h3>
               </div>
               <p className="text-xs font-semibold text-slate-500 sm:max-w-xs sm:text-right">
-                সর্বশেষ ক্লাস, ঘোষণা ও শিক্ষামূলক কনটেন্ট পেতে আমাদের অনুসরণ
-                করুন।
+                {t("aboutPage.social.description")}
               </p>
             </div>
 
@@ -856,8 +860,13 @@ const AboutUs = () => {
                     {(social.subscribers || social.members) && (
                       <div className="mt-3 rounded-xl bg-[#fffdf5] px-3 py-2 text-center text-xs font-extrabold text-[#9a6900]">
                         {social.subscribers &&
-                          `${social.subscribers} সাবস্ক্রাইবার`}
-                        {social.members && `${social.members} সদস্য`}
+                          t("aboutPage.social.subscribers", {
+                            count: social.subscribers,
+                          })}
+                        {social.members &&
+                          t("aboutPage.social.members", {
+                            count: social.members,
+                          })}
                       </div>
                     )}
                   </motion.a>
@@ -883,33 +892,31 @@ const AboutUs = () => {
           >
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-2 text-xs font-extrabold ring-1 ring-white/15 backdrop-blur-sm">
               <FiHeart className="text-[#ffb8a6]" />
-              ১৮ বছর ধরে ইসলামী শিক্ষার সেবায় নিয়োজিত
+              {t("aboutPage.cta.badge")}
             </div>
 
             <h2 className="text-2xl font-black leading-tight sm:text-3xl lg:text-4xl">
-              ইসলামী জ্ঞানার্জনের মহান যাত্রায় শরিক হোন
+              {t("aboutPage.cta.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm font-medium leading-7 text-[#d8f5ef] sm:text-base">
-              এখনই রেজিস্ট্রেশন করুন এবং একটি ফ্রি ডেমো ক্লাসে অংশগ্রহণ করুন।
-              আমাদের অভিজ্ঞ উস্তাযদের সাথে সরাসরি কথা বলুন।
+              {t("aboutPage.cta.description")}
             </p>
 
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
               <button className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fff4c9] px-6 py-3.5 text-sm font-black text-[#073b46] shadow-lg transition hover:-translate-y-0.5 hover:bg-white">
                 <FiPhone />
-                ফ্রি কনসালটেশন বুক করুন
+                {t("aboutPage.cta.consultation")}
                 <FiArrowRight className="transition group-hover:translate-x-1" />
               </button>
 
               <button className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/70 bg-white/5 px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/12">
                 <FiMail />
-                ইমেইলে তথ্য চাই
+                {t("aboutPage.cta.emailInfo")}
               </button>
             </div>
 
             <p className="mt-5 text-xs font-semibold leading-5 text-[#aee9df]">
-              সকাল ৯টা থেকে রাত ১০টা পর্যন্ত খোলা (শুক্রবার দুপুর ১২টা থেকে ৩টা
-              পর্যন্ত বন্ধ)
+              {t("aboutPage.cta.hours")}
             </p>
           </motion.div>
         </div>

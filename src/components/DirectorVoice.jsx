@@ -12,10 +12,8 @@ import {
 import { HiSparkles } from "react-icons/hi2";
 import TypingAnimation from "./TypingAnimation";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
-const DIRECTOR_NAME = "মোঃ মুজাহিদুল ইসলাম";
-
-// কম ডেকোরেশন - শুধু ৪টি আইকন
 const DECORATIONS = [
   {
     id: 1,
@@ -65,31 +63,38 @@ const ICONS = {
   heart: FiHeart,
 };
 
-const DirectorVoiceSkeleton = () => (
-  <section
-    id="director-message"
-    className="relative overflow-hidden bg-[#faf8f5] px-4 py-16 font-hind sm:px-6 lg:py-24"
-    aria-label="পরিচালকের বাণী লোড হচ্ছে"
-  >
-    <div className="mx-auto max-w-7xl animate-pulse">
-      <div className="mx-auto mb-12 h-9 w-52 rounded-full bg-[#e8e4f2]" />
-      <div className="grid items-center gap-10 lg:grid-cols-[0.85fr_1.15fr]">
-        <div className="mx-auto h-72 w-64 rounded-3xl bg-[#e8e4f2] sm:h-96 sm:w-80" />
-        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg sm:p-10">
-          <div className="mb-5 h-7 w-3/5 rounded-full bg-[#e8e4f2]" />
-          <div className="space-y-3">
-            <div className="h-4 rounded-full bg-[#f0eef5]" />
-            <div className="h-4 rounded-full bg-[#f0eef5]" />
-            <div className="h-4 w-11/12 rounded-full bg-[#f0eef5]" />
-            <div className="h-4 w-4/5 rounded-full bg-[#f0eef5]" />
+const DirectorVoiceSkeleton = () => {
+  const { t } = useLanguage();
+
+  return (
+    <section
+      id="director-message"
+      className="relative overflow-hidden bg-[#faf8f5] px-4 py-16 font-hind sm:px-6 lg:py-24"
+      aria-label={t("home.director.loading")}
+    >
+      <div className="mx-auto max-w-7xl animate-pulse">
+        <div className="mx-auto mb-12 h-9 w-52 rounded-full bg-[#e8e4f2]" />
+        <div className="grid items-center gap-10 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="mx-auto h-72 w-64 rounded-3xl bg-[#e8e4f2] sm:h-96 sm:w-80" />
+          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg sm:p-10">
+            <div className="mb-5 h-7 w-3/5 rounded-full bg-[#e8e4f2]" />
+            <div className="space-y-3">
+              <div className="h-4 rounded-full bg-[#f0eef5]" />
+              <div className="h-4 rounded-full bg-[#f0eef5]" />
+              <div className="h-4 w-11/12 rounded-full bg-[#f0eef5]" />
+              <div className="h-4 w-4/5 rounded-full bg-[#f0eef5]" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const DirectorVoice = () => {
+  const { t } = useLanguage();
+  const directorName = t("home.director.name");
+
   const [directorVoice, setDirectorVoice] = useState(null);
   const [status, setStatus] = useState("loading");
   const [imageFailed, setImageFailed] = useState(false);
@@ -145,17 +150,18 @@ const DirectorVoice = () => {
             <FiMessageCircle size={30} />
           </div>
           <h2 className="text-2xl font-bold text-[#49366f]">
-            পরিচালকের বাণী পাওয়া যায়নি
+            {t("home.director.unavailableTitle")}
           </h2>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            তথ্যটি আপডেট হওয়ার পর এখানে পরিচালকের বার্তা দেখা যাবে।
+            {t("home.director.unavailableDescription")}
           </p>
         </div>
       </section>
     );
   }
 
-  const directorTitle = directorVoice?.title || "প্রতিষ্ঠাতা ও পরিচালক";
+  const directorTitle =
+    directorVoice?.title || t("home.director.fallbackTitle");
 
   return (
     <section
@@ -215,14 +221,13 @@ const DirectorVoice = () => {
         >
           <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full bg-[#f3edf9] px-4 py-1.5 text-sm font-semibold text-[#7b5bb2]">
             <HiSparkles className="text-[#7b5bb2]" />
-            পরিচালকের বাণী
+            {t("home.director.badge")}
           </div>
           <h2 className="font-baloo text-3xl font-bold tracking-tight text-[#2d1b4e] sm:text-4xl lg:text-5xl">
-            আমাদের প্রেরণা
+            {t("home.director.heading")}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-gray-600 sm:text-base">
-            ইসলামী মূল্যবোধ ও সুন্দর চরিত্রের মাধ্যমে শিশুদের উজ্জ্বল ভবিষ্যৎ
-            গড়ে তোলাই আমাদের অঙ্গীকার।
+            {t("home.director.description")}
           </p>
         </motion.div>
 
@@ -247,7 +252,7 @@ const DirectorVoice = () => {
                   {directorVoice?.photo && !imageFailed ? (
                     <motion.img
                       src={directorVoice.photo}
-                      alt={`${DIRECTOR_NAME}, ${directorTitle}`}
+                      alt={`${directorName}, ${directorTitle}`}
                       className="h-full w-full object-cover object-top"
                       onError={() => setImageFailed(true)}
                       initial={reduceMotion ? false : { scale: 1.05 }}
@@ -266,7 +271,7 @@ const DirectorVoice = () => {
 
                   {/* নামের ব্যাজ */}
                   <div className="absolute inset-x-5 bottom-5 text-white">
-                    <p className="text-xl font-bold">{DIRECTOR_NAME}</p>
+                    <p className="text-xl font-bold">{directorName}</p>
                     <p className="mt-0.5 text-sm font-medium text-white/80">
                       {directorTitle}
                     </p>
@@ -321,14 +326,14 @@ const DirectorVoice = () => {
               >
                 <div>
                   <p className="text-base font-bold text-[#2d1b4e]">
-                    {DIRECTOR_NAME}
+                    {directorName}
                   </p>
                   <p className="text-sm text-gray-500">{directorTitle}</p>
                 </div>
 
                 <div className="inline-flex items-center gap-2 rounded-full bg-[#f3edf9] px-4 py-1.5 text-xs font-semibold text-[#7b5bb2]">
                   <FiHeart className="text-[#fa7478]" />
-                  শিশুদের ভবিষ্যতের জন্য
+                  {t("home.director.footerBadge")}
                 </div>
               </motion.div>
             </div>

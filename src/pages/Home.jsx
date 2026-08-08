@@ -19,8 +19,11 @@ import DirectorVoice from "../components/DirectorVoice";
 import Heading from "../components/Heading";
 import HeroSection from "../components/HeroSection";
 import HomeAbout from "../components/HomeAbout";
+import { useLanguage } from "../hooks/useLanguage";
 
 const Home = () => {
+  const { t } = useLanguage();
+
   const bounceAnimation = {
     whileHover: {
       scale: 1.05,
@@ -69,11 +72,9 @@ const Home = () => {
           {/* Featured Courses */}
 
           <Heading
-            label={"Featured Courses"}
-            text1={"জনপ্রিয় কোর্স সমুহ"}
-            text2={
-              "চাহিদার শীর্ষে থাকা আমাদের কোর্সসমুহ। যা আপনাদের আল্লাহর পথে পরিচালিত করতে সহয়তা করবে।"
-            }
+            label={t("home.courses.label")}
+            text1={t("home.courses.heading")}
+            text2={t("home.courses.description")}
           />
 
           <FeaturedCourses />
@@ -87,7 +88,7 @@ const Home = () => {
           >
             <motion.div {...bounceAnimation}>
               <button className="border-2 border-green-600 text-green-600 px-6 py-3 mb-10 rounded-2xl font-semibold hover:bg-green-600 hover:text-white transition shadow-lg">
-                <Link to={"/courses"}>View All Courses</Link>
+                <Link to={"/courses"}>{t("home.courses.viewAll")}</Link>
               </button>
             </motion.div>
           </motion.div>

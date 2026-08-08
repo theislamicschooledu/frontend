@@ -1,11 +1,14 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "react-router";
+import { useLanguage } from "../hooks/useLanguage";
 
 const bee = "/bee.png";
 const boy = "/man.png";
 const girl = "/woman.png";
 
 const HeroSection = () => {
+  const { t } = useLanguage();
+
   const sectionRef = useRef(null);
   const circleRef = useRef(null);
   const beeRef = useRef(null);
@@ -397,7 +400,7 @@ const HeroSection = () => {
       >
         <img
           src={girl}
-          alt="Student girl"
+          alt={t("home.hero.girlAlt")}
           draggable={false}
           decoding="async"
           className="hero-enter-girl block h-full w-full select-none object-contain object-bottom"
@@ -461,7 +464,7 @@ const HeroSection = () => {
                   tracking-[-0.05em]
                 "
               >
-                Online
+                {t("home.hero.online")}
               </span>
 
               <span
@@ -472,7 +475,7 @@ const HeroSection = () => {
                   tracking-[-0.03em]
                 "
               >
-                ISLAMIC
+                {t("home.hero.islamic")}
               </span>
             </h1>
 
@@ -486,7 +489,7 @@ const HeroSection = () => {
                 leading-none
               "
             >
-              School for
+              {t("home.hero.schoolFor")}
             </p>
 
             <div
@@ -500,7 +503,7 @@ const HeroSection = () => {
                 tracking-[-0.07em]
               "
             >
-              KIDS
+              {t("home.hero.kids")}
             </div>
 
             <div className="hero-enter-copy hero-enter-copy-4 mt-[clamp(0.65rem,1.8vw,1.25rem)]">
@@ -534,7 +537,7 @@ const HeroSection = () => {
                   motion-reduce:hover:translate-y-0
                 "
               >
-                Start Today
+                {t("home.hero.startToday")}
               </Link>
             </div>
 
@@ -549,9 +552,9 @@ const HeroSection = () => {
                 leading-[1.3]
               "
             >
-              Sign up → 5-minute evaluation →
+              {t("home.hero.stepsLine1")}
               <br />
-              pick a class time → done!
+              {t("home.hero.stepsLine2")}
             </p>
           </div>
         </div>
@@ -576,7 +579,7 @@ const HeroSection = () => {
         <div className="hero-enter-bee">
           <img
             src={bee}
-            alt="Bee"
+            alt={t("home.hero.beeAlt")}
             draggable={false}
             decoding="async"
             className="
@@ -612,7 +615,7 @@ const HeroSection = () => {
       >
         <img
           src={boy}
-          alt="Student boy"
+          alt={t("home.hero.boyAlt")}
           draggable={false}
           decoding="async"
           className="hero-enter-boy block h-full w-full select-none object-contain object-bottom"
@@ -709,7 +712,7 @@ const HeroSection = () => {
                 leading-[1.05]
               "
             >
-              MONEY BACK
+              {t("home.hero.moneyBack")}
             </span>
 
             <span
@@ -719,7 +722,7 @@ const HeroSection = () => {
                 leading-[1.05]
               "
             >
-              GUARANTEE
+              {t("home.hero.guarantee")}
             </span>
           </div>
         </div>

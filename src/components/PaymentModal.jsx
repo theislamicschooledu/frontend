@@ -18,9 +18,11 @@ import {
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
 const PaymentModal = ({ isOpen, onClose, course }) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [error, setError] = useState("");
   const [couponCode, setCouponCode] = useState("");
@@ -37,7 +39,7 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
-      setError("Please enter a coupon code");
+      setError(t("paymentModal.enterCoupon"));
       return;
     }
 
@@ -54,11 +56,13 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
         setAppliedCoupon(data.coupon);
         setError("");
       } else {
-        setError(data.message || "Invalid coupon code");
+        setError(data.message || t("paymentModal.invalidCoupon"));
       }
     } catch (error) {
       console.error("Coupon error:", error.response?.data);
-      setError(error.response?.data?.message || "Invalid coupon code");
+      setError(
+        error.response?.data?.message || t("paymentModal.invalidCoupon"),
+      );
       setAppliedCoupon(null);
     } finally {
       setApplyingCoupon(false);
@@ -86,9 +90,9 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
   };
 
   const paymentSteps = [
-    "আপনার পছন্দের মোবাইল ব্যাংকিং মাধ্যমে পেমেন্ট করুন",
-    "পরবর্তী পেজে ট্রানজেকশন ও পেমেন্টের তথ্য দিন",
-    "অ্যাডমিন অনুমোদনের পর কোর্সে প্রবেশাধিকার পাবেন",
+    t("paymentModal.step1"),
+    t("paymentModal.step2"),
+    t("paymentModal.step3"),
   ];
 
   return (
@@ -125,16 +129,16 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-lg font-extrabold text-[#263c35] sm:text-xl">
-                        কোর্সে এনরোল করুন
+                        {t("paymentModal.enrollTitle")}
                       </h3>
                       <span className="inline-flex items-center gap-1 rounded-full bg-[#e5f4ee] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#16745f]">
                         <FiShield />
-                        Secure
+                        {t("paymentModal.secure")}
                       </span>
                     </div>
 
                     <p className="mt-0.5 truncate text-xs font-medium text-[#71817b] sm:text-sm">
-                      ম্যানুয়াল পেমেন্ট • বিকাশ, নগদ অথবা রকেট
+                      {t("paymentModal.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -143,7 +147,7 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                   type="button"
                   onClick={onClose}
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e1e5e1] bg-white/80 text-[#71817b] transition hover:border-[#efb49f] hover:bg-[#fff2eb] hover:text-[#d9704b]"
-                  aria-label="Close payment modal"
+                  aria-label={t("paymentModal.close")}
                 >
                   <FiX size={19} />
                 </button>
@@ -169,7 +173,8 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
 
                     <div className="min-w-0 flex-1">
                       <span className="inline-flex rounded-full bg-[#eeeafd] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#6e5bb4]">
-                        {course?.category?.name || "Uncategorized"}
+                        {course?.category?.name ||
+                          t("paymentModal.uncategorized")}
                       </span>
 
                       <h4 className="mt-2 line-clamp-2 text-sm font-extrabold leading-5 text-[#263c35] sm:text-base">
@@ -179,7 +184,7 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
 
                     <div className="shrink-0 text-right">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                        Price
+                        {t("paymentModal.price")}
                       </p>
                       <p
                         className={`mt-1 font-extrabold ${
@@ -204,10 +209,10 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
 
                       <div>
                         <p className="text-sm font-extrabold text-[#263c35]">
-                          কুপন কোড
+                          {t("paymentModal.couponCode")}
                         </p>
                         <p className="text-xs text-[#7b8983]">
-                          বৈধ কুপন থাকলে মূল্য কমবে
+                          {t("paymentModal.couponHint")}
                         </p>
                       </div>
                     </div>
@@ -222,7 +227,7 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                         className="inline-flex items-center gap-1.5 rounded-lg bg-[#eef8f4] px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:bg-[#e1f1eb]"
                       >
                         <FiPlus />
-                        যোগ করুন
+                        {t("paymentModal.add")}
                       </button>
                     )}
                   </div>
@@ -241,7 +246,7 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                             <FiTag className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a9691]" />
                             <input
                               type="text"
-                              placeholder="কুপন কোড লিখুন"
+                              placeholder={t("paymentModal.couponPlaceholder")}
                               value={couponCode}
                               onChange={(e) => {
                                 setCouponCode(e.target.value.toUpperCase());
@@ -260,10 +265,10 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                             {applyingCoupon ? (
                               <>
                                 <FiLoader className="animate-spin" />
-                                যাচাই হচ্ছে
+                                {t("paymentModal.validating")}
                               </>
                             ) : (
-                              "Apply"
+                              t("paymentModal.apply")
                             )}
                           </button>
                         </div>
@@ -285,12 +290,18 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
 
                           <div className="min-w-0">
                             <p className="truncate text-sm font-extrabold text-[#145f50]">
-                              {appliedCoupon.code} Applied
+                              {t("paymentModal.applied", {
+                                code: appliedCoupon.code,
+                              })}
                             </p>
                             <p className="mt-0.5 text-xs font-semibold text-[#4d8172]">
                               {appliedCoupon.discountType === "percentage"
-                                ? `${appliedCoupon.discountValue}% ছাড়`
-                                : `৳${appliedCoupon.discountValue} ছাড়`}
+                                ? t("paymentModal.percentageDiscount", {
+                                    value: appliedCoupon.discountValue,
+                                  })
+                                : t("paymentModal.fixedDiscount", {
+                                    value: appliedCoupon.discountValue,
+                                  })}
                             </p>
                           </div>
                         </div>
@@ -299,7 +310,7 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                           type="button"
                           onClick={handleRemoveCoupon}
                           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4f8173] transition hover:bg-white hover:text-[#d9704b]"
-                          aria-label="Remove coupon"
+                          aria-label={t("paymentModal.removeCoupon")}
                         >
                           <FiX />
                         </button>
@@ -331,20 +342,22 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                         </span>
                         <div>
                           <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/55">
-                            Payment Summary
+                            {t("paymentModal.paymentSummary")}
                           </p>
-                          <p className="text-sm font-extrabold">মূল্য বিবরণ</p>
+                          <p className="text-sm font-extrabold">
+                            {t("paymentModal.priceBreakdown")}
+                          </p>
                         </div>
                       </div>
 
                       <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/75">
-                        BDT
+                        {t("paymentModal.currency")}
                       </span>
                     </div>
 
                     <div className="mt-4 space-y-2.5 text-sm">
                       <div className="flex items-center justify-between text-white/70">
-                        <span>কোর্সের মূল্য</span>
+                        <span>{t("paymentModal.coursePrice")}</span>
                         <span className="font-bold text-white">
                           ৳{course?.price || 0}
                         </span>
@@ -352,7 +365,7 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
 
                       {appliedCoupon && (
                         <div className="flex items-center justify-between text-[#9de2c9]">
-                          <span>কুপন ছাড়</span>
+                          <span>{t("paymentModal.couponDiscount")}</span>
                           <span className="font-extrabold">
                             -৳{appliedCoupon.discountAmount}
                           </span>
@@ -365,11 +378,13 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                     <div className="flex items-end justify-between gap-4">
                       <div>
                         <p className="text-xs font-medium text-white/55">
-                          সর্বমোট পরিশোধযোগ্য
+                          {t("paymentModal.totalPayable")}
                         </p>
                         {appliedCoupon && (
                           <p className="mt-1 text-xs font-bold text-[#9de2c9]">
-                            আপনি ৳{appliedCoupon.savings} সাশ্রয় করছেন
+                            {t("paymentModal.saving", {
+                              amount: appliedCoupon.savings,
+                            })}
                           </p>
                         )}
                       </div>
@@ -390,7 +405,7 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
 
                     <div className="min-w-0 flex-1">
                       <h5 className="text-sm font-extrabold text-[#263c35]">
-                        ম্যানুয়াল পেমেন্ট প্রক্রিয়া
+                        {t("paymentModal.processTitle")}
                       </h5>
 
                       <div className="mt-3 space-y-3">
@@ -419,13 +434,13 @@ const PaymentModal = ({ isOpen, onClose, course }) => {
                   disabled={!course}
                   className="group inline-flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 text-base font-extrabold text-white shadow-[0_14px_32px_rgba(22,116,95,0.23)] transition hover:-translate-y-0.5 hover:bg-[#115f4e] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <span>পেমেন্ট তথ্য দিন</span>
+                  <span>{t("paymentModal.continue")}</span>
                   <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                 </button>
 
                 <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-[11px] font-medium text-[#84918c]">
                   <FiCheck className="text-[#16745f]" />
-                  পরবর্তী ধাপে পেমেন্টের ট্রানজেকশন তথ্য জমা দিতে হবে
+                  {t("paymentModal.nextStep")}
                 </p>
               </div>
             </div>

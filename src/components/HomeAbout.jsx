@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import { useLanguage } from "../hooks/useLanguage";
 
 const HomeAbout = ({
   youtubeUrl = "https://www.youtube.com/watch?v=1KviEqtohqQ&pp=ygUPaXNsYW1pYyBuYXNoZWVk0gcJCaMLAYcqIYzv",
 }) => {
+  const { t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
 
   const videoId = useMemo(() => {
@@ -44,75 +46,50 @@ const HomeAbout = ({
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         {/* Main heading */}
         <h2 className="mb-12 text-center font-black tracking-wide text-[#083843] sm:text-left sm:text-5xl lg:mb-16 lg:text-6xl">
-          Learn with Noor &amp; Nora
+          {t("home.about.heading")}
         </h2>
 
         <div className="grid items-center gap-14 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
           {/* Left content */}
           <div className="order-2 lg:order-1">
             <h3 className="text-3xl font-black leading-tight text-[#063844] sm:text-4xl lg:text-[42px]">
-              Live Teachers. Fun Classes.
+              {t("home.about.title")}
             </h3>
 
             <h4 className="mt-5 text-base font-extrabold text-[#073844] sm:text-lg">
-              Live Teachers. Structured Learning. Fun Classes.
+              {t("home.about.subtitle")}
             </h4>
 
             <div className="mt-2 max-w-2xl space-y-2 text-[15px] leading-6 text-slate-800 sm:text-base sm:leading-7">
-              <p>
-                Looking for an Online Islamic School your child will actually
-                love? At{" "}
-                <strong className="font-extrabold text-[#073844]">
-                  Noor Academy
-                </strong>
-                , we combine{" "}
-                <strong className="font-extrabold">live teachers</strong> with
-                fun, engaging lessons designed to spark curiosity and build
-                strong foundations in{" "}
-                <strong className="font-extrabold">
-                  Islamic Studies, Quran, Tajweed, and Arabic
-                </strong>{" "}
-                — all taught in a way kids connect with.
-              </p>
-
-              <p>
-                Through animated videos featuring{" "}
-                <strong className="font-extrabold">Noor and Nora</strong>,
-                interactive activities, and exciting class sessions, your child
-                will learn about Islam while having fun every step of the way.
-              </p>
-
-              <p>
-                As parents, you want more than just screen time — you want
-                meaningful, guided learning that strengthens faith and
-                character. That’s exactly what we deliver.
-              </p>
+              <p>{t("home.about.paragraph1")}</p>
+              <p>{t("home.about.paragraph2")}</p>
+              <p>{t("home.about.paragraph3")}</p>
             </div>
 
             <ul className="mt-3 space-y-1 text-[15px] leading-6 text-slate-800 sm:text-base">
               <li className="flex items-start gap-2">
                 <span aria-hidden="true">🎓</span>
-                <span>Taught live by expert teachers</span>
+                <span>{t("home.about.benefit1")}</span>
               </li>
 
               <li className="flex items-start gap-2">
                 <span aria-hidden="true">🔎</span>
-                <span>Personal Supervisors to ensure quality learning</span>
+                <span>{t("home.about.benefit2")}</span>
               </li>
 
               <li className="flex items-start gap-2">
                 <span aria-hidden="true">📖</span>
-                <span>Covers Quran, Arabic, Tajweed &amp; Islamic Studies</span>
+                <span>{t("home.about.benefit3")}</span>
               </li>
 
               <li className="flex items-start gap-2">
                 <span aria-hidden="true">🎉</span>
-                <span>Includes stories, characters &amp; fun learning tools</span>
+                <span>{t("home.about.benefit4")}</span>
               </li>
 
               <li className="flex items-start gap-2">
                 <span aria-hidden="true">🚀</span>
-                <span>Designed for lasting spiritual and academic growth</span>
+                <span>{t("home.about.benefit5")}</span>
               </li>
             </ul>
 
@@ -120,7 +97,7 @@ const HomeAbout = ({
               href="#programs"
               className="mt-7 inline-flex min-h-12 items-center justify-center rounded border-2 border-[#ff5c39] px-6 py-2 text-sm font-black tracking-wide text-[#ff5c39] transition duration-300 hover:bg-[#ff5c39] hover:text-white focus:outline-none focus:ring-4 focus:ring-orange-200"
             >
-              Explore Our Programs
+              {t("home.about.explorePrograms")}
             </a>
           </div>
 
@@ -141,7 +118,7 @@ const HomeAbout = ({
                   {isPlaying && embedUrl ? (
                     <iframe
                       src={embedUrl}
-                      title="Noor Academy YouTube video"
+                      title={t("home.about.videoTitle")}
                       className="absolute inset-0 h-full w-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
@@ -151,13 +128,13 @@ const HomeAbout = ({
                       type="button"
                       onClick={() => videoId && setIsPlaying(true)}
                       disabled={!videoId}
-                      aria-label="Play video"
+                      aria-label={t("home.about.playVideo")}
                       className="group absolute inset-0 h-full w-full cursor-pointer overflow-hidden disabled:cursor-not-allowed"
                     >
                       {thumbnailUrl ? (
                         <img
                           src={thumbnailUrl}
-                          alt="Noor Academy video thumbnail"
+                          alt={t("home.about.videoThumbnailAlt")}
                           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                           onError={(event) => {
                             event.currentTarget.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
@@ -165,7 +142,7 @@ const HomeAbout = ({
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-[#fff0ad] px-6 text-center font-bold text-[#083843]">
-                          Please provide a valid YouTube video URL
+                          {t("home.about.invalidVideo")}
                         </div>
                       )}
 
@@ -198,7 +175,7 @@ const HomeAbout = ({
               {/* Bird */}
               <img
                 src="/bird.png"
-                alt="Decorative bird"
+                alt={t("home.about.birdAlt")}
                 className="pointer-events-none absolute bottom-0 left-1/2 z-20 w-[42%] min-w-36 -translate-x-1/2 object-contain drop-shadow-sm sm:w-[46%]"
               />
             </div>

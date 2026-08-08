@@ -12,6 +12,7 @@ import {
 import { FaExclamationCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
 const cardThemes = [
   {
@@ -112,6 +113,8 @@ const QuestionSkeleton = ({ index }) => {
 };
 
 const PopularQuestion = () => {
+  const { t } = useLanguage();
+
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState([]);
   const [error, setError] = useState(null);
@@ -129,25 +132,21 @@ const PopularQuestion = () => {
       if (res.data?.success || Array.isArray(questionsData)) {
         setQuestions(Array.isArray(questionsData) ? questionsData : []);
       } else {
-        setError("প্রশ্নগুলো লোড করা যায়নি।");
-        toast.error("নির্বাচিত প্রশ্নগুলো লোড করা সম্ভব হয়নি");
+        setError(true);
+        toast.error(t("home.questions.featuredLoadFailed"));
       }
     } catch (fetchError) {
       console.error("Error fetching questions:", fetchError);
 
-      const message =
-        fetchError?.response?.data?.message ||
-        fetchError?.message ||
-        "প্রশ্নগুলো লোড করা যায়নি।";
-
-      setError(message);
+      setError(true);
 
       if (!fetchError?.response?.status || fetchError.response.status >= 500) {
-        toast.error("নেটওয়ার্কে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।");
+        toast.error(t("home.questions.networkError"));
       }
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -231,15 +230,11 @@ const PopularQuestion = () => {
       </motion.div>
 
       <h3 className="relative mt-6 text-2xl font-black text-[#073b46]">
-        প্রশ্নগুলো লোড করা যায়নি
+        {t("home.questions.errorTitle")}
       </h3>
 
       <p className="relative mx-auto mt-3 max-w-lg leading-7 text-slate-500">
-        {String(error || "")
-          .toLowerCase()
-          .includes("network")
-          ? "আপনার ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।"
-          : "এই মুহূর্তে নির্বাচিত প্রশ্নগুলো দেখাতে সমস্যা হচ্ছে।"}
+        {t("home.questions.temporaryProblem")}
       </p>
 
       <motion.button
@@ -250,7 +245,7 @@ const PopularQuestion = () => {
         className="relative mt-7 inline-flex items-center gap-2 rounded-xl bg-[#073b46] px-6 py-3 font-bold text-white shadow-[0_12px_28px_rgba(7,59,70,0.22)] transition-colors hover:bg-[#0b4d59] focus:outline-none focus:ring-4 focus:ring-[#073b46]/15"
       >
         <FiRefreshCw />
-        আবার চেষ্টা করুন
+        {t("common.tryAgain")}
       </motion.button>
     </motion.div>
   );
@@ -280,12 +275,11 @@ const PopularQuestion = () => {
       </motion.div>
 
       <h3 className="relative mt-6 text-2xl font-black text-[#073b46]">
-        এখনো কোনো প্রশ্ন পাওয়া যায়নি
+        {t("home.questions.emptyTitle")}
       </h3>
 
       <p className="relative mx-auto mt-3 max-w-lg leading-7 text-slate-500">
-        এই মুহূর্তে দেখানোর মতো কোনো নির্বাচিত প্রশ্ন নেই। নতুন প্রশ্ন ও উত্তরের
-        জন্য পরে আবার দেখুন।
+        {t("home.questions.emptyDescription")}
       </p>
     </motion.div>
   );
@@ -307,8 +301,9 @@ const PopularQuestion = () => {
         const answerExcerpt = createExcerpt(answerText);
 
         // API/ডেটাবেস থেকে আসা মানগুলো অনুবাদ বা পরিবর্তন করা হচ্ছে না।
-        const questionTitle = item?.title || "শিরোনামহীন প্রশ্ন";
-        const categoryName = item?.category?.name || "সাধারণ";
+        const questionTitle = item?.title || t("home.questions.fallbackTitle");
+        const categoryName =
+          item?.category?.name || t("home.questions.fallbackCategory");
 
         return (
           <motion.article
@@ -360,7 +355,7 @@ const PopularQuestion = () => {
                 <span
                   className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${theme.accent} text-lg font-black text-white shadow-md`}
                 >
-                  প্র
+                  {t("home.questions.questionShort")}
                 </span>
 
                 <h3 className="pt-1 text-xl font-black leading-[1.45] text-[#073b46] transition-colors duration-300 group-hover:text-[#ef5739]">
@@ -373,10 +368,10 @@ const PopularQuestion = () => {
                   <span
                     className={`flex h-8 w-8 items-center justify-center rounded-xl ${theme.soft} ${theme.text} font-black`}
                   >
-                    উ
+                    {t("home.questions.answerShort")}
                   </span>
                   <span className="text-xs font-extrabold text-slate-400">
-                    উত্তর
+                    {t("home.questions.answer")}
                   </span>
                 </div>
 
@@ -387,7 +382,7 @@ const PopularQuestion = () => {
                 ) : (
                   <div className="mt-4 flex flex-1 items-center rounded-2xl border border-dashed border-[#073b46]/10 bg-white/80 px-4 py-5">
                     <p className="text-sm italic leading-6 text-slate-500">
-                      এই প্রশ্নের কোনো উত্তর এখনো যুক্ত করা হয়নি।
+                      {t("home.questions.noAnswer")}
                     </p>
                   </div>
                 )}
@@ -396,15 +391,19 @@ const PopularQuestion = () => {
                   {questionId ? (
                     <Link
                       to={`/qa/${questionId}`}
-                      aria-label={`${questionTitle} বিস্তারিত দেখুন`}
+                      aria-label={t("home.questions.detailsAria", {
+                        title: questionTitle,
+                      })}
                       className="group/link inline-flex items-center gap-2 rounded-xl border-2 border-[#ff6542] px-4 py-2.5 text-sm font-black text-[#ef5739] transition-all duration-300 hover:bg-[#ff6542] hover:text-white focus:outline-none focus:ring-4 focus:ring-orange-100"
                     >
-                      {answerExcerpt ? "বিস্তারিত পড়ুন" : "প্রথম উত্তরটি দিন"}
+                      {answerExcerpt
+                        ? t("home.questions.readMore")
+                        : t("home.questions.giveFirstAnswer")}
                       <FiArrowUpRight className="transition-transform duration-300 group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
                     </Link>
                   ) : (
                     <span className="inline-flex rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-400">
-                      বিস্তারিত পাওয়া যাচ্ছে না
+                      {t("home.questions.detailsUnavailable")}
                     </span>
                   )}
                 </div>
@@ -452,13 +451,13 @@ const PopularQuestion = () => {
           >
             <div className="inline-flex items-center gap-2 rounded-full bg-[#fff3bd] px-4 py-2 text-xs font-black text-[#073b46]">
               <FiMessageCircle className="text-[#ff6542]" />
-              নির্বাচিত প্রশ্নোত্তর
+              {t("home.questions.badge")}
             </div>
 
             <h2 className="mt-5 max-w-3xl text-4xl font-black leading-[1.15] tracking-tight text-[#073b46] sm:text-5xl lg:text-[56px]">
-              জানুন, বুঝুন এবং
+              {t("home.questions.headingPrefix")}
               <span className="relative ml-3 inline-block text-[#ff6542]">
-                জ্ঞান ভাগ করুন
+                {t("home.questions.headingAccent")}
                 <motion.span
                   initial={{ scaleX: 0 }}
                   whileInView={{ scaleX: 1 }}
@@ -470,8 +469,7 @@ const PopularQuestion = () => {
             </h2>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-              শিক্ষার্থী ও অভিভাবকদের গুরুত্বপূর্ণ প্রশ্ন, প্রয়োজনীয় উত্তর এবং
-              উপকারী আলোচনা এক জায়গায় খুঁজে নিন।
+              {t("home.questions.description")}
             </p>
           </motion.div>
 
@@ -528,9 +526,11 @@ const PopularQuestion = () => {
               }}
               className="absolute left-0 top-2 rounded-3xl border-2 border-[#073b46] bg-[#fff3bd] px-5 py-4 shadow-[8px_8px_0_#073b46]"
             >
-              <p className="text-xs font-black text-[#ff6542]">প্রশ্ন করুন</p>
+              <p className="text-xs font-black text-[#ff6542]">
+                {t("home.questions.askQuestion")}
+              </p>
               <p className="mt-1 text-xl font-black text-[#073b46]">
-                উত্তর জানুন
+                {t("home.questions.knowAnswer")}
               </p>
             </motion.div>
 
@@ -617,7 +617,7 @@ const PopularQuestion = () => {
               to="/qa"
               className="group inline-flex items-center gap-2 rounded-xl bg-[#073b46] px-7 py-3.5 text-sm font-black text-white shadow-[0_12px_30px_rgba(7,59,70,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#0b4d59] hover:shadow-[0_18px_38px_rgba(7,59,70,0.25)] focus:outline-none focus:ring-4 focus:ring-[#073b46]/15"
             >
-              সব প্রশ্ন দেখুন
+              {t("home.questions.viewAll")}
               <FiArrowUpRight className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </Link>
           </motion.div>
