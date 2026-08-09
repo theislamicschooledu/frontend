@@ -30,12 +30,14 @@ import { useEffect, useState } from "react";
 import api from "../../utils/axios";
 import { Link } from "react-router";
 import { toast } from "react-hot-toast";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const AdminDashboard = () => {
   const [totalStudent, setTotalStudent] = useState(0);
   const [totalTeacher, setTotalTeacher] = useState(0);
   const [totalCourses, setTotalCourses] = useState(0);
   const [totalBlogs, setTotalBlogs] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
   const [courses, setCourses] = useState(null);
   const [blogs, setBlogs] = useState(null);
   const [questions, setQuestions] = useState(null);
@@ -62,6 +64,17 @@ const AdminDashboard = () => {
   const [principalVoicePhoto, setPrincipalVoicePhoto] = useState(null);
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const { language, t } = useLanguage();
+
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
+  const statusLabel = (status) => {
+    const key = `adminDashboard.status.${status || "default"}`;
+    const translated = t(key);
+    return translated === key
+      ? status || t("adminDashboard.status.default")
+      : translated;
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -87,7 +100,9 @@ const AdminDashboard = () => {
 
     const fetchQuestions = async () => {
       const res = await api.get("/qna");
-      const sliceQuestion = res.data.questions.slice(0, 5);
+      const allQuestions = res.data.questions || [];
+      setTotalQuestions(allQuestions.length);
+      const sliceQuestion = allQuestions.slice(0, 5);
       setQuestions(sliceQuestion);
     };
 
@@ -123,11 +138,11 @@ const AdminDashboard = () => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
-        toast.error("Please select an image file");
+        toast.error(t("adminDashboard.toasts.selectImage"));
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
-        toast.error("Image size should be less than 10MB");
+        toast.error(t("adminDashboard.toasts.imageTooLarge"));
         return;
       }
       setPrincipalVoicePhoto(file);
@@ -197,13 +212,13 @@ const AdminDashboard = () => {
 
       // Required field validation
       if (!formData.principalVoiceTitle || !formData.principalVoiceText) {
-        toast.error("Principal voice title and text are required");
+        toast.error(t("adminDashboard.toasts.voiceRequired"));
         return;
       }
 
       // For update, image is optional. For create, image is required
       if (!documentation && !principalVoicePhoto) {
-        toast.error("Principal voice photo is required");
+        toast.error(t("adminDashboard.toasts.photoRequired"));
         return;
       }
 
@@ -248,7 +263,7 @@ const AdminDashboard = () => {
       toast.error(
         error.response?.data?.message ||
           error.response?.data?.error ||
-          "Failed to save documentation"
+          t("adminDashboard.toasts.saveFailed")
       );
     } finally {
       setLoading(false);
@@ -257,19 +272,19 @@ const AdminDashboard = () => {
 
   // Delete documentation
   const handleDeleteDocumentation = async () => {
-    if (!window.confirm("Are you sure you want to delete the documentation?")) {
+    if (!window.confirm(t("adminDashboard.deleteConfirm"))) {
       return;
     }
 
     try {
       const res = await api.delete("/documentation");
       if (res.data.success) {
-        toast.success("Documentation deleted successfully!");
+        toast.success(t("adminDashboard.toasts.deleted"));
         setDocumentation(null);
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to delete documentation"
+        error.response?.data?.message || t("adminDashboard.toasts.deleteFailed")
       );
     }
   };
@@ -295,7 +310,7 @@ const AdminDashboard = () => {
 
   // Format date
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -304,36 +319,36 @@ const AdminDashboard = () => {
 
   const stats = [
     {
-      title: "Total Students",
+      title: t("adminDashboard.stats.students"),
       value: totalStudent,
       icon: FiUsers,
       color: "from-blue-500 to-cyan-500",
       bgColor: "bg-linear-to-br from-blue-50 to-cyan-50",
     },
     {
-      title: "Total Courses",
+      title: t("adminDashboard.stats.courses"),
       value: totalCourses,
       icon: FiBook,
       color: "from-green-500 to-emerald-500",
       bgColor: "bg-linear-to-br from-green-50 to-emerald-50",
     },
     {
-      title: "Active Teachers",
+      title: t("adminDashboard.stats.teachers"),
       value: totalTeacher,
       icon: FiUserCheck,
       color: "from-purple-500 to-fuchsia-500",
       bgColor: "bg-linear-to-br from-purple-50 to-fuchsia-50",
     },
     {
-      title: "Total Blogs",
+      title: t("adminDashboard.stats.blogs"),
       value: totalBlogs,
       icon: ImBlog,
       color: "from-amber-500 to-orange-500",
       bgColor: "bg-linear-to-br from-amber-50 to-orange-50",
     },
     {
-      title: "Total Questions",
-      value: totalBlogs,
+      title: t("adminDashboard.stats.questions"),
+      value: totalQuestions,
       icon: MdOutlineQuestionMark,
       color: "from-rose-500 to-pink-500",
       bgColor: "bg-linear-to-br from-rose-50 to-pink-50",
@@ -358,10 +373,10 @@ const AdminDashboard = () => {
       >
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Dashboard Overview
+            {t("adminDashboard.title")}
           </h1>
           <p className="text-gray-600 mt-2">
-            Welcome back, Admin! Here's what's happening today.
+            {t("adminDashboard.subtitle")}
           </p>
         </div>
       </motion.div>
@@ -384,7 +399,7 @@ const AdminDashboard = () => {
                     {stat.title}
                   </p>
                   <h3 className="text-2xl font-bold text-gray-900">
-                    {stat.value}
+                    {formatNumber(stat.value)}
                   </h3>
                 </div>
                 <div
@@ -413,13 +428,13 @@ const AdminDashboard = () => {
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                Recent Blogs
+                {t("adminDashboard.recentBlogs")}
               </h2>
               <Link
                 to={"/admin/blogs"}
                 className="text-emerald-600 text-sm font-medium hover:text-emerald-700 flex items-center gap-1 transition-colors"
               >
-                View All
+                {t("adminDashboard.viewAll")}
                 <FiChevronRight size={16} />
               </Link>
             </div>
@@ -437,7 +452,7 @@ const AdminDashboard = () => {
                       {blog.title}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {new Date(blog.createdAt).toLocaleString("en-US", {
+                      {new Date(blog.createdAt).toLocaleString(locale, {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -453,7 +468,7 @@ const AdminDashboard = () => {
                     statusColors[blog.status] || statusColors.default
                   } shrink-0 ml-2`}
                 >
-                  {blog.status}
+                  {statusLabel(blog.status)}
                 </span>
               </Link>
             ))}
@@ -470,13 +485,13 @@ const AdminDashboard = () => {
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                Recent Questions
+                {t("adminDashboard.recentQuestions")}
               </h2>
               <Link
                 to={"/admin/questions"}
                 className="text-blue-600 text-sm font-medium hover:text-blue-700 flex items-center gap-1 transition-colors"
               >
-                View All
+                {t("adminDashboard.viewAll")}
                 <FiChevronRight size={16} />
               </Link>
             </div>
@@ -493,7 +508,7 @@ const AdminDashboard = () => {
                     {question.title}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {new Date(question.createdAt).toLocaleString("en-US", {
+                    {new Date(question.createdAt).toLocaleString(locale, {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
@@ -508,7 +523,7 @@ const AdminDashboard = () => {
                     statusColors[question.status] || statusColors.default
                   } shrink-0 ml-3`}
                 >
-                  {question.status}
+                  {statusLabel(question.status)}
                 </span>
               </Link>
             ))}
@@ -525,13 +540,13 @@ const AdminDashboard = () => {
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                Course Performance
+                {t("adminDashboard.coursePerformance")}
               </h2>
               <Link
                 to={"/admin/courses"}
                 className="text-purple-600 text-sm font-medium hover:text-purple-700 flex items-center gap-1 transition-colors"
               >
-                View All
+                {t("adminDashboard.viewAll")}
                 <FiChevronRight size={16} />
               </Link>
             </div>
@@ -554,7 +569,9 @@ const AdminDashboard = () => {
                     </div>
                     <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
                     <span className="text-xs text-gray-500">
-                      {course.studentCount || 0} students
+                      {t("adminDashboard.studentsCount", {
+                        count: formatNumber(course.studentCount || 0),
+                      })}
                     </span>
                   </div>
                 </div>
@@ -563,7 +580,7 @@ const AdminDashboard = () => {
                     statusColors[course.status] || statusColors.default
                   } shrink-0 ml-3`}
                 >
-                  {course.status}
+                  {statusLabel(course.status)}
                 </span>
               </Link>
             ))}
@@ -581,7 +598,7 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <FiFileText className="text-indigo-600" />
-                Documentation
+                {t("adminDashboard.documentation.title")}
               </h2>
               <div className="flex gap-2">
                 {documentation ? (
@@ -591,14 +608,14 @@ const AdminDashboard = () => {
                       className="text-indigo-600 text-sm font-medium hover:text-indigo-700 flex items-center gap-1 transition-colors px-3 py-1.5 bg-indigo-50 rounded-lg"
                     >
                       <FiEdit size={14} />
-                      Edit
+                      {t("adminDashboard.actions.edit")}
                     </button>
                     <button
                       onClick={handleDeleteDocumentation}
                       className="text-red-600 text-sm font-medium hover:text-red-700 flex items-center gap-1 transition-colors px-3 py-1.5 bg-red-50 rounded-lg"
                     >
                       <FiTrash2 size={14} />
-                      Delete
+                      {t("adminDashboard.actions.delete")}
                     </button>
                   </>
                 ) : (
@@ -607,7 +624,7 @@ const AdminDashboard = () => {
                     className="text-indigo-600 text-sm font-medium hover:text-indigo-700 flex items-center gap-1 transition-colors"
                   >
                     <FiPlus size={16} />
-                    Create
+                    {t("adminDashboard.actions.create")}
                   </button>
                 )}
               </div>
@@ -621,11 +638,13 @@ const AdminDashboard = () => {
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                     <span className="text-sm font-medium text-gray-900">
-                      Active
+                      {t("adminDashboard.status.active")}
                     </span>
                   </div>
                   <span className="text-xs text-gray-500">
-                    Updated: {formatDate(documentation.updatedAt)}
+                    {t("adminDashboard.documentation.updated", {
+                      date: formatDate(documentation.updatedAt),
+                    })}
                   </span>
                 </div>
 
@@ -633,22 +652,24 @@ const AdminDashboard = () => {
                 <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
                     <span className="text-xl">👨‍💼</span>
-                    Principal Voice
+                    {t("adminDashboard.documentation.principalVoice")}
                   </h3>
                   <div className="flex items-center gap-4">
                     {documentation.principalVoice?.photo && (
                       <img
                         src={documentation.principalVoice.photo}
-                        alt="Principal"
+                        alt={t("adminDashboard.documentation.principalAlt")}
                         className="w-20 h-20 object-cover rounded-lg border border-gray-200"
                       />
                     )}
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">
-                        {documentation.principalVoice?.title || "No Title"}
+                        {documentation.principalVoice?.title ||
+                          t("adminDashboard.documentation.noTitle")}
                       </h4>
                       <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                        {documentation.principalVoice?.text || "No content"}
+                        {documentation.principalVoice?.text ||
+                          t("adminDashboard.documentation.noContent")}
                       </p>
                     </div>
                   </div>
@@ -660,26 +681,26 @@ const AdminDashboard = () => {
                     <div className="flex items-center gap-2 mb-1">
                       <FiTarget className="text-blue-500" size={16} />
                       <span className="text-xs font-medium text-gray-700">
-                        Mission
+                        {t("adminDashboard.documentation.mission")}
                       </span>
                     </div>
                     <p className="text-xs text-gray-600 truncate">
                       {documentation.ourMission
                         ? `${documentation.ourMission.substring(0, 40)}...`
-                        : "Not set"}
+                        : t("adminDashboard.documentation.notSet")}
                     </p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <FiEye className="text-green-500" size={16} />
                       <span className="text-xs font-medium text-gray-700">
-                        Vision
+                        {t("adminDashboard.documentation.vision")}
                       </span>
                     </div>
                     <p className="text-xs text-gray-600 truncate">
                       {documentation.ourVision
                         ? `${documentation.ourVision.substring(0, 40)}...`
-                        : "Not set"}
+                        : t("adminDashboard.documentation.notSet")}
                     </p>
                   </div>
                 </div>
@@ -691,15 +712,15 @@ const AdminDashboard = () => {
                       <div className="flex items-center gap-2">
                         <FiGlobe className="text-purple-500" size={16} />
                         <span className="text-xs font-medium text-gray-700">
-                          Features
+                          {t("adminDashboard.documentation.features")}
                         </span>
                       </div>
                       <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-                        {documentation.onlineFeatures?.length || 0}
+                        {formatNumber(documentation.onlineFeatures?.length || 0)}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500">
-                      Online features available
+                      {t("adminDashboard.documentation.featuresAvailable")}
                     </p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3">
@@ -707,15 +728,15 @@ const AdminDashboard = () => {
                       <div className="flex items-center gap-2">
                         <FiStar className="text-amber-500" size={16} />
                         <span className="text-xs font-medium text-gray-700">
-                          Achievements
+                          {t("adminDashboard.documentation.achievements")}
                         </span>
                       </div>
                       <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
-                        {documentation.ourAchievement?.length || 0}
+                        {formatNumber(documentation.ourAchievement?.length || 0)}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500">
-                      Total achievements listed
+                      {t("adminDashboard.documentation.achievementsListed")}
                     </p>
                   </div>
                 </div>
@@ -726,15 +747,19 @@ const AdminDashboard = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <FiPhone className="text-red-500" size={16} />
                       <span className="text-xs font-medium text-gray-700">
-                        Contact
+                        {t("adminDashboard.documentation.contact")}
                       </span>
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs text-gray-600">
-                        📞 {documentation.contact?.helpline?.length || 0} numbers
+                        📞 {t("adminDashboard.documentation.numberCount", {
+                          count: formatNumber(documentation.contact?.helpline?.length || 0),
+                        })}
                       </p>
                       <p className="text-xs text-gray-600">
-                        ✉️ {documentation.contact?.email?.length || 0} emails
+                        ✉️ {t("adminDashboard.documentation.emailCount", {
+                          count: formatNumber(documentation.contact?.email?.length || 0),
+                        })}
                       </p>
                     </div>
                   </div>
@@ -742,7 +767,7 @@ const AdminDashboard = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <FiMessageSquare className="text-blue-500" size={16} />
                       <span className="text-xs font-medium text-gray-700">
-                        Social Media
+                        {t("adminDashboard.documentation.socialMedia")}
                       </span>
                     </div>
                     <div className="flex gap-1">
@@ -777,19 +802,21 @@ const AdminDashboard = () => {
                     className="w-full py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     <FiEye size={16} />
-                    View Full Details
+                    {t("adminDashboard.documentation.viewDetails")}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="text-center py-8">
                 <FiFileText className="mx-auto text-gray-400 mb-3" size={32} />
-                <p className="text-gray-500 text-sm">No documentation found</p>
+                <p className="text-gray-500 text-sm">
+                  {t("adminDashboard.documentation.notFound")}
+                </p>
                 <button
                   onClick={handleCreate}
                   className="mt-3 text-indigo-600 text-sm font-medium hover:text-indigo-700"
                 >
-                  Create documentation
+                  {t("adminDashboard.documentation.create")}
                 </button>
               </div>
             )}
@@ -806,37 +833,37 @@ const AdminDashboard = () => {
       >
         {[
           {
-            title: "Manage Students",
+            title: t("adminDashboard.quick.manageStudents"),
             icon: FiUsers,
             actionIcon: FiEdit,
             gradient: "from-emerald-500 to-green-500",
-            description: "Add, edit, or remove student accounts",
+            description: t("adminDashboard.quick.manageStudentsDescription"),
             to: "/admin/users",
           },
           {
-            title: "Create Course",
+            title: t("adminDashboard.quick.createCourse"),
             icon: FiBook,
             actionIcon: FiPlus,
             gradient: "from-blue-500 to-cyan-500",
-            description: "Design and publish new courses",
+            description: t("adminDashboard.quick.createCourseDescription"),
             to: "/admin/courses/add",
           },
           {
-            title: "Create Blog",
+            title: t("adminDashboard.quick.createBlog"),
             icon: FiBarChart2,
             actionIcon: FiTrendingUp,
             gradient: "from-purple-500 to-fuchsia-500",
-            description: "Publish your thought and experience",
+            description: t("adminDashboard.quick.createBlogDescription"),
             to: "/admin/blogs/add",
           },
           {
-            title: "Manage Documentation",
+            title: t("adminDashboard.quick.manageDocumentation"),
             icon: FiFileText,
             actionIcon: documentation ? FiEdit : FiPlus,
             gradient: "from-indigo-500 to-violet-500",
             description: documentation
-              ? "Edit documentation"
-              : "Create documentation",
+              ? t("adminDashboard.documentation.edit")
+              : t("adminDashboard.documentation.create"),
             to: "#",
             onClick: documentation ? handleEdit : handleCreate,
           },
@@ -885,10 +912,10 @@ const AdminDashboard = () => {
             <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">
-                  Documentation Details
+                  {t("adminDashboard.documentation.detailsTitle")}
                 </h3>
                 <p className="text-gray-600 text-sm mt-1">
-                  Full view of all documentation information
+                  {t("adminDashboard.documentation.detailsSubtitle")}
                 </p>
               </div>
               <button
@@ -904,14 +931,14 @@ const AdminDashboard = () => {
               <div className="border border-gray-200 rounded-xl p-6">
                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <span className="text-2xl">👨‍💼</span>
-                  Principal Voice
+                  {t("adminDashboard.documentation.principalVoice")}
                 </h4>
                 <div className="flex flex-col md:flex-row gap-6">
                   {documentation.principalVoice?.photo && (
                     <div className="md:w-1/3">
                       <img
                         src={documentation.principalVoice.photo}
-                        alt="Principal"
+                        alt={t("adminDashboard.documentation.principalAlt")}
                         className="w-full max-w-xs h-auto object-cover rounded-lg border border-gray-200"
                       />
                     </div>
@@ -932,7 +959,7 @@ const AdminDashboard = () => {
                 <div className="border border-gray-200 rounded-xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FiTarget className="text-blue-600" />
-                    Our Mission
+                    {t("adminDashboard.documentation.ourMission")}
                   </h4>
                   <p className="text-gray-600 whitespace-pre-line">
                     {documentation.ourMission}
@@ -942,7 +969,7 @@ const AdminDashboard = () => {
                 <div className="border border-gray-200 rounded-xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FiEye className="text-green-600" />
-                    Our Vision
+                    {t("adminDashboard.documentation.ourVision")}
                   </h4>
                   <p className="text-gray-600 whitespace-pre-line">
                     {documentation.ourVision}
@@ -955,7 +982,7 @@ const AdminDashboard = () => {
                 <div className="border border-gray-200 rounded-xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FiGlobe className="text-purple-600" />
-                    Online Features
+                    {t("adminDashboard.documentation.onlineFeatures")}
                   </h4>
                   <ul className="space-y-2">
                     {documentation.onlineFeatures?.map((feature, index) => (
@@ -973,7 +1000,7 @@ const AdminDashboard = () => {
                 <div className="border border-gray-200 rounded-xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FiStar className="text-amber-600" />
-                    Our Achievements
+                    {t("adminDashboard.documentation.ourAchievements")}
                   </h4>
                   <ul className="space-y-2">
                     {documentation.ourAchievement?.map((achievement, index) => (
@@ -993,14 +1020,14 @@ const AdminDashboard = () => {
               <div className="border border-gray-200 rounded-xl p-6">
                 <h4 className="font-semibold text-gray-900 mb-6 flex items-center gap-2">
                   <FiPhone className="text-red-600" />
-                  Contact Information
+                  {t("adminDashboard.documentation.contactInformation")}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
                       <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                         <FiPhone className="text-gray-400" />
-                        Helpline Numbers
+                        {t("adminDashboard.documentation.helplineNumbers")}
                       </h5>
                       <ul className="space-y-2">
                         {documentation.contact?.helpline?.map((number, index) => (
@@ -1017,7 +1044,7 @@ const AdminDashboard = () => {
                     <div>
                       <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                         <FiMail className="text-gray-400" />
-                        Email Addresses
+                        {t("adminDashboard.documentation.emailAddresses")}
                       </h5>
                       <ul className="space-y-2">
                         {documentation.contact?.email?.map((email, index) => (
@@ -1036,7 +1063,7 @@ const AdminDashboard = () => {
                     <div>
                       <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                         <FiMapPin className="text-gray-400" />
-                        Head Office
+                        {t("adminDashboard.documentation.headOffice")}
                       </h5>
                       <p className="text-gray-600 bg-gray-50 p-3 rounded-lg whitespace-pre-line">
                         {documentation.contact?.headOffice}
@@ -1046,7 +1073,7 @@ const AdminDashboard = () => {
                     <div>
                       <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                         <FiGlobe className="text-gray-400" />
-                        Websites
+                        {t("adminDashboard.documentation.websites")}
                       </h5>
                       <ul className="space-y-2">
                         {documentation.contact?.website?.map((site, index) => (
@@ -1071,7 +1098,7 @@ const AdminDashboard = () => {
               <div className="border border-gray-200 rounded-xl p-6">
                 <h4 className="font-semibold text-gray-900 mb-6 flex items-center gap-2">
                   <FiMessageSquare className="text-blue-600" />
-                  Social Media Links
+                  {t("adminDashboard.documentation.socialMediaLinks")}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {documentation.socialMedia?.facebook && (
@@ -1085,7 +1112,9 @@ const AdminDashboard = () => {
                         <FiMessageSquare className="text-blue-600" size={20} />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Facebook</p>
+                        <p className="font-medium text-gray-900">
+                          {t("adminDashboard.documentation.facebook")}
+                        </p>
                         <p className="text-xs text-gray-500 truncate">
                           {documentation.socialMedia.facebook}
                         </p>
@@ -1104,7 +1133,9 @@ const AdminDashboard = () => {
                         <FiVideo className="text-red-600" size={20} />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">YouTube</p>
+                        <p className="font-medium text-gray-900">
+                          {t("adminDashboard.documentation.youtube")}
+                        </p>
                         <p className="text-xs text-gray-500 truncate">
                           {documentation.socialMedia.youtube}
                         </p>
@@ -1123,7 +1154,9 @@ const AdminDashboard = () => {
                         <FiMessageCircle className="text-green-600" size={20} />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">WhatsApp</p>
+                        <p className="font-medium text-gray-900">
+                          {t("adminDashboard.documentation.whatsapp")}
+                        </p>
                         <p className="text-xs text-gray-500">
                           {documentation.socialMedia.whatsapp}
                         </p>
@@ -1145,7 +1178,9 @@ const AdminDashboard = () => {
                         <FiSend className="text-blue-600" size={20} />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Telegram</p>
+                        <p className="font-medium text-gray-900">
+                          {t("adminDashboard.documentation.telegram")}
+                        </p>
                         <p className="text-xs text-gray-500">
                           {documentation.socialMedia.telegram}
                         </p>
@@ -1159,11 +1194,15 @@ const AdminDashboard = () => {
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between items-center text-sm text-gray-500">
                   <div>
-                    <span className="font-medium">Created:</span>{" "}
+                    <span className="font-medium">
+                      {t("adminDashboard.documentation.created")}
+                    </span>{" "}
                     {formatDate(documentation.createdAt)}
                   </div>
                   <div>
-                    <span className="font-medium">Last Updated:</span>{" "}
+                    <span className="font-medium">
+                      {t("adminDashboard.documentation.lastUpdated")}
+                    </span>{" "}
                     {formatDate(documentation.updatedAt)}
                   </div>
                 </div>
@@ -1175,7 +1214,7 @@ const AdminDashboard = () => {
                 onClick={() => setIsViewModalOpen(false)}
                 className="px-5 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Close
+                {t("adminDashboard.actions.close")}
               </button>
               <button
                 onClick={() => {
@@ -1184,7 +1223,7 @@ const AdminDashboard = () => {
                 }}
                 className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
               >
-                Edit Documentation
+                {t("adminDashboard.documentation.edit")}
               </button>
             </div>
           </motion.div>
@@ -1201,12 +1240,14 @@ const AdminDashboard = () => {
           >
             <div className="p-6 border-b">
               <h3 className="text-xl font-semibold text-gray-900">
-                {documentation ? "Edit Documentation" : "Create Documentation"}
+                {documentation
+                  ? t("adminDashboard.documentation.edit")
+                  : t("adminDashboard.documentation.create")}
               </h3>
               <p className="text-gray-600 text-sm mt-1">
                 {documentation
-                  ? "Update the documentation information"
-                  : "Fill in all the required information to create documentation"}
+                  ? t("adminDashboard.documentation.updateDescription")
+                  : t("adminDashboard.documentation.createDescription")}
               </p>
             </div>
 
@@ -1215,17 +1256,17 @@ const AdminDashboard = () => {
               <div className="border border-gray-200 rounded-xl p-6">
                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <span className="text-2xl">👨‍💼</span>
-                  Principal Voice
+                  {t("adminDashboard.documentation.principalVoice")}
                 </h4>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Image Upload */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Principal Photo *
+                      {t("adminDashboard.documentation.principalPhotoRequired")}
                       {documentation && (
                         <span className="text-xs text-gray-500 ml-2">
-                          (Leave empty to keep current)
+                          {t("adminDashboard.documentation.keepCurrentImage")}
                         </span>
                       )}
                     </label>
@@ -1246,11 +1287,11 @@ const AdminDashboard = () => {
                             <div className="space-y-2">
                               <img
                                 src={imagePreview}
-                                alt="Preview"
+                                alt={t("adminDashboard.documentation.previewAlt")}
                                 className="mx-auto h-40 w-40 object-cover rounded-lg"
                               />
                               <p className="text-sm text-gray-600">
-                                Click to change image
+                                {t("adminDashboard.documentation.clickChangeImage")}
                               </p>
                             </div>
                           ) : (
@@ -1259,10 +1300,10 @@ const AdminDashboard = () => {
                                 <FiPlus className="text-gray-400" size={24} />
                               </div>
                               <p className="text-sm text-gray-600">
-                                Click to upload principal photo
+                                {t("adminDashboard.documentation.clickUploadImage")}
                               </p>
                               <p className="text-xs text-gray-500 mt-1">
-                                PNG, JPG, GIF up to 10MB
+                                {t("adminDashboard.documentation.imageHelp")}
                               </p>
                             </div>
                           )}
@@ -1272,11 +1313,11 @@ const AdminDashboard = () => {
                         !imagePreview && (
                           <div className="text-center">
                             <p className="text-xs text-gray-500 mb-2">
-                              Current Image:
+                              {t("adminDashboard.documentation.currentImage")}
                             </p>
                             <img
                               src={documentation.principalVoice.photo}
-                              alt="Current Principal"
+                              alt={t("adminDashboard.documentation.currentPrincipalAlt")}
                               className="mx-auto h-32 w-32 object-cover rounded-lg border border-gray-200"
                             />
                           </div>
@@ -1288,7 +1329,7 @@ const AdminDashboard = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Title *
+                        {t("adminDashboard.documentation.titleRequired")}
                       </label>
                       <input
                         type="text"
@@ -1300,13 +1341,13 @@ const AdminDashboard = () => {
                           )
                         }
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="e.g., Message from our Principal"
+                        placeholder={t("adminDashboard.documentation.titlePlaceholder")}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Text *
+                        {t("adminDashboard.documentation.textRequired")}
                       </label>
                       <textarea
                         value={formData.principalVoiceText}
@@ -1318,7 +1359,7 @@ const AdminDashboard = () => {
                         }
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         rows="4"
-                        placeholder="Write the principal's message here..."
+                        placeholder={t("adminDashboard.documentation.voicePlaceholder")}
                       />
                     </div>
                   </div>
@@ -1330,7 +1371,7 @@ const AdminDashboard = () => {
                 <div className="border border-gray-200 rounded-xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FiTarget className="text-blue-600" />
-                    Our Mission
+                    {t("adminDashboard.documentation.ourMission")}
                   </h4>
                   <textarea
                     value={formData.ourMission}
@@ -1339,14 +1380,14 @@ const AdminDashboard = () => {
                     }
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     rows="3"
-                    placeholder="Write your mission statement..."
+                    placeholder={t("adminDashboard.documentation.missionPlaceholder")}
                   />
                 </div>
 
                 <div className="border border-gray-200 rounded-xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FiEye className="text-green-600" />
-                    Our Vision
+                    {t("adminDashboard.documentation.ourVision")}
                   </h4>
                   <textarea
                     value={formData.ourVision}
@@ -1355,7 +1396,7 @@ const AdminDashboard = () => {
                     }
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     rows="3"
-                    placeholder="Write your vision statement..."
+                    placeholder={t("adminDashboard.documentation.visionPlaceholder")}
                   />
                 </div>
               </div>
@@ -1365,11 +1406,11 @@ const AdminDashboard = () => {
                 <div className="border border-gray-200 rounded-xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FiGlobe className="text-purple-600" />
-                    Online Features
+                    {t("adminDashboard.documentation.onlineFeatures")}
                   </h4>
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600 mb-2">
-                      Enter features separated by commas
+                      {t("adminDashboard.documentation.featuresHelp")}
                     </p>
                     <textarea
                       value={formData.onlineFeatures}
@@ -1378,10 +1419,10 @@ const AdminDashboard = () => {
                       }
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       rows="3"
-                      placeholder="e.g., Live Classes, Recorded Lectures, Interactive Quizzes"
+                      placeholder={t("adminDashboard.documentation.featuresPlaceholder")}
                     />
                     <p className="text-xs text-gray-500">
-                      Example: Feature 1, Feature 2, Feature 3
+                      {t("adminDashboard.documentation.featuresExample")}
                     </p>
                   </div>
                 </div>
@@ -1389,11 +1430,11 @@ const AdminDashboard = () => {
                 <div className="border border-gray-200 rounded-xl p-6">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FiStar className="text-amber-600" />
-                    Our Achievements
+                    {t("adminDashboard.documentation.ourAchievements")}
                   </h4>
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600 mb-2">
-                      Enter achievements separated by commas
+                      {t("adminDashboard.documentation.achievementsHelp")}
                     </p>
                     <textarea
                       value={formData.ourAchievement}
@@ -1402,10 +1443,10 @@ const AdminDashboard = () => {
                       }
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       rows="3"
-                      placeholder="e.g., Award 2023, 1000+ Students, Top Ranking"
+                      placeholder={t("adminDashboard.documentation.achievementsPlaceholder")}
                     />
                     <p className="text-xs text-gray-500">
-                      Example: Achievement 1, Achievement 2, Achievement 3
+                      {t("adminDashboard.documentation.achievementsExample")}
                     </p>
                   </div>
                 </div>
@@ -1415,13 +1456,13 @@ const AdminDashboard = () => {
               <div className="border border-gray-200 rounded-xl p-6">
                 <h4 className="font-semibold text-gray-900 mb-6 flex items-center gap-2">
                   <FiPhone className="text-red-600" />
-                  Contact Information
+                  {t("adminDashboard.documentation.contactInformation")}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Helpline Numbers
+                        {t("adminDashboard.documentation.helplineNumbers")}
                       </label>
                       <textarea
                         value={formData.helpline}
@@ -1430,16 +1471,16 @@ const AdminDashboard = () => {
                         }
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         rows="2"
-                        placeholder="e.g., +8801700000000, +8801800000000"
+                        placeholder={t("adminDashboard.documentation.helplinePlaceholder")}
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Separate numbers with commas
+                        {t("adminDashboard.documentation.numbersHelp")}
                       </p>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Addresses
+                        {t("adminDashboard.documentation.emailAddresses")}
                       </label>
                       <textarea
                         value={formData.email}
@@ -1448,10 +1489,10 @@ const AdminDashboard = () => {
                         }
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         rows="2"
-                        placeholder="e.g., info@example.com, support@example.com"
+                        placeholder={t("adminDashboard.documentation.emailPlaceholder")}
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Separate emails with commas
+                        {t("adminDashboard.documentation.emailsHelp")}
                       </p>
                     </div>
                   </div>
@@ -1459,7 +1500,7 @@ const AdminDashboard = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Head Office Address
+                        {t("adminDashboard.documentation.headOffice")} Address
                       </label>
                       <textarea
                         value={formData.headOffice}
@@ -1468,13 +1509,13 @@ const AdminDashboard = () => {
                         }
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         rows="2"
-                        placeholder="e.g., 123 Main Street, City, Country"
+                        placeholder={t("adminDashboard.documentation.officePlaceholder")}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Website URLs
+                        {t("adminDashboard.documentation.websiteUrls")}
                       </label>
                       <textarea
                         value={formData.website}
@@ -1483,10 +1524,10 @@ const AdminDashboard = () => {
                         }
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         rows="2"
-                        placeholder="e.g., https://example.com, https://shop.example.com"
+                        placeholder={t("adminDashboard.documentation.websitePlaceholder")}
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Separate URLs with commas
+                        {t("adminDashboard.documentation.urlsHelp")}
                       </p>
                     </div>
                   </div>
@@ -1497,13 +1538,13 @@ const AdminDashboard = () => {
               <div className="border border-gray-200 rounded-xl p-6">
                 <h4 className="font-semibold text-gray-900 mb-6 flex items-center gap-2">
                   <FiMessageSquare className="text-blue-600" />
-                  Social Media Links
+                  {t("adminDashboard.documentation.socialMediaLinks")}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Facebook URL
+                        {t("adminDashboard.documentation.facebookUrl")}
                       </label>
                       <input
                         type="text"
@@ -1518,7 +1559,7 @@ const AdminDashboard = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        YouTube URL
+                        {t("adminDashboard.documentation.youtubeUrl")}
                       </label>
                       <input
                         type="text"
@@ -1535,7 +1576,7 @@ const AdminDashboard = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        WhatsApp Number
+                        {t("adminDashboard.documentation.whatsappNumber")}
                       </label>
                       <input
                         type="text"
@@ -1550,7 +1591,7 @@ const AdminDashboard = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Telegram Username
+                        {t("adminDashboard.documentation.telegramUsername")}
                       </label>
                       <input
                         type="text"
@@ -1559,7 +1600,7 @@ const AdminDashboard = () => {
                           handleInputChange("telegram", e.target.value)
                         }
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="@username or https://t.me/username"
+                        placeholder={t("adminDashboard.documentation.telegramPlaceholder")}
                       />
                     </div>
                   </div>
@@ -1577,7 +1618,7 @@ const AdminDashboard = () => {
                 className="px-5 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 disabled={loading}
               >
-                Cancel
+                {t("adminDashboard.actions.cancel")}
               </button>
               <button
                 onClick={handleSaveDocumentation}
@@ -1587,12 +1628,14 @@ const AdminDashboard = () => {
                 {loading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    {documentation ? "Updating..." : "Creating..."}
+                    {documentation
+                      ? t("adminDashboard.documentation.updating")
+                      : t("adminDashboard.documentation.creating")}
                   </>
                 ) : documentation ? (
-                  "Update Documentation"
+                  t("adminDashboard.documentation.update")
                 ) : (
-                  "Create Documentation"
+                  t("adminDashboard.documentation.create")
                 )}
               </button>
             </div>

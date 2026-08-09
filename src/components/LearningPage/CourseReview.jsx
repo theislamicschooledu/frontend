@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../utils/axios";
 import toast from "react-hot-toast";
+import { useLanguage } from "../../hooks/useLanguage";
 import {
   FiStar,
   FiEdit2,
@@ -16,6 +17,9 @@ import {
 } from "react-icons/fi";
 
 const CourseReview = ({ courseId, userId }) => {
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [myReview, setMyReview] = useState(null);
@@ -54,7 +58,7 @@ const CourseReview = ({ courseId, userId }) => {
       }
     } catch (error) {
       console.error("Error fetching reviews:", error);
-      toast.error("Failed to load reviews");
+      toast.error(t("learningPage.review.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -93,7 +97,7 @@ const CourseReview = ({ courseId, userId }) => {
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!formData.rating) {
-      toast.error("Please select a rating");
+      toast.error(t("learningPage.review.selectRatingError"));
       return;
     }
 
@@ -106,7 +110,7 @@ const CourseReview = ({ courseId, userId }) => {
           { rating: formData.rating, comment: formData.comment }
         );
         if (response.data?.success) {
-          toast.success("Review updated successfully");
+          toast.success(t("learningPage.review.updatedSuccess"));
           setMyReview(response.data.data.review);
           fetchReviews();
           setShowReviewModal(false);
@@ -118,7 +122,7 @@ const CourseReview = ({ courseId, userId }) => {
           { rating: formData.rating, comment: formData.comment }
         );
         if (response.data?.success) {
-          toast.success("Review submitted successfully");
+          toast.success(t("learningPage.review.submittedSuccess"));
           setMyReview(response.data.data.review);
           fetchReviews();
           setShowReviewModal(false);
@@ -126,7 +130,9 @@ const CourseReview = ({ courseId, userId }) => {
       }
     } catch (error) {
       console.error("Error submitting review:", error);
-      toast.error(error.response?.data?.message || "Failed to submit review");
+      toast.error(
+        error.response?.data?.message || t("learningPage.review.submitFailed")
+      );
     } finally {
       setSubmitting(false);
     }
@@ -135,7 +141,7 @@ const CourseReview = ({ courseId, userId }) => {
   const handleDeleteReview = async () => {
     if (!myReview) return;
     
-    if (!window.confirm("Are you sure you want to delete your review?")) return;
+    if (!window.confirm(t("learningPage.review.deleteConfirm"))) return;
     
     setDeleting(true);
     try {
@@ -143,14 +149,14 @@ const CourseReview = ({ courseId, userId }) => {
         `/courses/${courseId}/reviews/${myReview._id}`
       );
       if (response.data?.success) {
-        toast.success("Review deleted successfully");
+        toast.success(t("learningPage.review.deletedSuccess"));
         setMyReview(null);
         setFormData({ rating: 0, comment: "", hoverRating: 0 });
         fetchReviews();
       }
     } catch (error) {
       console.error("Error deleting review:", error);
-      toast.error("Failed to delete review");
+      toast.error(t("learningPage.review.deleteFailed"));
     } finally {
       setDeleting(false);
     }
@@ -158,7 +164,7 @@ const CourseReview = ({ courseId, userId }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric"
@@ -196,23 +202,32 @@ const CourseReview = ({ courseId, userId }) => {
         <div className="flex flex-col md:flex-row justify-between items-center md:items-center gap-6">
           <div className="flex-1">
             <h3 className="text-2xl text-center font-bold bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Course Rating
+              {t("learningPage.review.courseRating")}
             </h3>
             <div className="flex items-center justify-between gap-4 mt-2">
               <div className="text-center">
-                <div className="text-5xl font-bold text-white">{averageRating.toFixed(1)}</div>
+                <div className="text-5xl font-bold text-white">
+                  {averageRating.toLocaleString(locale, {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })}
+                </div>
                 <div className="flex items-center justify-center mt-1">
                   {renderStars(Math.round(averageRating), "text-xl")}
                 </div>
                 <div className="text-gray-400 text-sm mt-1">
-                  {ratingCount} {ratingCount === 1 ? 'review' : 'reviews'}
+                  {t("learningPage.review.reviewCount", {
+                    count: formatNumber(ratingCount),
+                  })}
                 </div>
               </div>
               
               <div className="flex-1 max-w-md">
                 {[5, 4, 3, 2, 1].map((star) => (
                   <div key={star} className="flex items-center gap-2 mb-1">
-                    <div className="w-10 text-right text-gray-300">{star}</div>
+                    <div className="w-10 text-right text-gray-300">
+                      {formatNumber(star)}
+                    </div>
                     <FiStar className="text-yellow-400" />
                     <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
                       <div
@@ -221,7 +236,7 @@ const CourseReview = ({ courseId, userId }) => {
                       />
                     </div>
                     <div className="w-10 text-left text-gray-400 text-sm">
-                      {calculateRatingPercentage(star)}%
+                      {formatNumber(calculateRatingPercentage(star))}%
                     </div>
                   </div>
                 ))}
@@ -230,9 +245,11 @@ const CourseReview = ({ courseId, userId }) => {
           </div>
 
           <div className="md:w-64">
-            <h4 className="text-lg font-semibold text-white mb-4">Share Your Experience</h4>
+            <h4 className="text-lg font-semibold text-white mb-4">
+              {t("learningPage.review.shareExperience")}
+            </h4>
             <p className="text-gray-300 text-sm mb-4">
-              Rate this course and help other students make their decision.
+              {t("learningPage.review.shareDescription")}
             </p>
             <button
               onClick={() => setShowReviewModal(true)}
@@ -240,11 +257,11 @@ const CourseReview = ({ courseId, userId }) => {
             >
               {myReview ? (
                 <>
-                  <FiEdit2 /> Edit Your Review
+                  <FiEdit2 /> {t("learningPage.review.editYourReview")}
                 </>
               ) : (
                 <>
-                  <FiStar /> Add Your Review
+                  <FiStar /> {t("learningPage.review.addYourReview")}
                 </>
               )}
             </button>
@@ -256,7 +273,9 @@ const CourseReview = ({ courseId, userId }) => {
       {reviews.length > 0 && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 shadow-xl">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-bold text-white">Student Reviews</h3>
+            <h3 className="text-2xl font-bold text-white">
+              {t("learningPage.review.studentReviews")}
+            </h3>
             {reviews.length > 3 && (
               <button
                 onClick={() => setShowAllReviews(!showAllReviews)}
@@ -264,11 +283,11 @@ const CourseReview = ({ courseId, userId }) => {
               >
                 {showAllReviews ? (
                   <>
-                    Show Less <FiChevronUp />
+                    {t("learningPage.review.showLess")} <FiChevronUp />
                   </>
                 ) : (
                   <>
-                    Show All Reviews <FiChevronDown />
+                    {t("learningPage.review.showAll")} <FiChevronDown />
                   </>
                 )}
               </button>
@@ -295,7 +314,7 @@ const CourseReview = ({ courseId, userId }) => {
                       </div>
                       <div>
                         <h4 className="font-semibold text-white">
-                          {review.user?.name || "Anonymous"}
+                          {review.user?.name || t("learningPage.review.anonymous")}
                         </h4>
                         <div className="flex items-center gap-2 text-sm text-gray-400">
                           <FiCalendar className="text-xs" />
@@ -331,7 +350,7 @@ const CourseReview = ({ courseId, userId }) => {
                           }}
                           className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg flex items-center gap-2 transition-colors"
                         >
-                          <FiEdit2 /> Edit
+                          <FiEdit2 /> {t("learningPage.review.edit")}
                         </button>
                         <button
                           onClick={handleDeleteReview}
@@ -341,11 +360,11 @@ const CourseReview = ({ courseId, userId }) => {
                           {deleting ? (
                             <>
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
-                              Deleting...
+                              {t("learningPage.review.deleting")}
                             </>
                           ) : (
                             <>
-                              <FiTrash2 /> Delete
+                              <FiTrash2 /> {t("learningPage.review.delete")}
                             </>
                           )}
                         </button>
@@ -378,7 +397,9 @@ const CourseReview = ({ courseId, userId }) => {
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-2xl font-bold text-white">
-                  {myReview ? "Edit Your Review" : "Rate This Course"}
+                  {myReview
+                    ? t("learningPage.review.editYourReview")
+                    : t("learningPage.review.rateThisCourse")}
                 </h3>
                 <button
                   onClick={() => setShowReviewModal(false)}
@@ -390,7 +411,9 @@ const CourseReview = ({ courseId, userId }) => {
 
               <form onSubmit={handleSubmitReview}>
                 <div className="mb-4">
-                  <label className="block text-gray-300 mb-3">Your Rating</label>
+                  <label className="block text-gray-300 mb-3">
+                    {t("learningPage.review.yourRating")}
+                  </label>
                   <div className="flex justify-center gap-1 mb-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -413,25 +436,27 @@ const CourseReview = ({ courseId, userId }) => {
                   </div>
                   <div className="text-center text-gray-400 text-sm">
                     {formData.rating === 0
-                      ? "Select a rating"
-                      : `${formData.rating} star${formData.rating > 1 ? "s" : ""}`}
+                      ? t("learningPage.review.selectRating")
+                      : t("learningPage.review.starCount", {
+                          count: formatNumber(formData.rating),
+                        })}
                   </div>
                 </div>
 
                 <div className="mb-4">
                   <label className="block text-gray-300 mb-3">
-                    Your Review (Optional)
+                    {t("learningPage.review.yourReviewOptional")}
                   </label>
                   <textarea
                     value={formData.comment}
                     onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
-                    placeholder="Share your experience with this course..."
+                    placeholder={t("learningPage.review.placeholder")}
                     className="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                     rows="4"
                     maxLength="1000"
                   />
                   <div className="text-right text-gray-400 text-sm mt-1">
-                    {formData.comment.length}/1000
+                    {formatNumber(formData.comment.length)}/{formatNumber(1000)}
                   </div>
                 </div>
 
@@ -441,7 +466,7 @@ const CourseReview = ({ courseId, userId }) => {
                     onClick={() => setShowReviewModal(false)}
                     className="flex-1 py-3 px-4 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
                   >
-                    <FiX /> Cancel
+                    <FiX /> {t("learningPage.review.cancel")}
                   </button>
                   <button
                     type="submit"
@@ -451,11 +476,14 @@ const CourseReview = ({ courseId, userId }) => {
                     {submitting ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        Submitting...
+                        {t("learningPage.review.submitting")}
                       </>
                     ) : (
                       <>
-                        <FiSend /> {myReview ? "Update Review" : "Submit Review"}
+                        <FiSend />
+                        {myReview
+                          ? t("learningPage.review.updateReview")
+                          : t("learningPage.review.submitReview")}
                       </>
                     )}
                   </button>
@@ -471,16 +499,16 @@ const CourseReview = ({ courseId, userId }) => {
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-xl text-center">
           <FiStar className="text-5xl text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">
-            No Reviews Yet
+            {t("learningPage.review.noReviewsTitle")}
           </h3>
           <p className="text-gray-400 mb-6">
-            Be the first to share your experience with this course!
+            {t("learningPage.review.noReviewsDescription")}
           </p>
           <button
             onClick={() => setShowReviewModal(true)}
             className="bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-xl inline-flex items-center gap-2 transition-all duration-300 transform hover:scale-[1.02]"
           >
-            <FiStar /> Be the First Reviewer
+            <FiStar /> {t("learningPage.review.firstReviewer")}
           </button>
         </div>
       )}

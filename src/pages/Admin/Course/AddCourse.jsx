@@ -22,6 +22,7 @@ import { useNavigate } from "react-router";
 
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 const AddCourse = () => {
   const [title, setTitle] = useState("");
@@ -47,6 +48,7 @@ const AddCourse = () => {
   const editorRef = useRef(null);
   const quillRef = useRef(null);
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
 
   // Fetch categories - ফিক্সড API রেসপন্স অনুযায়ী
   const fetchCategories = async () => {
@@ -56,7 +58,7 @@ const AddCourse = () => {
       if (res.data.success) {
         setCategories(res.data.data || res.data.categories || []);
       } else {
-        toast.error(res?.data?.message || "Failed to load categories");
+        toast.error(res?.data?.message || t("adminCourse.form.toasts.loadCategoriesFailed"));
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
@@ -70,7 +72,7 @@ const AddCourse = () => {
       if (res.data.success) {
         setTeachers(res.data.data || res.data.teachers || []);
       } else {
-        toast.error(res?.data?.message || "Failed to load teachers");
+        toast.error(res?.data?.message || t("adminCourse.form.toasts.loadTeachersFailed"));
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
@@ -87,7 +89,7 @@ const AddCourse = () => {
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
-        placeholder: "Write course description here...",
+        placeholder: t("adminCourse.form.descriptionPlaceholder"),
         modules: {
           toolbar: [
             [{ header: [1, 2, 3, false] }],
@@ -99,6 +101,12 @@ const AddCourse = () => {
       });
     }
   }, []);
+
+  useEffect(() => {
+    if (quillRef.current?.root) {
+      quillRef.current.root.dataset.placeholder = t("adminCourse.form.descriptionPlaceholder");
+    }
+  }, [language, t]);
 
   // Cleanup preview URL
   useEffect(() => {
@@ -129,9 +137,9 @@ const AddCourse = () => {
       const courseStartDate = new Date(courseStart);
 
       if (start > end) {
-        setDateError("Enrollment end date must be after start date");
+        setDateError(t("adminCourse.form.toasts.enrollmentOrder"));
       } else if (end > courseStartDate) {
-        setDateError("Course must start on or after enrollment ends");
+        setDateError(t("adminCourse.form.toasts.courseStartOrder"));
       } else {
         setDateError("");
       }
@@ -147,13 +155,13 @@ const AddCourse = () => {
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Only JPG, PNG, and WEBP images are allowed");
+      toast.error(t("adminCourse.form.toasts.imageType"));
       return;
     }
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size should be less than 5MB");
+      toast.error(t("adminCourse.form.toasts.imageSize"));
       return;
     }
 
@@ -211,44 +219,44 @@ const AddCourse = () => {
     
     // Basic validations
     if (!title.trim()) {
-      toast.error("Title is required!");
+      toast.error(t("adminCourse.form.toasts.titleRequired"));
       return false;
     }
 
     if (!price || parseFloat(price) <= 0) {
-      toast.error("Valid price is required!");
+      toast.error(t("adminCourse.form.toasts.priceRequired"));
       return false;
     }
 
     if (!editorContent.trim() || editorContent === "<p><br></p>") {
-      toast.error("Description is required!");
+      toast.error(t("adminCourse.form.toasts.descriptionRequired"));
       return false;
     }
 
     if (!selectedCategory) {
-      toast.error("Category is required!");
+      toast.error(t("adminCourse.form.toasts.categoryRequired"));
       return false;
     }
 
     if (!duration || parseInt(duration) <= 0) {
-      toast.error("Duration must be a positive number!");
+      toast.error(t("adminCourse.form.toasts.durationRequired"));
       return false;
     }
 
     // Date validations for non-upcoming courses
     if (!isUpcoming) {
       if (!enrollmentStart) {
-        toast.error("Enrollment start date is required!");
+        toast.error(t("adminCourse.form.toasts.enrollmentStartRequired"));
         return false;
       }
 
       if (!enrollmentEnd) {
-        toast.error("Enrollment end date is required!");
+        toast.error(t("adminCourse.form.toasts.enrollmentEndRequired"));
         return false;
       }
 
       if (!courseStart) {
-        toast.error("Course start date is required!");
+        toast.error(t("adminCourse.form.toasts.courseStartRequired"));
         return false;
       }
 
@@ -257,31 +265,31 @@ const AddCourse = () => {
       const courseStartDate = new Date(courseStart);
 
       if (isNaN(start.getTime()) || isNaN(end.getTime()) || isNaN(courseStartDate.getTime())) {
-        toast.error("Invalid date format!");
+        toast.error(t("adminCourse.form.toasts.invalidDate"));
         return false;
       }
 
       if (start > end) {
-        toast.error("Enrollment end date must be after start date!");
+        toast.error(t("adminCourse.form.toasts.enrollmentOrder"));
         return false;
       }
 
       if (end > courseStartDate) {
-        toast.error("Course must start on or after enrollment ends!");
+        toast.error(t("adminCourse.form.toasts.courseStartOrder"));
         return false;
       }
     }
 
     // Teachers validation
     if (selectedTeachers.length === 0) {
-      toast.error("Please select at least one teacher!");
+      toast.error(t("adminCourse.form.toasts.teacherRequired"));
       return false;
     }
 
     // Features validation
     const validFeatures = features.filter(feature => feature && feature.trim() !== "");
     if (validFeatures.length === 0) {
-      toast.error("Please add at least one course feature!");
+      toast.error(t("adminCourse.form.toasts.featureRequired"));
       return false;
     }
 
@@ -352,7 +360,7 @@ const AddCourse = () => {
       });
 
       if (data.success) {
-        toast.success(`✅ ${isUpcoming ? "Upcoming" : ""} Course created successfully!`);
+        toast.success(t("adminCourse.form.toasts.created"));
         resetForm();
         navigate("/admin/courses");
       }
@@ -360,8 +368,8 @@ const AddCourse = () => {
       console.error("Course creation error:", error);
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.errors?.[0] || 
-                          "Failed to create course!";
-      toast.error(`❌ ${errorMessage}`);
+                          t("adminCourse.form.toasts.createFailed");
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -411,10 +419,10 @@ const AddCourse = () => {
           onClick={() => navigate("/admin/courses")}
           className="flex items-center px-4 py-2 text-gray-600 hover:bg-white rounded-xl transition"
         >
-          <FiArrowLeft className="mr-2" /> Back to Courses
+          <FiArrowLeft className="mr-2" /> {t("adminCourse.common.backToCourses")}
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-          Add New Course
+          {t("adminCourse.form.addTitle")}
         </h1>
       </motion.div>
 
@@ -430,13 +438,13 @@ const AddCourse = () => {
             animate={{ opacity: 1, x: 0 }}
             className="bg-white rounded-2xl shadow-lg p-6"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-3">Course Title *</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-3">{t("adminCourse.form.courseTitle")}</h2>
             <input
               type="text"
               name="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter course title..."
+              placeholder={t("adminCourse.form.titlePlaceholder")}
               className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
               required
             />
@@ -451,10 +459,10 @@ const AddCourse = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                  <FiInfo className="mr-2" /> Upcoming Course
+                  <FiInfo className="mr-2" /> {t("adminCourse.form.upcomingCourse")}
                 </h2>
                 <p className="text-gray-600 text-sm mt-1">
-                  Enable this to create an "Coming Soon" course without requiring dates
+                  {t("adminCourse.form.upcomingHelp")}
                 </p>
               </div>
               <label className="flex items-center cursor-pointer">
@@ -473,7 +481,7 @@ const AddCourse = () => {
                   }`}></div>
                 </div>
                 <span className="ml-3 text-gray-700 font-medium">
-                  {isUpcoming ? "Enabled" : "Disabled"}
+                  {isUpcoming ? t("adminCourse.common.enabled") : t("adminCourse.common.disabled")}
                 </span>
               </label>
             </div>
@@ -483,10 +491,9 @@ const AddCourse = () => {
                 <div className="flex items-start">
                   <FiCheck className="text-blue-500 mt-1 mr-3 shrink-0" />
                   <div>
-                    <p className="text-blue-800 font-medium">Coming Soon Mode Active</p>
+                    <p className="text-blue-800 font-medium">{t("adminCourse.form.comingSoonActive")}</p>
                     <p className="text-blue-600 text-sm mt-1">
-                      This course will be marked as "Coming Soon". Dates are optional and can be added later.
-                      Course will be published immediately with "coming_soon" badge.
+                      {t("adminCourse.form.comingSoonActiveDesc")}
                     </p>
                   </div>
                 </div>
@@ -503,14 +510,14 @@ const AddCourse = () => {
               transition={{ delay: 0.05 }}
               className="bg-white rounded-2xl shadow-lg p-6"
             >
-              <h2 className="text-xl font-bold text-gray-800 mb-3">Category *</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-3">{t("adminCourse.form.category")}</h2>
               <select
                 className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 required
               >
-                <option value="" disabled>Select a category</option>
+                <option value="" disabled>{t("adminCourse.form.selectCategory")}</option>
                 {categories.map((cat) => (
                   <option key={cat._id} value={cat._id}>
                     {cat.name}
@@ -525,7 +532,7 @@ const AddCourse = () => {
               animate={{ opacity: 1, x: 0 }}
               className="bg-white rounded-2xl shadow-lg p-6"
             >
-              <h2 className="text-xl font-bold text-gray-800 mb-3">Price (৳) *</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-3">{t("adminCourse.form.price")}</h2>
               <div className="relative">
                 <span className="absolute left-4 top-4 text-gray-500">৳</span>
                 <input
@@ -549,14 +556,14 @@ const AddCourse = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-3 flex items-center">
-                <FiClock className="mr-2" /> Duration (weeks) *
+                <FiClock className="mr-2" /> {t("adminCourse.form.durationWeeks")}
               </h2>
               <input
                 type="number"
                 name="duration"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                placeholder="Course duration in weeks..."
+                placeholder={t("adminCourse.form.durationPlaceholder")}
                 min="1"
                 className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
                 required
@@ -570,14 +577,14 @@ const AddCourse = () => {
                 animate={{ opacity: 1, x: 0 }}
                 className="bg-white rounded-2xl shadow-lg p-6"
               >
-                <h2 className="text-xl font-bold text-gray-800 mb-3">Status</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-3">{t("adminCourse.form.status")}</h2>
                 <select
                   className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
-                  <option value="pending">Pending</option>
-                  <option value="published">Published</option>
+                  <option value="pending">{t("adminCourse.common.pending")}</option>
+                  <option value="published">{t("adminCourse.common.published")}</option>
                 </select>
               </motion.div>
             )}
@@ -590,8 +597,8 @@ const AddCourse = () => {
             transition={{ delay: 0.07 }}
             className="bg-white rounded-2xl shadow-lg p-6"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-3">Course Features *</h2>
-            <p className="text-gray-600 mb-4">Add key features and benefits of this course</p>
+            <h2 className="text-xl font-bold text-gray-800 mb-3">{t("adminCourse.form.features")}</h2>
+            <p className="text-gray-600 mb-4">{t("adminCourse.form.featuresDesc")}</p>
             
             {/* Existing Features List */}
             <div className="space-y-3 mb-4">
@@ -603,7 +610,7 @@ const AddCourse = () => {
                       type="text"
                       value={feature}
                       onChange={(e) => updateFeature(index, e.target.value)}
-                      placeholder="Enter feature..."
+                      placeholder={t("adminCourse.form.featurePlaceholder")}
                       className="flex-1 bg-transparent outline-none"
                     />
                   </div>
@@ -625,7 +632,7 @@ const AddCourse = () => {
                 value={newFeature}
                 onChange={(e) => setNewFeature(e.target.value)}
                 onKeyPress={handleFeatureKeyPress}
-                placeholder="Add a new feature..."
+                placeholder={t("adminCourse.form.addFeaturePlaceholder")}
                 className="flex-1 p-3 bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
               />
               <button
@@ -635,12 +642,12 @@ const AddCourse = () => {
                 className="px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <FiPlus size={18} />
-                Add
+                {t("adminCourse.form.add")}
               </button>
             </div>
             
             <p className="text-sm text-gray-500 mt-3">
-              Press Enter or click Add to include features like "Lifetime Access", "Certificate", etc.
+              {t("adminCourse.form.featureHelp")}
             </p>
           </motion.div>
 
@@ -652,7 +659,7 @@ const AddCourse = () => {
             className="bg-white rounded-2xl shadow-lg p-6"
           >
             <h2 className="text-xl font-bold text-gray-800 mb-3 flex items-center">
-              <FiCalendar className="mr-2" /> Course Dates {!isUpcoming && "*"}
+              <FiCalendar className="mr-2" /> {t("adminCourse.form.courseDates")} {!isUpcoming && "*"}
             </h2>
             
             {!isUpcoming ? (
@@ -660,7 +667,7 @@ const AddCourse = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Enrollment Start *
+                      {t("adminCourse.form.enrollmentStart")} *
                     </label>
                     <input
                       type="datetime-local"
@@ -672,7 +679,7 @@ const AddCourse = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Enrollment End *
+                      {t("adminCourse.form.enrollmentEnd")} *
                     </label>
                     <input
                       type="datetime-local"
@@ -684,7 +691,7 @@ const AddCourse = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Course Start *
+                      {t("adminCourse.form.courseStart")} *
                     </label>
                     <input
                       type="datetime-local"
@@ -709,14 +716,14 @@ const AddCourse = () => {
                 <div className="flex items-start">
                   <FiInfo className="text-blue-500 mt-1 mr-3 shrink-0" />
                   <div>
-                    <p className="text-blue-800 font-medium">Dates Optional for Coming Soon Course</p>
+                    <p className="text-blue-800 font-medium">{t("adminCourse.form.datesOptionalTitle")}</p>
                     <p className="text-blue-600 text-sm mt-1">
-                      You can add dates now or leave them empty. Dates can be added later when enrollment opens.
+                      {t("adminCourse.form.datesOptionalDesc")}
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Enrollment Start
+                          {t("adminCourse.form.enrollmentStart")}
                         </label>
                         <input
                           type="datetime-local"
@@ -727,7 +734,7 @@ const AddCourse = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Enrollment End
+                          {t("adminCourse.form.enrollmentEnd")}
                         </label>
                         <input
                           type="datetime-local"
@@ -738,7 +745,7 @@ const AddCourse = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Course Start
+                          {t("adminCourse.form.courseStart")}
                         </label>
                         <input
                           type="datetime-local"
@@ -761,7 +768,7 @@ const AddCourse = () => {
             transition={{ delay: 0.15 }}
             className="bg-white rounded-2xl shadow-lg p-6"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-3">Select Teachers *</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-3">{t("adminCourse.form.selectTeachers")}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-1">
               {teachers.length > 0 ? (
                 teachers.map((teacher) => (
@@ -796,7 +803,7 @@ const AddCourse = () => {
                 ))
               ) : (
                 <p className="text-gray-500 text-center py-4 col-span-2">
-                  No teachers available
+                  {t("adminCourse.form.noTeachers")}
                 </p>
               )}
             </div>
@@ -809,7 +816,7 @@ const AddCourse = () => {
             transition={{ delay: 0.2 }}
             className="bg-white rounded-2xl shadow-lg p-6"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-3">Course Description *</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-3">{t("adminCourse.form.description")}</h2>
             <div
               ref={editorRef}
               className="bg-gray-100 rounded-xl min-h-64 p-4 quill-editor"
@@ -832,14 +839,14 @@ const AddCourse = () => {
             className="bg-white rounded-2xl shadow-lg p-6"
           >
             <h2 className="text-xl font-bold text-gray-800 mb-4">
-              Cover Image
+              {t("adminCourse.form.coverImage")}
             </h2>
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center mb-4">
               {preview ? (
                 <div className="relative">
                   <img
                     src={preview}
-                    alt="Preview"
+                    alt={t("adminCourse.form.previewAlt")}
                     className="w-full h-48 object-cover rounded-lg mb-4"
                   />
                   <button
@@ -856,16 +863,16 @@ const AddCourse = () => {
               ) : (
                 <div className="py-8">
                   <FiImage className="text-4xl text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-2">Upload cover image</p>
+                  <p className="text-gray-600 mb-2">{t("adminCourse.form.uploadCover")}</p>
                   <p className="text-sm text-gray-500 mb-4">
-                    JPG, PNG, or WEBP up to 5MB
+                    {t("adminCourse.form.imageHelp")}
                   </p>
                 </div>
               )}
 
               <label className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition cursor-pointer">
                 <FiUpload className="mr-2" />
-                {preview ? "Change Image" : "Upload Image"}
+                {preview ? t("adminCourse.form.changeImage") : t("adminCourse.form.uploadImage")}
                 <input
                   type="file"
                   accept="image/jpeg,image/jpg,image/png,image/webp"
@@ -885,7 +892,7 @@ const AddCourse = () => {
             className="bg-white rounded-2xl shadow-lg p-6"
           >
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <FiStar className="mr-2" /> Course Options
+              <FiStar className="mr-2" /> {t("adminCourse.form.courseOptions")}
             </h2>
             
             {/* Featured Course */}
@@ -905,26 +912,26 @@ const AddCourse = () => {
                     featured ? "transform translate-x-6" : ""
                   }`}></div>
                 </div>
-                <span className="ml-3 text-gray-700 font-medium">Featured Course</span>
+                <span className="ml-3 text-gray-700 font-medium">{t("adminCourse.form.featuredCourse")}</span>
               </label>
               <p className="text-sm text-gray-500 mt-2">
-                Featured courses will be highlighted on the homepage
+                {t("adminCourse.form.featuredHelp")}
               </p>
             </div>
 
             {/* Course Mode Indicator */}
             <div className={`mt-4 p-4 rounded-xl ${isUpcoming ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}>
-              <h3 className="font-medium text-gray-800 mb-2">Course Mode:</h3>
+              <h3 className="font-medium text-gray-800 mb-2">{t("adminCourse.form.courseMode")}</h3>
               <div className={`inline-flex items-center px-3 py-1 rounded-full ${
                 isUpcoming ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
               }`}>
                 <span className={`w-2 h-2 rounded-full mr-2 ${isUpcoming ? 'bg-blue-500' : 'bg-green-500'}`}></span>
-                {isUpcoming ? "Coming Soon Course" : "Regular Course"}
+                {isUpcoming ? t("adminCourse.common.comingSoonCourse") : t("adminCourse.common.regularCourse")}
               </div>
               <p className="text-sm text-gray-600 mt-2">
                 {isUpcoming 
-                  ? "This course will show as 'Coming Soon' and can be published without dates."
-                  : "This course requires all dates to be set."}
+                  ? t("adminCourse.form.comingSoonModeDesc")
+                  : t("adminCourse.form.regularModeDesc")}
               </p>
             </div>
           </motion.div>
@@ -946,12 +953,12 @@ const AddCourse = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {isUpcoming ? "Creating Coming Soon Course..." : "Creating Course..."}
+                {isUpcoming ? t("adminCourse.form.creatingComingSoon") : t("adminCourse.form.creating")}
               </div>
             ) : (
               <>
                 <FiSave className="mr-2" /> 
-                {isUpcoming ? "Create Coming Soon Course" : "Create Course"}
+                {isUpcoming ? t("adminCourse.form.createComingSoon") : t("adminCourse.form.create")}
               </>
             )}
           </motion.button>

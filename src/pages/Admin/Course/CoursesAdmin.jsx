@@ -22,6 +22,7 @@ import toast from "react-hot-toast";
 import api from "../../../utils/axios";
 import ConfirmModal from "../../../components/ConfirmModal";
 import { FaChalkboardTeacher } from "react-icons/fa";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 const CoursesAdmin = () => {
   const [courses, setCourses] = useState([]);
@@ -31,6 +32,9 @@ const CoursesAdmin = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [modalAction, setModalAction] = useState(null);
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
 
   useEffect(() => {
     fetchCourses();
@@ -43,7 +47,8 @@ const CoursesAdmin = () => {
 
       if (data.success) setCourses(data.data);
     } catch (err) {
-      toast.error("Failed to load courses", err.message);
+      console.error(err);
+      toast.error(t("adminCourse.list.toasts.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -63,7 +68,7 @@ const CoursesAdmin = () => {
       switch (modalAction) {
         case "delete":
           await api.delete(`/courses/${selectedCourseId}`);
-          toast.success("🗑️ Course deleted successfully");
+          toast.success(t("adminCourse.list.toasts.deleted"));
           break;
 
         case "publish":
@@ -74,7 +79,7 @@ const CoursesAdmin = () => {
             !selectedCourse.courseStart
           ) {
             toast.error(
-              "Please add all dates before publishing as regular course",
+              t("adminCourse.list.toasts.datesRequiredPublish"),
             );
             setLoading(false);
             setModalOpen(false);
@@ -87,7 +92,7 @@ const CoursesAdmin = () => {
             status: "published",
             isUpcoming: false,
           });
-          toast.success("✅ Course published");
+          toast.success(t("adminCourse.list.toasts.published"));
           break;
 
         case "publish_as_upcoming":
@@ -96,35 +101,35 @@ const CoursesAdmin = () => {
             status: "published",
             isUpcoming: true,
           });
-          toast.success("⏳ Course published as Upcoming");
+          toast.success(t("adminCourse.list.toasts.publishedUpcoming"));
           break;
 
         case "pending":
           await api.put(`/courses/${selectedCourseId}`, {
             status: "pending",
           });
-          toast.success("🕒 Course marked as pending");
+          toast.success(t("adminCourse.list.toasts.markedPending"));
           break;
 
         case "reject":
           await api.put(`/courses/${selectedCourseId}`, {
             status: "rejected",
           });
-          toast.success("❌ Course rejected");
+          toast.success(t("adminCourse.list.toasts.rejected"));
           break;
 
         case "feature":
           await api.put(`/courses/${selectedCourseId}`, {
             featured: true,
           });
-          toast.success("🌟 Course featured successfully");
+          toast.success(t("adminCourse.list.toasts.featured"));
           break;
 
         case "unfeature":
           await api.put(`/courses/${selectedCourseId}`, {
             featured: false,
           });
-          toast.success("⭐ Course unfeatured successfully");
+          toast.success(t("adminCourse.list.toasts.unfeatured"));
           break;
 
         case "mark_upcoming":
@@ -133,7 +138,7 @@ const CoursesAdmin = () => {
             isUpcoming: true,
             status: "published",
           });
-          toast.success("⏳ Course marked as Upcoming");
+          toast.success(t("adminCourse.list.toasts.markedUpcoming"));
           break;
 
         case "remove_upcoming":
@@ -143,7 +148,7 @@ const CoursesAdmin = () => {
             !selectedCourse.enrollmentEnd ||
             !selectedCourse.courseStart
           ) {
-            toast.error("Please add all dates before removing upcoming status");
+            toast.error(t("adminCourse.list.toasts.datesRequiredRemoveUpcoming"));
             setLoading(false);
             setModalOpen(false);
             setSelectedCourseId(null);
@@ -155,7 +160,7 @@ const CoursesAdmin = () => {
             isUpcoming: false,
             status: "published",
           });
-          toast.success("📅 Course removed from Upcoming");
+          toast.success(t("adminCourse.list.toasts.removedUpcoming"));
           break;
 
         default:
@@ -164,8 +169,8 @@ const CoursesAdmin = () => {
       fetchCourses();
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || error.message || "Action failed";
-      toast.error(`❌ ${errorMessage}`);
+        error.response?.data?.message || error.message || t("adminCourse.list.toasts.actionFailed");
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
       setModalOpen(false);
@@ -178,53 +183,48 @@ const CoursesAdmin = () => {
     switch (modalAction) {
       case "delete":
         return {
-          title: "Delete Course",
-          message: "Are you sure to delete? This action cannot be undone.",
+          title: t("adminCourse.list.modal.deleteTitle"),
+          message: t("adminCourse.list.modal.deleteMessage"),
         };
       case "publish":
         return {
-          title: "Publish Course",
-          message:
-            "Publish this course as a regular course? All dates must be set.",
+          title: t("adminCourse.list.modal.publishTitle"),
+          message: t("adminCourse.list.modal.publishMessage"),
         };
       case "publish_as_upcoming":
         return {
-          title: "Publish as Upcoming",
-          message: "Publish this course as Upcoming? Dates can be added later.",
+          title: t("adminCourse.list.modal.publishUpcomingTitle"),
+          message: t("adminCourse.list.modal.publishUpcomingMessage"),
         };
       case "pending":
         return {
-          title: "Mark Pending",
-          message:
-            "Mark this course as pending? It will not be visible to students.",
+          title: t("adminCourse.list.modal.pendingTitle"),
+          message: t("adminCourse.list.modal.pendingMessage"),
         };
       case "reject":
         return {
-          title: "Reject Course",
-          message: "Reject this course? It will be marked as rejected.",
+          title: t("adminCourse.list.modal.rejectTitle"),
+          message: t("adminCourse.list.modal.rejectMessage"),
         };
       case "feature":
         return {
-          title: "Feature Course",
-          message:
-            "Feature this course? It will be highlighted on the platform.",
+          title: t("adminCourse.list.modal.featureTitle"),
+          message: t("adminCourse.list.modal.featureMessage"),
         };
       case "unfeature":
         return {
-          title: "Unfeature Course",
-          message: "Remove this course from featured listings?",
+          title: t("adminCourse.list.modal.unfeatureTitle"),
+          message: t("adminCourse.list.modal.unfeatureMessage"),
         };
       case "mark_upcoming":
         return {
-          title: "Mark as Upcoming",
-          message:
-            "Mark this course as Upcoming? It will show 'Upcoming' badge on frontend.",
+          title: t("adminCourse.list.modal.upcomingTitle"),
+          message: t("adminCourse.list.modal.upcomingMessage"),
         };
       case "remove_upcoming":
         return {
-          title: "Remove Upcoming Status",
-          message:
-            "Remove Upcoming status? This will convert it to a regular course.",
+          title: t("adminCourse.list.modal.removeUpcomingTitle"),
+          message: t("adminCourse.list.modal.removeUpcomingMessage"),
         };
       default:
         return { title: "", message: "" };
@@ -279,24 +279,21 @@ const CoursesAdmin = () => {
 
   const getStatusText = (course) => {
     if (course.isUpcoming === true) {
-      return "Upcoming";
+      return t("adminCourse.common.upcoming");
     }
-    return (
-      course.status?.charAt(0).toUpperCase() +
-      course.status?.slice(1).toLowerCase()
-    );
+    return t(`adminCourse.common.${course.status || "unknown"}`);
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "Not Set";
+    if (!dateString) return t("adminCourse.common.notSet");
     try {
-      return new Date(dateString).toLocaleDateString("en-US", {
+      return new Date(dateString).toLocaleDateString(locale, {
         year: "numeric",
         month: "short",
         day: "numeric",
       });
     } catch (error) {
-      return "Invalid Date";
+      return t("adminCourse.common.invalidDate");
     }
   };
 
@@ -306,9 +303,9 @@ const CoursesAdmin = () => {
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
-            Course Management
+            {t("adminCourse.list.title")}
           </h1>
-          <p className="text-gray-600">Manage all courses in your platform</p>
+          <p className="text-gray-600">{t("adminCourse.list.subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Link
@@ -316,14 +313,14 @@ const CoursesAdmin = () => {
             className="mt-4 md:mt-0 flex items-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
           >
             <FiPlus className="mr-2" />
-            Add Course Category
+            {t("adminCourse.list.addCategory")}
           </Link>
           <Link
             to={`/admin/courses/add`}
             className="mt-4 md:mt-0 flex items-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
           >
             <FiPlus className="mr-2" />
-            Add New Course
+            {t("adminCourse.list.addCourse")}
           </Link>
         </div>
       </div>
@@ -334,7 +331,7 @@ const CoursesAdmin = () => {
           <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search courses by title or description..."
+            placeholder={t("adminCourse.list.searchPlaceholder")}
             className="w-full pl-12 pr-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-300"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -372,8 +369,7 @@ const CoursesAdmin = () => {
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              {status.charAt(0).toUpperCase() +
-                status.slice(1).replace("_", " ")}{" "}
+              {t(`adminCourse.common.${status}`)}{" "}
               ({statusCounts[status] || 0})
             </button>
           ))}
@@ -384,39 +380,39 @@ const CoursesAdmin = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <div className="bg-white rounded-2xl shadow-lg p-4 text-center">
           <div className="text-2xl font-bold text-gray-800">
-            {statusCounts.all}
+            {formatNumber(statusCounts.all)}
           </div>
-          <div className="text-sm text-gray-600">Total Courses</div>
+          <div className="text-sm text-gray-600">{t("adminCourse.list.totalCourses")}</div>
         </div>
         <div className="bg-green-50 rounded-2xl shadow-lg p-4 text-center">
           <div className="text-2xl font-bold text-green-800">
-            {statusCounts.published}
+            {formatNumber(statusCounts.published)}
           </div>
-          <div className="text-sm text-green-600">Published</div>
+          <div className="text-sm text-green-600">{t("adminCourse.common.published")}</div>
         </div>
         <div className="bg-yellow-50 rounded-2xl shadow-lg p-4 text-center">
           <div className="text-2xl font-bold text-yellow-800">
-            {statusCounts.pending}
+            {formatNumber(statusCounts.pending)}
           </div>
-          <div className="text-sm text-yellow-600">Pending</div>
+          <div className="text-sm text-yellow-600">{t("adminCourse.common.pending")}</div>
         </div>
         <div className="bg-blue-50 rounded-2xl shadow-lg p-4 text-center">
           <div className="text-2xl font-bold text-blue-800">
-            {statusCounts.upcoming}
+            {formatNumber(statusCounts.upcoming)}
           </div>
-          <div className="text-sm text-blue-600">Upcoming</div>
+          <div className="text-sm text-blue-600">{t("adminCourse.common.upcoming")}</div>
         </div>
         <div className="bg-amber-50 rounded-2xl shadow-lg p-4 text-center">
           <div className="text-2xl font-bold text-amber-800">
-            {statusCounts.featured}
+            {formatNumber(statusCounts.featured)}
           </div>
-          <div className="text-sm text-amber-600">Featured</div>
+          <div className="text-sm text-amber-600">{t("adminCourse.common.featured")}</div>
         </div>
         <div className="bg-red-50 rounded-2xl shadow-lg p-4 text-center">
           <div className="text-2xl font-bold text-red-800">
-            {statusCounts.rejected}
+            {formatNumber(statusCounts.rejected)}
           </div>
-          <div className="text-sm text-red-600">Rejected</div>
+          <div className="text-sm text-red-600">{t("adminCourse.common.rejected")}</div>
         </div>
       </div>
 
@@ -429,11 +425,11 @@ const CoursesAdmin = () => {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-700">
-            <div className="col-span-4">Course Information</div>
-            <div className="col-span-2 text-center">Category & Type</div>
-            <div className="col-span-2 text-center">Stats</div>
-            <div className="col-span-2 text-center">Status & Dates</div>
-            <div className="col-span-2 text-center">Actions</div>
+            <div className="col-span-4">{t("adminCourse.list.courseInfo")}</div>
+            <div className="col-span-2 text-center">{t("adminCourse.list.categoryType")}</div>
+            <div className="col-span-2 text-center">{t("adminCourse.list.stats")}</div>
+            <div className="col-span-2 text-center">{t("adminCourse.list.statusDates")}</div>
+            <div className="col-span-2 text-center">{t("adminCourse.common.actions")}</div>
           </div>
 
           {/* Course List Items */}
@@ -484,7 +480,7 @@ const CoursesAdmin = () => {
                             }}
                           />
                         ) : (
-                          "No description available"
+                          t("adminCourse.list.noDescription")
                         )}
                       </p>
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
@@ -500,7 +496,7 @@ const CoursesAdmin = () => {
                         {course.duration && (
                           <div className="flex items-center space-x-1">
                             <FiClock className="text-gray-400" />
-                            <span>{course.duration} hours</span>
+                            <span>{t("adminCourse.list.hours", { count: formatNumber(course.duration) })}</span>
                           </div>
                         )}
                       </div>
@@ -510,11 +506,11 @@ const CoursesAdmin = () => {
                   {/* Category & Type */}
                   <div className="col-span-2 flex flex-col items-center justify-center space-y-2">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {course.category?.name || "Uncategorized"}
+                      {course.category?.name || t("adminCourse.common.uncategorized")}
                     </span>
                     {isUpcoming && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                        Upcoming
+                        {t("adminCourse.common.upcoming")}
                       </span>
                     )}
                   </div>
@@ -526,30 +522,30 @@ const CoursesAdmin = () => {
                         <div className="flex items-center space-x-1">
                           <FaChalkboardTeacher className="text-gray-400" />
                           <span className="font-semibold">
-                            {course.teachers?.length || 0}
+                            {formatNumber(course.teachers?.length || 0)}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500">Teachers</span>
+                        <span className="text-xs text-gray-500">{t("adminCourse.list.teachers")}</span>
                       </div>
                       <div className="flex flex-col items-center">
                         <div className="flex items-center space-x-1">
                           <FiList className="text-gray-400" />
                           <span className="font-semibold">
-                            {course.lectureCount ||
+                            {formatNumber(course.lectureCount ||
                               course.lectures?.length ||
-                              0}
+                              0)}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500">Lectures</span>
+                        <span className="text-xs text-gray-500">{t("adminCourse.list.lectures")}</span>
                       </div>
                       <div className="flex flex-col items-center">
                         <div className="flex items-center space-x-1">
                           <FiUsers className="text-gray-400" />
                           <span className="font-semibold">
-                            {course.studentCount || 0}
+                            {formatNumber(course.studentCount || 0)}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500">Students</span>
+                        <span className="text-xs text-gray-500">{t("adminCourse.list.students")}</span>
                       </div>
                     </div>
                   </div>
@@ -567,7 +563,7 @@ const CoursesAdmin = () => {
                       </span>
                       {course.featured && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                          Featured
+                          {t("adminCourse.common.featured")}
                         </span>
                       )}
                     </div>
@@ -577,16 +573,16 @@ const CoursesAdmin = () => {
                         course.enrollmentEnd ||
                         course.courseStart ? (
                           <div className="text-xs text-blue-600">
-                            <div>Tentative Dates:</div>
+                            <div>{t("adminCourse.list.tentativeDates")}</div>
                             {course.enrollmentStart && (
                               <div>
-                                Start: {formatDate(course.enrollmentStart)}
+                                {t("adminCourse.common.enrollmentStart")}: {formatDate(course.enrollmentStart)}
                               </div>
                             )}
                           </div>
                         ) : (
                           <span className="text-xs text-blue-600 italic">
-                            Dates not set
+                            {t("adminCourse.details.datesNotSet")}
                           </span>
                         )}
                       </div>
@@ -599,12 +595,12 @@ const CoursesAdmin = () => {
                               {formatDate(course.enrollmentEnd)}
                             </div>
                             <div className="text-xs text-gray-500">
-                              Starts: {formatDate(course.courseStart)}
+                              {t("adminCourse.common.courseStart")}: {formatDate(course.courseStart)}
                             </div>
                           </>
                         ) : (
                           <span className="text-xs text-red-500 italic">
-                            Dates required
+                            {t("adminCourse.list.datesRequired")}
                           </span>
                         )}
                       </div>
@@ -616,21 +612,21 @@ const CoursesAdmin = () => {
                     <Link
                       to={`/admin/courses/${course._id}`}
                       className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                      title="View Course Details"
+                      title={t("adminCourse.list.viewDetails")}
                     >
                       <FiEye className="text-lg" />
                     </Link>
                     <Link
                       to={`/admin/courses/update/${course._id}`}
                       className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                      title="Edit Course"
+                      title={t("adminCourse.list.editCourse")}
                     >
                       <FiEdit className="text-lg" />
                     </Link>
                     <button
                       onClick={() => openModal(course._id, "delete")}
                       className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                      title="Delete Course"
+                      title={t("adminCourse.list.deleteCourse")}
                     >
                       <FiTrash2 className="text-lg" />
                     </button>
@@ -644,7 +640,7 @@ const CoursesAdmin = () => {
                               <button
                                 onClick={() => openModal(course._id, "publish")}
                                 className="p-1 text-green-400 hover:text-green-600 hover:bg-green-50 rounded transition"
-                                title="Publish as Regular"
+                                title={t("adminCourse.list.publishRegular")}
                               >
                                 <FiCheckCircle className="text-sm" />
                               </button>
@@ -653,14 +649,14 @@ const CoursesAdmin = () => {
                                   openModal(course._id, "publish_as_upcoming")
                                 }
                                 className="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
-                                title="Publish as Upcoming"
+                                title={t("adminCourse.list.publishUpcoming")}
                               >
                                 <FiInfo className="text-sm" />
                               </button>
                               <button
                                 onClick={() => openModal(course._id, "reject")}
                                 className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition"
-                                title="Reject Course"
+                                title={t("adminCourse.list.rejectCourse")}
                               >
                                 <FiXCircle className="text-sm" />
                               </button>
@@ -672,7 +668,7 @@ const CoursesAdmin = () => {
                               <button
                                 onClick={() => openModal(course._id, "pending")}
                                 className="p-1 text-yellow-400 hover:text-yellow-600 hover:bg-yellow-50 rounded transition"
-                                title="Mark as Pending"
+                                title={t("adminCourse.list.markPending")}
                               >
                                 <FiCheckCircle className="text-sm" />
                               </button>
@@ -681,7 +677,7 @@ const CoursesAdmin = () => {
                                   openModal(course._id, "mark_upcoming")
                                 }
                                 className="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
-                                title="Mark as Upcoming"
+                                title={t("adminCourse.list.markUpcoming")}
                               >
                                 <FiInfo className="text-sm" />
                               </button>
@@ -691,7 +687,7 @@ const CoursesAdmin = () => {
                                     openModal(course._id, "unfeature")
                                   }
                                   className="p-1 text-amber-400 hover:text-amber-600 hover:bg-amber-50 rounded transition"
-                                  title="Remove Featured"
+                                  title={t("adminCourse.list.removeFeatured")}
                                 >
                                   <FiStar className="text-sm" />
                                 </button>
@@ -701,7 +697,7 @@ const CoursesAdmin = () => {
                                     openModal(course._id, "feature")
                                   }
                                   className="p-1 text-green-400 hover:text-green-600 hover:bg-green-50 rounded transition"
-                                  title="Mark as Featured"
+                                  title={t("adminCourse.list.markFeatured")}
                                 >
                                   <FiStar className="text-sm" />
                                 </button>
@@ -714,7 +710,7 @@ const CoursesAdmin = () => {
                               <button
                                 onClick={() => openModal(course._id, "publish")}
                                 className="p-1 text-green-400 hover:text-green-600 hover:bg-green-50 rounded transition"
-                                title="Publish as Regular"
+                                title={t("adminCourse.list.publishRegular")}
                               >
                                 <FiCheckCircle className="text-sm" />
                               </button>
@@ -723,14 +719,14 @@ const CoursesAdmin = () => {
                                   openModal(course._id, "publish_as_upcoming")
                                 }
                                 className="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
-                                title="Publish as Upcoming"
+                                title={t("adminCourse.list.publishUpcoming")}
                               >
                                 <FiInfo className="text-sm" />
                               </button>
                               <button
                                 onClick={() => openModal(course._id, "pending")}
                                 className="p-1 text-yellow-400 hover:text-yellow-600 hover:bg-yellow-50 rounded transition"
-                                title="Mark as Pending"
+                                title={t("adminCourse.list.markPending")}
                               >
                                 <FiCheckCircle className="text-sm" />
                               </button>
@@ -743,7 +739,7 @@ const CoursesAdmin = () => {
                           <button
                             onClick={() => openModal(course._id, "publish")}
                             className="p-1 text-green-400 hover:text-green-600 hover:bg-green-50 rounded transition"
-                            title="Publish as Regular"
+                            title={t("adminCourse.list.publishRegular")}
                           >
                             <FiCheckCircle className="text-sm" />
                           </button>
@@ -752,7 +748,7 @@ const CoursesAdmin = () => {
                               openModal(course._id, "remove_upcoming")
                             }
                             className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded transition"
-                            title="Remove Upcoming"
+                            title={t("adminCourse.list.removeUpcoming")}
                           >
                             <FiXCircle className="text-sm" />
                           </button>
@@ -760,7 +756,7 @@ const CoursesAdmin = () => {
                             <button
                               onClick={() => openModal(course._id, "unfeature")}
                               className="p-1 text-amber-400 hover:text-amber-600 hover:bg-amber-50 rounded transition"
-                              title="Remove Featured"
+                              title={t("adminCourse.list.removeFeatured")}
                             >
                               <FiStar className="text-sm" />
                             </button>
@@ -768,7 +764,7 @@ const CoursesAdmin = () => {
                             <button
                               onClick={() => openModal(course._id, "feature")}
                               className="p-1 text-green-400 hover:text-green-600 hover:bg-green-50 rounded transition"
-                              title="Mark as Featured"
+                              title={t("adminCourse.list.markFeatured")}
                             >
                               <FiStar className="text-sm" />
                             </button>
@@ -786,10 +782,10 @@ const CoursesAdmin = () => {
         <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
           <FiBookOpen className="text-gray-300 text-5xl mx-auto mb-4" />
           <h3 className="text-xl font-medium text-gray-700 mb-2">
-            No courses found
+            {t("adminCourse.list.noCourses")}
           </h3>
           <p className="text-gray-500 mb-4">
-            Try adjusting your search or filters
+            {t("adminCourse.list.noCoursesDesc")}
           </p>
           <div className="flex gap-2 justify-center">
             <button
@@ -799,14 +795,14 @@ const CoursesAdmin = () => {
               }}
               className="px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition"
             >
-              Clear Filters
+              {t("adminCourse.list.clearFilters")}
             </button>
             <Link
               to="/admin/courses/add"
               className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
             >
               <FiPlus className="inline mr-2" />
-              Add New Course
+              {t("adminCourse.list.addCourse")}
             </Link>
           </div>
         </div>

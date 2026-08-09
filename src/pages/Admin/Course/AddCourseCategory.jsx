@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { FiArrowLeft, FiSave, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../../../utils/axios";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 const AddCourseCategory = () => {
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
   const [allCategory, setAllCategory] = useState([]);
   const [category, setCategory] = useState("");
 
@@ -38,14 +40,14 @@ const AddCourseCategory = () => {
     try {
       const res = await api.post("/courses/category", { name: category });
       if (res.data.success) {
-        toast.success(res.data.message);
+        toast.success(t("adminCourse.category.created"));
         setCategory("");
         fetchCategory();
       } else {
-        toast.error(res.data.message);
+        toast.error(res.data.message || t("adminCourse.category.createFailed"));
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(error?.response?.data?.message || t("adminCourse.category.createFailed"));
     } finally {
       setLoading(false);
     }
@@ -56,14 +58,14 @@ const AddCourseCategory = () => {
     try {
       const res = await api.delete(`/courses/category/${id}`);
       if (res.data.success) {
-        toast.success(res.data.message);
+        toast.success(t("adminCourse.category.deleted"));
         setCategory("");
         fetchCategory();
       } else {
-        toast.error(res.data.message);
+        toast.error(res.data.message || t("adminCourse.category.deleteFailed"));
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(error?.response?.data?.message || t("adminCourse.category.deleteFailed"));
     }
   };
 
@@ -75,10 +77,10 @@ const AddCourseCategory = () => {
           onClick={() => window.history.back()}
           className="flex items-center px-4 py-2 text-gray-600 hover:bg-white rounded-xl shadow-sm transition"
         >
-          <FiArrowLeft className="mr-2" /> Back
+          <FiArrowLeft className="mr-2" /> {t("adminCourse.common.back")}
         </button>
         <h1 className="text-3xl font-bold text-gray-800 mt-4 md:mt-0">
-          Add Course Category
+          {t("adminCourse.category.title")}
         </h1>
       </div>
 
@@ -91,13 +93,13 @@ const AddCourseCategory = () => {
           animate={{ opacity: 1, y: 0 }}
           className="flex-1 bg-white rounded-2xl shadow-lg p-8 space-y-6"
         >
-          <h2 className="text-2xl font-semibold text-gray-800">New Category</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">{t("adminCourse.category.newCategory")}</h2>
           <input
             type="text"
             name="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            placeholder="Enter course category..."
+            placeholder={t("adminCourse.category.placeholder")}
             className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-400 outline-none transition"
             required
           />
@@ -110,10 +112,10 @@ const AddCourseCategory = () => {
             }`}
           >
             {loading ? (
-              "Saving..."
+              t("adminCourse.category.saving")
             ) : (
               <>
-                <FiSave className="mr-2" /> Save Category
+                <FiSave className="mr-2" /> {t("adminCourse.category.save")}
               </>
             )}
           </motion.button>
@@ -126,11 +128,11 @@ const AddCourseCategory = () => {
           className="flex-1 bg-linear-to-br from-orange-50 to-amber-50 rounded-2xl p-6 border border-amber-100 shadow-md"
         >
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-            All Categories
+            {t("adminCourse.category.allCategories")}
           </h2>
           <div className="space-y-3 max-h-100 overflow-x-hidden overflow-y-auto">
             {allCategory.length === 0 ? (
-              <p className="text-gray-500">No categories found.</p>
+              <p className="text-gray-500">{t("adminCourse.category.noCategories")}</p>
             ) : (
               allCategory.map((cat) => (
                 <motion.div

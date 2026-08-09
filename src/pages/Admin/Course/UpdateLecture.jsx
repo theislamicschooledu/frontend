@@ -16,6 +16,7 @@ import {
 } from "react-icons/fi";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 const UpdateLecture = () => {
   const { courseId, lectureId } = useParams();
@@ -28,7 +29,10 @@ const UpdateLecture = () => {
   const [course, setCourse] = useState(null);
   const navigate = useNavigate();
 
-  const {user} = useAuth()
+  const { user } = useAuth();
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
 
   // Fetch lecture and course details
   useEffect(() => {
@@ -53,7 +57,7 @@ const UpdateLecture = () => {
         }
       } catch (error) {
         console.error(error);
-        toast.error("Failed to fetch data");
+        toast.error(t("adminCourse.lecture.toasts.dataLoadFailed"));
       } finally {
         setFetchLoading(false);
       }
@@ -67,7 +71,7 @@ const UpdateLecture = () => {
 
     const validFiles = files.filter((file) => {
       if (file.size > 50 * 1024 * 1024) {
-        toast.error(`${file.name} is too large. Max 50MB per file`);
+        toast.error(t("adminCourse.lecture.toasts.fileTooLarge", { name: file.name }));
         return false;
       }
       return true;
@@ -81,7 +85,7 @@ const UpdateLecture = () => {
   };
 
   const removeExistingResource = async (resourceId) => {
-    if (!window.confirm("Are you sure you want to delete this resource?")) {
+    if (!window.confirm(t("adminCourse.lecture.deleteResourceConfirm"))) {
       return;
     }
 
@@ -91,14 +95,14 @@ const UpdateLecture = () => {
       );
 
       if (data.success) {
-        toast.success("✅ Resource deleted successfully!");
+        toast.success(t("adminCourse.lecture.toasts.resourceDeleted"));
         setExistingResources((prev) =>
           prev.filter((resource) => resource._id !== resourceId)
         );
       }
     } catch (error) {
       console.error(error);
-      toast.error("❌ Failed to delete resource");
+      toast.error(t("adminCourse.lecture.toasts.resourceDeleteFailed"));
     }
   };
 
@@ -115,7 +119,7 @@ const UpdateLecture = () => {
     e.preventDefault();
 
     if (!title.trim()) {
-      toast.error("Lecture title is required");
+      toast.error(t("adminCourse.lecture.toasts.titleRequired"));
       return;
     }
 
@@ -138,13 +142,13 @@ const UpdateLecture = () => {
       });
 
       if (data.success) {
-        toast.success("✅ Lecture updated successfully!");
+        toast.success(t("adminCourse.lecture.toasts.updated"));
         navigate(`/${user.role}/courses/${courseId}`);
       }
     } catch (error) {
       console.error("Update lecture error:", error);
       toast.error(
-        `❌ ${error.response?.data?.message || "Failed to update lecture"}`
+        error.response?.data?.message || t("adminCourse.lecture.toasts.updateFailed")
       );
     } finally {
       setLoading(false);
@@ -156,7 +160,7 @@ const UpdateLecture = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading lecture data...</p>
+          <p className="mt-4 text-gray-600">{t("adminCourse.lecture.loading")}</p>
         </div>
       </div>
     );
@@ -174,11 +178,11 @@ const UpdateLecture = () => {
           onClick={() => navigate(`/${user.role}/courses/${courseId}`)}
           className="flex items-center px-4 py-2 text-gray-600 hover:bg-white rounded-xl transition"
         >
-          <FiArrowLeft className="mr-2" /> Back to Course
+          <FiArrowLeft className="mr-2" /> {t("adminCourse.common.backToCourse")}
         </button>
         <div className="text-center sm:text-left">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Edit Lecture
+            {t("adminCourse.lecture.updateTitle")}
           </h1>
           <p className="text-gray-600 mt-1">{course?.title}</p>
         </div>
@@ -195,13 +199,13 @@ const UpdateLecture = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-3">
-                Lecture Title
+                {t("adminCourse.lecture.title")}
               </h2>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter lecture title..."
+                placeholder={t("adminCourse.lecture.titlePlaceholder")}
                 className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none"
                 required
               />
@@ -214,7 +218,7 @@ const UpdateLecture = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <FiLink className="mr-2" /> Video URL
+                <FiLink className="mr-2" /> {t("adminCourse.lecture.videoUrl")}
               </h2>
 
               <div className="space-y-4">
@@ -231,7 +235,7 @@ const UpdateLecture = () => {
                     <div className="flex items-center">
                       <FiVideo className="text-green-500 mr-3" />
                       <span className="text-green-700 font-medium">
-                        Valid URL format
+                        {t("adminCourse.lecture.validUrl")}
                       </span>
                     </div>
                   </div>
@@ -247,7 +251,7 @@ const UpdateLecture = () => {
                 className="bg-white rounded-2xl shadow-lg p-6"
               >
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                  <FiFile className="mr-2" /> Existing Resources
+                  <FiFile className="mr-2" /> {t("adminCourse.lecture.existingResources")}
                 </h2>
 
                 <div className="space-y-2">
@@ -269,14 +273,14 @@ const UpdateLecture = () => {
                           rel="noopener noreferrer"
                           className="flex items-center px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
                         >
-                          <FiDownload className="mr-1" /> Download
+                          <FiDownload className="mr-1" /> {t("adminCourse.common.download")}
                         </a>
                         <button
                           type="button"
                           onClick={() => removeExistingResource(resource._id)}
                           className="flex items-center px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
                         >
-                          <FiTrash2 className="mr-1" /> Remove
+                          <FiTrash2 className="mr-1" /> {t("adminCourse.common.remove")}
                         </button>
                       </div>
                     </div>
@@ -292,23 +296,23 @@ const UpdateLecture = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <FiFile className="mr-2" /> Add New Resources
+                <FiFile className="mr-2" /> {t("adminCourse.lecture.addResources")}
               </h2>
 
               <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center mb-4">
                 <div className="py-4">
                   <FiFile className="text-3xl text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-2">
-                    Upload new resource files
+                    {t("adminCourse.lecture.uploadNewResources")}
                   </p>
                   <p className="text-sm text-gray-500 mb-4">
-                    PDF, DOC, PPT, ZIP up to 50MB each
+                    {t("adminCourse.lecture.resourceHelp")}
                   </p>
                 </div>
 
                 <label className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition cursor-pointer">
                   <FiUpload className="mr-2" />
-                  Add Resources
+                  {t("adminCourse.lecture.addResources")}
                   <input
                     type="file"
                     multiple
@@ -322,7 +326,7 @@ const UpdateLecture = () => {
               {resources.length > 0 && (
                 <div className="space-y-2">
                   <h3 className="font-semibold text-gray-800">
-                    New Resources to Upload:
+                    {t("adminCourse.lecture.newResources")}
                   </h3>
                   {resources.map((resource, index) => (
                     <div
@@ -361,22 +365,22 @@ const UpdateLecture = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Course Information
+                {t("adminCourse.lecture.courseInformation")}
               </h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-gray-600">Course:</span>
+                  <span className="text-gray-600">{t("adminCourse.lecture.course")}</span>
                   <p className="font-medium text-gray-800">{course?.title}</p>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Lectures:</span>
+                  <span className="text-gray-600">{t("adminCourse.lecture.totalLectures")}</span>
                   <span className="font-medium">
                     {course?.lectureCount || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Duration:</span>
-                  <span className="font-medium">{course?.duration}h</span>
+                  <span className="text-gray-600">{t("adminCourse.lecture.duration")}</span>
+                  <span className="font-medium">{t("adminCourse.list.hours", { count: formatNumber(course?.duration) })}</span>
                 </div>
               </div>
             </motion.div>
@@ -391,10 +395,10 @@ const UpdateLecture = () => {
               }`}
             >
               {loading ? (
-                "Updating Lecture..."
+                t("adminCourse.lecture.updating")
               ) : (
                 <>
-                  <FiSave className="mr-2" /> Update Lecture
+                  <FiSave className="mr-2" /> {t("adminCourse.lecture.update")}
                 </>
               )}
             </motion.button>

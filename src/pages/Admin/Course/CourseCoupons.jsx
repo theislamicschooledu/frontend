@@ -17,6 +17,7 @@ import {
   FiClock,
 } from "react-icons/fi";
 import { useNavigate, useParams } from "react-router-dom";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 const CourseCoupons = () => {
   const { courseId } = useParams();
@@ -25,6 +26,9 @@ const CourseCoupons = () => {
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState(null);
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
 
   // Fetch course and coupons
   useEffect(() => {
@@ -45,7 +49,7 @@ const CourseCoupons = () => {
         }
       } catch (error) {
         console.error(error);
-        toast.error("Failed to fetch data");
+        toast.error(t("adminCourse.coupon.toasts.loadDataFailed"));
       } finally {
         setLoading(false);
       }
@@ -55,7 +59,7 @@ const CourseCoupons = () => {
   }, [courseId]);
 
   const handleDeleteCoupon = async (couponId) => {
-    if (!window.confirm("Are you sure you want to delete this coupon?")) {
+    if (!window.confirm(t("adminCourse.coupon.toasts.deleteConfirm"))) {
       return;
     }
 
@@ -64,12 +68,12 @@ const CourseCoupons = () => {
       const { data } = await api.delete(`/coupons/${couponId}`);
 
       if (data.success) {
-        toast.success("✅ Coupon deleted successfully!");
+        toast.success(t("adminCourse.coupon.toasts.deleted"));
         setCoupons((prev) => prev.filter((coupon) => coupon._id !== couponId));
       }
     } catch (error) {
       console.error(error);
-      toast.error("❌ Failed to delete coupon");
+      toast.error(t("adminCourse.coupon.toasts.deleteFailed"));
     } finally {
       setDeleteLoading(null);
     }
@@ -77,7 +81,7 @@ const CourseCoupons = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    toast.success("Coupon code copied to clipboard!");
+    toast.success(t("adminCourse.coupon.toasts.copied"));
   };
 
   const isCouponExpired = (coupon) => {
@@ -91,12 +95,12 @@ const CourseCoupons = () => {
 
   const getCouponStatus = (coupon) => {
     if (isCouponExpired(coupon)) {
-      return { status: "expired", color: "red", text: "Expired" };
+      return { status: "expired", color: "red", text: t("adminCourse.common.expired") };
     }
     if (isCouponUsedUp(coupon)) {
-      return { status: "used", color: "orange", text: "Used Up" };
+      return { status: "used", color: "orange", text: t("adminCourse.common.usedUp") };
     }
-    return { status: "active", color: "green", text: "Active" };
+    return { status: "active", color: "green", text: t("adminCourse.common.active") };
   };
 
   const calculateDiscountedPrice = (coupon) => {
@@ -115,7 +119,7 @@ const CourseCoupons = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading coupons...</p>
+          <p className="mt-4 text-gray-600">{t("adminCourse.coupon.loading")}</p>
         </div>
       </div>
     );
@@ -133,11 +137,11 @@ const CourseCoupons = () => {
           onClick={() => navigate(`/admin/courses/${courseId}`)}
           className="flex items-center px-4 py-2 text-gray-600 hover:bg-white rounded-xl transition"
         >
-          <FiArrowLeft className="mr-2" /> Back to Course
+          <FiArrowLeft className="mr-2" /> {t("adminCourse.common.backToCourse")}
         </button>
         <div className="text-center sm:text-left">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Course Coupons
+            {t("adminCourse.coupon.listTitle")}
           </h1>
           <p className="text-gray-600 mt-1">{course?.title}</p>
         </div>
@@ -145,7 +149,7 @@ const CourseCoupons = () => {
           onClick={() => navigate(`/admin/courses/${courseId}/coupons/add`)}
           className="flex items-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
         >
-          <FiPlus className="mr-2" /> Create Coupon
+          <FiPlus className="mr-2" /> {t("adminCourse.coupon.create")}
         </button>
       </motion.div>
 
@@ -159,16 +163,16 @@ const CourseCoupons = () => {
           >
             <FiTag className="text-6xl text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-600 mb-2">
-              No Coupons Yet
+              {t("adminCourse.coupon.noCoupons")}
             </h3>
             <p className="text-gray-500 mb-6">
-              Create your first coupon to offer discounts on this course.
+              {t("adminCourse.coupon.noCouponsDesc")}
             </p>
             <button
               onClick={() => navigate(`/admin/courses/${courseId}/coupons/add`)}
               className="flex items-center px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition mx-auto"
             >
-              <FiPlus className="mr-2" /> Create First Coupon
+              <FiPlus className="mr-2" /> {t("adminCourse.coupon.createFirst")}
             </button>
           </motion.div>
         ) : (
@@ -198,8 +202,8 @@ const CourseCoupons = () => {
                           </div>
                           <div className="flex items-center gap-1 text-sm text-gray-500">
                             <FiClock className="mr-1" />
-                            Created{" "}
-                            {new Date(coupon.createdAt).toLocaleDateString()}
+                            {t("adminCourse.coupon.created")} {" "}
+                            {new Date(coupon.createdAt).toLocaleDateString(locale)}
                           </div>
                         </div>
 
@@ -211,7 +215,7 @@ const CourseCoupons = () => {
                             <button
                               onClick={() => copyToClipboard(coupon.code)}
                               className="p-2 text-gray-500 hover:text-gray-700 transition"
-                              title="Copy coupon code"
+                              title={t("adminCourse.coupon.copyCode")}
                             >
                               <FiCopy size={16} />
                             </button>
@@ -224,11 +228,8 @@ const CourseCoupons = () => {
                               <FiDollarSign className="text-green-600" />
                             )}
                             <span className="text-xl font-bold text-gray-800">
-                              {coupon.discountValue}
-                              {coupon.discountType === "percentage"
-                                ? "%"
-                                : "৳"}{" "}
-                              OFF
+                              {formatNumber(coupon.discountValue)}
+                              {coupon.discountType === "percentage" ? "%" : "৳"} {t("adminCourse.coupon.off")}
                             </span>
                           </div>
                         </div>
@@ -237,14 +238,13 @@ const CourseCoupons = () => {
                         {discountedPrice && (
                           <div className="flex items-center gap-4 text-sm">
                             <span className="text-gray-600 line-through">
-                              ৳{course.price}
+                              ৳{formatNumber(course.price)}
                             </span>
                             <span className="text-green-600 font-bold">
-                              ৳{discountedPrice.toFixed(2)}
+                              ৳{Number(discountedPrice).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                             <span className="text-blue-600">
-                              Save ৳
-                              {(course.price - discountedPrice).toFixed(2)}
+                              {t("adminCourse.coupon.save")} ৳{Number(course.price - discountedPrice).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                           </div>
                         )}
@@ -254,7 +254,7 @@ const CourseCoupons = () => {
                           <div className="flex items-center gap-1">
                             <FiUsers />
                             <span>
-                              {coupon.usedCount} / {coupon.usageLimit} used
+                              {formatNumber(coupon.usedCount)} / {formatNumber(coupon.usageLimit)} {t("adminCourse.coupon.used")}
                             </span>
                           </div>
 
@@ -262,10 +262,7 @@ const CourseCoupons = () => {
                             <div className="flex items-center gap-1">
                               <FiCalendar />
                               <span>
-                                Expires{" "}
-                                {new Date(
-                                  coupon.expiryDate
-                                ).toLocaleDateString()}
+                                {t("adminCourse.coupon.expires")} {new Date(coupon.expiryDate).toLocaleDateString(locale)}
                               </span>
                             </div>
                           )}
@@ -283,7 +280,7 @@ const CourseCoupons = () => {
                           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
                         >
                           <FiEdit size={16} />
-                          Edit
+                          {t("adminCourse.coupon.edit")}
                         </button>
                         <button
                           onClick={() => handleDeleteCoupon(coupon._id)}
@@ -292,8 +289,8 @@ const CourseCoupons = () => {
                         >
                           <FiTrash2 size={16} />
                           {deleteLoading === coupon._id
-                            ? "Deleting..."
-                            : "Delete"}
+                            ? t("adminCourse.coupon.deleting")
+                            : t("adminCourse.coupon.delete")}
                         </button>
                       </div>
                     </div>

@@ -17,6 +17,7 @@ import {
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
+import { useLanguage } from "../../hooks/useLanguage";
 
 export default function ChangePassword() {
   const [step, setStep] = useState(1);
@@ -29,6 +30,7 @@ export default function ChangePassword() {
 
   const navigate = useNavigate();
   const { verifyOldPassword, changePassword, error } = useAuth();
+  const { t } = useLanguage();
 
   const handleVerifyOld = async () => {
     setLocalLoading(true);
@@ -40,14 +42,14 @@ export default function ChangePassword() {
       if (res.success) {
         setStep(2);
         setShowPassword(false);
-        setMessage("Old password verified! Now set a new password.");
+        setMessage(t("changePasswordPage.oldVerified"));
         setMessageColor(1);
       } else {
-        setMessage(res.message || "Unable to verify your old password.");
+        setMessage(res.message || t("changePasswordPage.verifyFailed"));
         setMessageColor(2);
       }
     } catch (error) {
-      setMessage(error.message);
+      setMessage(error?.message || t("changePasswordPage.verifyFailed"));
       setMessageColor(2);
     } finally {
       setLocalLoading(false);
@@ -55,25 +57,30 @@ export default function ChangePassword() {
   };
 
   const handleChangePassword = async () => {
-    setLocalLoading(true);
     setMessage("");
+
+    if (newPassword.length < 8) {
+      setMessage(t("changePasswordPage.passwordTooShort"));
+      setMessageColor(2);
+      return;
+    }
+
+    setLocalLoading(true);
 
     try {
       const res = await changePassword(oldPassword, newPassword);
 
       if (res.success) {
-        toast.success("Password changed successfully!");
+        toast.success(t("changePasswordPage.changeSuccess"));
         navigate("/profile");
       } else {
         setMessage(
-          res.message ||
-            error?.message ||
-            "Unable to change your password. Please try again.",
+          res.message || error?.message || t("changePasswordPage.changeFailed"),
         );
         setMessageColor(2);
       }
     } catch (error) {
-      setMessage(error.message);
+      setMessage(error?.message || t("changePasswordPage.changeFailed"));
       setMessageColor(2);
     } finally {
       setLocalLoading(false);
@@ -105,26 +112,25 @@ export default function ChangePassword() {
             className="inline-flex items-center gap-2 rounded-full border border-[#dce5df] bg-white px-3 py-2 text-xs font-extrabold text-[#16745f] transition hover:border-[#8bcdbd] hover:bg-[#f1f8f5]"
           >
             <FiArrowLeft />
-            ফিরে যান
+            {t("changePasswordPage.back")}
           </button>
 
           <div className="mt-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#eeeafd] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
               <FiShield />
-              Account Security
+              {t("changePasswordPage.badge")}
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold leading-tight text-[#263c35] sm:text-4xl">
-              আপনার পাসওয়ার্ড
+              {t("changePasswordPage.headingPrefix")}
               <span className="relative ml-2 inline-block text-[#16745f]">
-                পরিবর্তন করুন
+                {t("changePasswordPage.headingAccent")}
                 <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
               </span>
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-7 text-[#71817b]">
-              প্রথমে বর্তমান পাসওয়ার্ড যাচাই করুন, এরপর একটি নতুন ও নিরাপদ
-              পাসওয়ার্ড সেট করুন।
+              {t("changePasswordPage.description")}
             </p>
           </div>
 
@@ -145,15 +151,19 @@ export default function ChangePassword() {
                       : "bg-[#e9eeea] text-[#7d8b85]"
                   }`}
                 >
-                  {step > 1 ? <FiCheck /> : "1"}
+                  {step > 1 ? (
+                    <FiCheck />
+                  ) : (
+                    t("changePasswordPage.stepOneNumber")
+                  )}
                 </span>
 
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                    Step One
+                    {t("changePasswordPage.stepOne")}
                   </p>
                   <p className="truncate text-xs font-extrabold text-[#263c35] sm:text-sm">
-                    বর্তমান পাসওয়ার্ড
+                    {t("changePasswordPage.currentPasswordShort")}
                   </p>
                 </div>
               </div>
@@ -180,15 +190,15 @@ export default function ChangePassword() {
                       : "bg-[#e9eeea] text-[#7d8b85]"
                   }`}
                 >
-                  2
+                  {t("changePasswordPage.stepTwoNumber")}
                 </span>
 
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                    Step Two
+                    {t("changePasswordPage.stepTwo")}
                   </p>
                   <p className="truncate text-xs font-extrabold text-[#263c35] sm:text-sm">
-                    নতুন পাসওয়ার্ড
+                    {t("changePasswordPage.newPasswordShort")}
                   </p>
                 </div>
               </div>
@@ -239,7 +249,7 @@ export default function ChangePassword() {
                     className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                   >
                     <FiLock className="text-[#d9704b]" />
-                    বর্তমান পাসওয়ার্ড
+                    {t("changePasswordPage.currentPasswordLabel")}
                     <span className="text-[#d9704b]">*</span>
                   </label>
 
@@ -252,7 +262,9 @@ export default function ChangePassword() {
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-white pl-11 pr-12 text-sm font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#8bcdbd] focus:ring-4 focus:ring-[#8bcdbd]/15"
-                      placeholder="বর্তমান পাসওয়ার্ড লিখুন"
+                      placeholder={t(
+                        "changePasswordPage.currentPasswordPlaceholder",
+                      )}
                       required
                       autoComplete="current-password"
                     />
@@ -262,7 +274,9 @@ export default function ChangePassword() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#8b9893] transition hover:bg-[#eef3ef] hover:text-[#16745f]"
                       aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                        showPassword
+                          ? t("changePasswordPage.hidePassword")
+                          : t("changePasswordPage.showPassword")
                       }
                     >
                       {showPassword ? <FiEyeOff /> : <FiEye />}
@@ -284,11 +298,11 @@ export default function ChangePassword() {
                     {localLoading ? (
                       <>
                         <FiLoader className="animate-spin" />
-                        যাচাই হচ্ছে...
+                        {t("changePasswordPage.verifying")}
                       </>
                     ) : (
                       <>
-                        বর্তমান পাসওয়ার্ড যাচাই করুন
+                        {t("changePasswordPage.verifyButton")}
                         <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                       </>
                     )}
@@ -309,7 +323,7 @@ export default function ChangePassword() {
                     className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[#40554d]"
                   >
                     <FiKey className="text-[#7865c9]" />
-                    নতুন পাসওয়ার্ড
+                    {t("changePasswordPage.newPasswordLabel")}
                     <span className="text-[#d9704b]">*</span>
                   </label>
 
@@ -322,7 +336,9 @@ export default function ChangePassword() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className="h-13 w-full rounded-xl border border-[#dfe5e0] bg-white pl-11 pr-12 text-sm font-medium text-[#263c35] outline-none transition placeholder:text-[#9ba6a2] focus:border-[#a99be3] focus:ring-4 focus:ring-[#a99be3]/15"
-                      placeholder="একটি নতুন নিরাপদ পাসওয়ার্ড লিখুন"
+                      placeholder={t(
+                        "changePasswordPage.newPasswordPlaceholder",
+                      )}
                       required
                       autoComplete="new-password"
                     />
@@ -332,7 +348,9 @@ export default function ChangePassword() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-[#8b9893] transition hover:bg-[#f1eff9] hover:text-[#7865c9]"
                       aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                        showPassword
+                          ? t("changePasswordPage.hidePassword")
+                          : t("changePasswordPage.showPassword")
                       }
                     >
                       {showPassword ? <FiEyeOff /> : <FiEye />}
@@ -343,8 +361,7 @@ export default function ChangePassword() {
                     <div className="flex items-start gap-2">
                       <FiInfo className="mt-0.5 shrink-0 text-[#7865c9]" />
                       <p className="text-xs leading-6 text-[#665d82]">
-                        নিরাপত্তার জন্য পূর্বের পাসওয়ার্ড থেকে আলাদা এবং
-                        শক্তিশালী পাসওয়ার্ড ব্যবহার করুন।
+                        {t("changePasswordPage.passwordHint")}
                       </p>
                     </div>
                   </div>
@@ -364,11 +381,11 @@ export default function ChangePassword() {
                     {localLoading ? (
                       <>
                         <FiLoader className="animate-spin" />
-                        পরিবর্তন করা হচ্ছে...
+                        {t("changePasswordPage.changing")}
                       </>
                     ) : (
                       <>
-                        পাসওয়ার্ড পরিবর্তন করুন
+                        {t("changePasswordPage.changeButton")}
                         <FiCheckCircle />
                       </>
                     )}
@@ -380,7 +397,7 @@ export default function ChangePassword() {
 
           <p className="mt-6 flex items-center justify-center gap-2 border-t border-[#ece5d8] pt-5 text-center text-[11px] font-semibold text-[#8a9691]">
             <FiShield className="text-[#16745f]" />
-            আপনার পাসওয়ার্ড এনক্রিপ্টেড ও নিরাপদভাবে সংরক্ষিত থাকে
+            {t("changePasswordPage.encryptedNote")}
           </p>
         </section>
 
@@ -400,7 +417,7 @@ export default function ChangePassword() {
               <div className="flex items-center justify-between gap-4">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#f7c969]">
                   <FiLock />
-                  Password Security
+                  {t("changePasswordPage.asideBadge")}
                 </span>
 
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#9de2c9]">
@@ -409,20 +426,19 @@ export default function ChangePassword() {
               </div>
 
               <h2 className="mt-7 text-3xl font-extrabold leading-tight sm:text-4xl">
-                শক্তিশালী পাসওয়ার্ড দিয়ে আপনার অ্যাকাউন্ট সুরক্ষিত রাখুন
+                {t("changePasswordPage.asideTitle")}
               </h2>
 
               <p className="mt-4 max-w-lg text-sm leading-7 text-white/68 sm:text-base">
-                একটি নিরাপদ পাসওয়ার্ড আপনার কোর্স, ব্যক্তিগত তথ্য ও শেখার
-                অগ্রগতি অননুমোদিত প্রবেশ থেকে রক্ষা করে।
+                {t("changePasswordPage.asideDescription")}
               </p>
 
               <div className="mt-8 space-y-3">
                 {[
-                  "কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড ব্যবহার করুন",
-                  "বড় ও ছোট হাতের অক্ষর, সংখ্যা ও চিহ্ন যুক্ত করুন",
-                  "অন্য কোনো অ্যাকাউন্টের পাসওয়ার্ড পুনরায় ব্যবহার করবেন না",
-                  "নিয়মিত বিরতিতে পাসওয়ার্ড পরিবর্তন করুন",
+                  t("changePasswordPage.tips.minLength"),
+                  t("changePasswordPage.tips.mixCharacters"),
+                  t("changePasswordPage.tips.noReuse"),
+                  t("changePasswordPage.tips.changeRegularly"),
                 ].map((item, index) => (
                   <motion.div
                     key={item}
@@ -453,11 +469,10 @@ export default function ChangePassword() {
 
                   <div>
                     <p className="text-sm font-extrabold text-white">
-                      Two-step verification
+                      {t("changePasswordPage.twoStepTitle")}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-white/52">
-                      বর্তমান পাসওয়ার্ড যাচাই না করে নতুন পাসওয়ার্ড সেট করা যাবে
-                      না।
+                      {t("changePasswordPage.twoStepDescription")}
                     </p>
                   </div>
                 </div>
@@ -465,7 +480,7 @@ export default function ChangePassword() {
 
               <p className="mt-5 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-white/45">
                 <FiShield className="text-[#9de2c9]" />
-                নিরাপদ account security workflow
+                {t("changePasswordPage.secureWorkflow")}
               </p>
             </div>
           </div>

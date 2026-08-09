@@ -13,6 +13,7 @@ import {
   FiTag
 } from "react-icons/fi";
 import { useNavigate, useParams } from "react-router-dom";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 const EditCoupon = () => {
   const { courseId, couponId } = useParams();
@@ -27,6 +28,9 @@ const EditCoupon = () => {
   const [fetchLoading, setFetchLoading] = useState(true);
   const [course, setCourse] = useState(null);
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
 
   // Fetch coupon and course details
   useEffect(() => {
@@ -54,7 +58,7 @@ const EditCoupon = () => {
         }
       } catch (error) {
         console.error(error);
-        toast.error("Failed to fetch data");
+        toast.error(t("adminCourse.coupon.toasts.loadDataFailed"));
       } finally {
         setFetchLoading(false);
       }
@@ -73,22 +77,22 @@ const EditCoupon = () => {
 
   const validateForm = () => {
     if (!formData.code.trim()) {
-      toast.error("Coupon code is required");
+      toast.error(t("adminCourse.coupon.toasts.codeRequired"));
       return false;
     }
 
     if (!formData.discountValue || formData.discountValue <= 0) {
-      toast.error("Discount value must be a positive number");
+      toast.error(t("adminCourse.coupon.toasts.positiveDiscount"));
       return false;
     }
 
     if (formData.discountType === 'percentage' && formData.discountValue > 100) {
-      toast.error("Percentage discount cannot exceed 100%");
+      toast.error(t("adminCourse.coupon.toasts.percentageLimit"));
       return false;
     }
 
     if (formData.expiryDate && new Date(formData.expiryDate) <= new Date()) {
-      toast.error("Expiry date must be in the future");
+      toast.error(t("adminCourse.coupon.toasts.futureExpiry"));
       return false;
     }
 
@@ -116,12 +120,12 @@ const EditCoupon = () => {
       });
 
       if (data.success) {
-        toast.success("✅ Coupon updated successfully!");
+        toast.success(t("adminCourse.coupon.toasts.updated"));
         navigate(`/admin/courses/${courseId}/coupons`);
       }
     } catch (error) {
       console.error("Update coupon error:", error);
-      toast.error(`❌ ${error.response?.data?.message || "Failed to update coupon"}`);
+      toast.error(error.response?.data?.message || t("adminCourse.coupon.toasts.updateFailed"));
     } finally {
       setLoading(false);
     }
@@ -156,7 +160,7 @@ const EditCoupon = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading coupon data...</p>
+          <p className="mt-4 text-gray-600">{t("adminCourse.coupon.loadingData")}</p>
         </div>
       </div>
     );
@@ -174,11 +178,11 @@ const EditCoupon = () => {
           onClick={() => navigate(`/admin/courses/${courseId}/coupons`)}
           className="flex items-center px-4 py-2 text-gray-600 hover:bg-white rounded-xl transition"
         >
-          <FiArrowLeft className="mr-2" /> Back to Coupons
+          <FiArrowLeft className="mr-2" /> {t("adminCourse.coupon.backToCoupons")}
         </button>
         <div className="text-center sm:text-left">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Edit Coupon
+            {t("adminCourse.coupon.editTitle")}
           </h1>
           <p className="text-gray-600 mt-1">{course?.title}</p>
         </div>
@@ -195,7 +199,7 @@ const EditCoupon = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <FiTag className="mr-2" /> Coupon Code
+                <FiTag className="mr-2" /> {t("adminCourse.coupon.couponCode")}
               </h2>
               
               <input
@@ -203,12 +207,12 @@ const EditCoupon = () => {
                 name="code"
                 value={formData.code}
                 onChange={handleChange}
-                placeholder="Enter coupon code"
+                placeholder={t("adminCourse.coupon.editCodePlaceholder")}
                 className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none uppercase"
                 required
               />
               <p className="text-sm text-gray-500 mt-2">
-                Uppercase letters and numbers only.
+                {t("adminCourse.coupon.codeHelp")}
               </p>
             </motion.div>
 
@@ -219,14 +223,14 @@ const EditCoupon = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Discount Settings
+                {t("adminCourse.coupon.discountSettings")}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Discount Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Discount Type
+                    {t("adminCourse.coupon.discountType")}
                   </label>
                   <div className="flex gap-2">
                     <button
@@ -239,7 +243,7 @@ const EditCoupon = () => {
                       }`}
                     >
                       <FiPercent />
-                      Percentage
+                      {t("adminCourse.coupon.percentage")}
                     </button>
                     <button
                       type="button"
@@ -251,7 +255,7 @@ const EditCoupon = () => {
                       }`}
                     >
                       <FiDollarSign />
-                      Flat Amount
+                      {t("adminCourse.coupon.flatAmount")}
                     </button>
                   </div>
                 </div>
@@ -259,7 +263,7 @@ const EditCoupon = () => {
                 {/* Discount Value */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Discount Value
+                    {t("adminCourse.coupon.discountValue")}
                     {formData.discountType === 'percentage' ? ' (%)' : ' (৳)'}
                   </label>
                   <div className="relative">
@@ -290,14 +294,14 @@ const EditCoupon = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <FiUsers className="mr-2" /> Usage Limits
+                <FiUsers className="mr-2" /> {t("adminCourse.coupon.usageLimits")}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Usage Limit */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Maximum Usage Limit
+                    {t("adminCourse.coupon.maxUsage")}
                   </label>
                   <div className="relative">
                     <input
@@ -318,7 +322,7 @@ const EditCoupon = () => {
                 {/* Expiry Date */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Expiry Date (Optional)
+                    {t("adminCourse.coupon.expiryDate")}
                   </label>
                   <div className="relative">
                     <input
@@ -345,27 +349,27 @@ const EditCoupon = () => {
                 className="bg-white rounded-2xl shadow-lg p-6"
               >
                 <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Discount Preview
+                  {t("adminCourse.coupon.discountPreview")}
                 </h2>
                 
                 <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-xl p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Original Price</p>
+                      <p className="text-sm text-gray-600 mb-1">{t("adminCourse.coupon.originalPrice")}</p>
                       <p className="text-2xl font-bold text-gray-800 line-through">
-                        ৳{discountPreview.original}
+                        ৳{formatNumber(discountPreview.original)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Discounted Price</p>
+                      <p className="text-sm text-gray-600 mb-1">{t("adminCourse.coupon.discountedPrice")}</p>
                       <p className="text-2xl font-bold text-green-600">
-                        ৳{discountPreview.discounted.toFixed(2)}
+                        ৳{Number(discountPreview.discounted).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">You Save</p>
+                      <p className="text-sm text-gray-600 mb-1">{t("adminCourse.coupon.youSave")}</p>
                       <p className="text-2xl font-bold text-blue-600">
-                        ৳{discountPreview.savings.toFixed(2)}
+                        ৳{Number(discountPreview.savings).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
@@ -383,21 +387,21 @@ const EditCoupon = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Course Information
+                {t("adminCourse.coupon.courseInformation")}
               </h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-gray-600">Course:</span>
+                  <span className="text-gray-600">{t("adminCourse.coupon.course")}</span>
                   <p className="font-medium text-gray-800">{course?.title}</p>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Original Price:</span>
+                  <span className="text-gray-600">{t("adminCourse.coupon.originalPrice")}:</span>
                   <span className="font-medium">৳{course?.price || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Coupons:</span>
+                  <span className="text-gray-600">{t("adminCourse.coupon.totalCoupons")}</span>
                   <span className="font-medium">
-                    {course?.coupons?.length || 0}
+                    {formatNumber(course?.coupons?.length || 0)}
                   </span>
                 </div>
               </div>
@@ -413,10 +417,10 @@ const EditCoupon = () => {
               }`}
             >
               {loading ? (
-                "Updating Coupon..."
+                t("adminCourse.coupon.updating")
               ) : (
                 <>
-                  <FiSave className="mr-2" /> Update Coupon
+                  <FiSave className="mr-2" /> {t("adminCourse.coupon.update")}
                 </>
               )}
             </motion.button>

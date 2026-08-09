@@ -16,11 +16,14 @@ import LoadingState from "../components/LearningPage/LoadingState";
 import ErrorState from "../components/LearningPage/ErrorState";
 import { useAuth } from "../hooks/useAuth";
 import CourseReview from "../components/LearningPage/CourseReview";
+import { useLanguage } from "../hooks/useLanguage";
 
 const LearningPage = () => {
   const { courseId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
 
   const [course, setCourse] = useState(null);
   const [lectures, setLectures] = useState([]);
@@ -110,7 +113,7 @@ const LearningPage = () => {
       }
     } catch (err) {
       console.error("fetchCourseData error:", err.response || err);
-      toast.error("Failed to load course data");
+      toast.error(t("learningPage.toasts.loadFailed"));
       navigate("/my-courses");
     } finally {
       setLoading(false);
@@ -125,7 +128,7 @@ const LearningPage = () => {
 
   const markLectureComplete = async (lectureId) => {
     if (!enrollment?._id) {
-      toast.error("Enrollment not found");
+      toast.error(t("learningPage.toasts.enrollmentNotFound"));
       return;
     }
 
@@ -150,7 +153,7 @@ const LearningPage = () => {
           data.enrollment?.lastActivity || data.enrollment?.updatedAt
         );
 
-        toast.success(data.message || "Lecture marked as complete!");
+        toast.success(data.message || t("learningPage.toasts.markedComplete"));
 
         if (currentLecture) {
           localStorage.setItem(`last_watched_${courseId}`, currentLecture._id);
@@ -163,16 +166,18 @@ const LearningPage = () => {
           setTimeout(() => {
             setCurrentLecture(nextLecture);
             setVideoError(false);
-            toast.success(`Moving to next lecture: ${nextLecture.title}`);
+            toast.success(
+              t("learningPage.toasts.movingNext", { title: nextLecture.title })
+            );
           }, 1500);
         }
       } else {
-        toast.error(data?.message || "Failed to mark as complete");
+        toast.error(data?.message || t("learningPage.toasts.markCompleteFailed"));
       }
     } catch (err) {
       console.error("markLectureComplete error:", err.response || err);
       toast.error(
-        err.response?.data?.message || "Failed to mark lecture as complete"
+        err.response?.data?.message || t("learningPage.toasts.markCompleteFailed")
       );
     } finally {
       setMarkingComplete(false);
@@ -198,13 +203,13 @@ const LearningPage = () => {
         }
 
         setProgress(data.progress);
-        toast.success(data.message || "Lecture marked as incomplete");
+        toast.success(data.message || t("learningPage.toasts.markedIncomplete"));
       } else {
-        toast.error(data?.message || "Failed to update");
+        toast.error(data?.message || t("learningPage.toasts.updateFailed"));
       }
     } catch (err) {
       console.error("markLectureIncomplete:", err);
-      toast.error("Failed to update lecture status");
+      toast.error(t("learningPage.toasts.updateStatusFailed"));
     }
   };
 
@@ -255,13 +260,13 @@ const LearningPage = () => {
 
   const handleVideoIframeError = () => {
     setVideoError(true);
-    toast.error("Video failed to load");
+    toast.error(t("learningPage.toasts.videoLoadFailed"));
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleString(locale, {
       month: "short",
       day: "numeric",
       hour: "2-digit",

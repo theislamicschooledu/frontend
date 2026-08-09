@@ -19,6 +19,7 @@ import {
 import { IoMailOpenSharp } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
 import ConfirmModal from "../../../components/ConfirmModal";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 const UserDetails = () => {
   const [loading, setLoading] = useState(false);
@@ -37,6 +38,11 @@ const UserDetails = () => {
 
   const { id } = useParams();
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
+
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+
+  const roleLabel = (role) => t(`adminUserDetails.roles.${role || "student"}`);
 
   const fetchUser = async () => {
     setLoading(true);
@@ -111,7 +117,7 @@ const UserDetails = () => {
       });
 
       if (res.data.success) {
-        toast.success(res.data.message || "User updated successfully");
+        toast.success(res.data.message || t("adminUserDetails.toasts.updated"));
         setIsEditMode(false);
         await fetchUser();
       }
@@ -129,7 +135,7 @@ const UserDetails = () => {
       if (modalAction === "delete") {
         const res = await api.delete(`/admin/users/${id}`);
         if (res.data.success) {
-          toast.success("User deleted successfully");
+          toast.success(t("adminUserDetails.toasts.deleted"));
           navigate("/admin/users");
           return;
         }
@@ -171,7 +177,7 @@ const UserDetails = () => {
       if (modalAction === "banned") {
         const res = await api.put(`/admin/${id}/ban`);
         if (res.data.success) {
-          toast.success("User banned successfully");
+          toast.success(t("adminUserDetails.toasts.banned"));
           await fetchUser();
         } else {
           toast.error(res.data.message);
@@ -181,7 +187,7 @@ const UserDetails = () => {
       if (modalAction === "unbanned") {
         const res = await api.put(`/admin/${id}/unBan`);
         if (res.data.success) {
-          toast.success("User unbanned successfully");
+          toast.success(t("adminUserDetails.toasts.unbanned"));
           await fetchUser();
         } else {
           toast.error(res.data.message);
@@ -199,31 +205,34 @@ const UserDetails = () => {
   const getModalText = () => {
     switch (modalAction) {
       case "delete":
-        return { title: "Delete User", message: "Are you sure to delete?" };
+        return {
+          title: t("adminUserDetails.modal.deleteTitle"),
+          message: t("adminUserDetails.modal.deleteMessage"),
+        };
       case "banned":
         return {
-          title: "Banned User",
-          message: "Are you sure to want ban this user?",
+          title: t("adminUserDetails.modal.banTitle"),
+          message: t("adminUserDetails.modal.banMessage"),
         };
       case "unbanned":
         return {
-          title: "Unbanned User",
-          message: "Are you sure to want unbanned this user?",
+          title: t("adminUserDetails.modal.unbanTitle"),
+          message: t("adminUserDetails.modal.unbanMessage"),
         };
       case "makeAdmin":
         return {
-          title: "Make Admin",
-          message: "Are you sure to want make admin?",
+          title: t("adminUserDetails.modal.makeAdminTitle"),
+          message: t("adminUserDetails.modal.makeAdminMessage"),
         };
       case "makeTeacher":
         return {
-          title: "Make Teacher",
-          message: "Are you sure to want make teacher?",
+          title: t("adminUserDetails.modal.makeTeacherTitle"),
+          message: t("adminUserDetails.modal.makeTeacherMessage"),
         };
       case "makeUser":
         return {
-          title: "Make User",
-          message: "Are you sure to want make user?",
+          title: t("adminUserDetails.modal.makeStudentTitle"),
+          message: t("adminUserDetails.modal.makeStudentMessage"),
         };
       default:
         return { title: "", message: "" };
@@ -247,16 +256,16 @@ const UserDetails = () => {
         className="bg-linear-to-r from-amber-500 to-orange-500 text-white p-6 rounded-2xl shadow-lg mb-6 flex justify-between items-center"
       >
         <div>
-          <h2 className="text-2xl font-bold">User Details</h2>
+          <h2 className="text-2xl font-bold">{t("adminUserDetails.title")}</h2>
           <p className="opacity-80 text-sm">
-            Profile information & quick actions
+            {t("adminUserDetails.subtitle")}
           </p>
         </div>
         <button
           onClick={() => window.history.back()}
           className="px-4 py-2 bg-white text-amber-600 rounded-xl hover:bg-gray-100 transition font-medium"
         >
-          Back
+          {t("adminUserDetails.back")}
         </button>
       </motion.div>
 
@@ -303,7 +312,7 @@ const UserDetails = () => {
                 roleColors[user?.role]
               }`}
             >
-              {user?.role?.toUpperCase()}
+              {roleLabel(user?.role)}
             </p>
 
             <p
@@ -311,7 +320,9 @@ const UserDetails = () => {
                 user?.isBanned ? statusColors.banned : statusColors.active
               }`}
             >
-              {user?.isBanned ? "BANNED" : "ACTIVE"}
+              {user?.isBanned
+                ? t("adminUserDetails.status.banned")
+                : t("adminUserDetails.status.active")}
             </p>
           </div>
 
@@ -319,17 +330,19 @@ const UserDetails = () => {
             <div className="flex items-center gap-2">
               <IoMailOpenSharp />
               <span className="text-gray-500 break-all">
-                {user?.email || "N/A"}
+                {user?.email || t("common.unavailable")}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <FiPhone />
-              <span className="text-gray-500">{user?.phone || "N/A"}</span>
+              <span className="text-gray-500">
+                {user?.phone || t("common.unavailable")}
+              </span>
             </div>
             <div className="flex items-start gap-2">
               <FaLocationDot className="mt-1" />
               <address className="text-gray-500 not-italic">
-                {user?.address || "N/A"}
+                {user?.address || t("common.unavailable")}
               </address>
             </div>
           </div>
@@ -339,7 +352,7 @@ const UserDetails = () => {
           <div className="bg-linear-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-amber-100 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-semibold text-gray-800 text-lg">
-                Edit Information
+                {t("adminUserDetails.editInformation")}
               </h4>
 
               {!isEditMode ? (
@@ -348,7 +361,7 @@ const UserDetails = () => {
                   className="inline-flex items-center gap-2 px-4 py-2 bg-white text-amber-600 rounded-xl border border-amber-200 hover:bg-amber-50 transition"
                 >
                   <FiEdit2 />
-                  Edit
+                  {t("adminUserDetails.edit")}
                 </button>
               ) : (
                 <button
@@ -364,7 +377,7 @@ const UserDetails = () => {
                   className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl border border-gray-200 hover:bg-gray-50 transition"
                 >
                   <FiX />
-                  Cancel
+                  {t("adminUserDetails.cancel")}
                 </button>
               )}
             </div>
@@ -372,7 +385,7 @@ const UserDetails = () => {
             <form onSubmit={handleUpdateUser} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  User Name
+                  {t("adminUserDetails.userName")}
                 </label>
                 <input
                   type="text"
@@ -381,13 +394,13 @@ const UserDetails = () => {
                   onChange={handleInputChange}
                   disabled={!isEditMode}
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400 disabled:bg-gray-100 disabled:text-gray-500"
-                  placeholder="Enter user name"
+                  placeholder={t("adminUserDetails.userNamePlaceholder")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address
+                  {t("adminUserDetails.address")}
                 </label>
                 <textarea
                   name="address"
@@ -396,7 +409,7 @@ const UserDetails = () => {
                   onChange={handleInputChange}
                   disabled={!isEditMode}
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400 disabled:bg-gray-100 disabled:text-gray-500"
-                  placeholder="Enter address"
+                  placeholder={t("adminUserDetails.addressPlaceholder")}
                 />
               </div>
 
@@ -407,7 +420,9 @@ const UserDetails = () => {
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition disabled:opacity-70"
                 >
                   <FiSave />
-                  {saving ? "Saving..." : "Save Changes"}
+                  {saving
+                    ? t("adminUserDetails.saving")
+                    : t("adminUserDetails.saveChanges")}
                 </button>
               )}
             </form>
@@ -415,43 +430,59 @@ const UserDetails = () => {
 
           <div className="bg-linear-to-r from-purple-50 to-fuchsia-50 rounded-2xl p-6 border border-fuchsia-100 shadow-sm">
             <h4 className="font-semibold text-gray-800 mb-4 text-lg">
-              Activity
+              {t("adminUserDetails.activity")}
             </h4>
             <div className="space-y-2 text-gray-600">
               <p className="flex gap-1">
-                <span className="font-medium">User Type:</span>
-                <span>{user?.verified ? "Verified" : "Unverified"}</span>
+                <span className="font-medium">
+                  {t("adminUserDetails.userType")}
+                </span>
+                <span>
+                  {user?.verified
+                    ? t("adminUserDetails.verified")
+                    : t("adminUserDetails.unverified")}
+                </span>
               </p>
               <p className="flex gap-1">
-                <span className="font-medium">Verification Code:</span>
-                <span>{user?.otp ? user?.otp : "Not found"}</span>
+                <span className="font-medium">
+                  {t("adminUserDetails.verificationCode")}
+                </span>
+                <span>
+                  {user?.otp ? user?.otp : t("adminUserDetails.notFound")}
+                </span>
               </p>
               <p className="flex gap-1">
-                <span className="font-medium">Reset Code:</span>
+                <span className="font-medium">
+                  {t("adminUserDetails.resetCode")}
+                </span>
                 <span>
                   {user?.resetPasswordToken
                     ? user?.resetPasswordToken
-                    : "Not found"}
+                    : t("adminUserDetails.notFound")}
                 </span>
               </p>
               <p>
-                <span className="font-medium">Joined:</span>{" "}
+                <span className="font-medium">
+                  {t("adminUserDetails.joined")}
+                </span>{" "}
                 {user?.createdAt
-                  ? new Date(user.createdAt).toLocaleString()
-                  : "N/A"}
+                  ? new Date(user.createdAt).toLocaleString(locale)
+                  : t("common.unavailable")}
               </p>
               <p>
-                <span className="font-medium">Last Update:</span>{" "}
+                <span className="font-medium">
+                  {t("adminUserDetails.lastUpdate")}
+                </span>{" "}
                 {user?.updatedAt
-                  ? new Date(user.updatedAt).toLocaleString()
-                  : "N/A"}
+                  ? new Date(user.updatedAt).toLocaleString(locale)
+                  : t("common.unavailable")}
               </p>
             </div>
           </div>
 
           <div className="bg-linear-to-r from-purple-50 to-fuchsia-50 rounded-2xl p-6 border border-fuchsia-100 shadow-sm">
             <h4 className="font-semibold text-gray-800 mb-4 text-lg">
-              Quick Actions
+              {t("adminUserDetails.quickActions")}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <a
@@ -459,7 +490,7 @@ const UserDetails = () => {
                 className="flex items-center justify-center px-4 py-2 bg-white text-green-600 rounded-xl border border-green-200 hover:bg-green-50 transition"
               >
                 <FiMail className="mr-2" />
-                Send Message
+                {t("adminUserDetails.sendMessage")}
               </a>
 
               <a
@@ -467,7 +498,7 @@ const UserDetails = () => {
                 className="flex items-center justify-center px-4 py-2 bg-white text-green-600 rounded-xl border border-green-200 hover:bg-green-50 transition"
               >
                 <FiPhoneCall className="mr-2" />
-                Call
+                {t("adminUserDetails.call")}
               </a>
 
               {user?.role === "student" && (
@@ -476,13 +507,13 @@ const UserDetails = () => {
                     onClick={() => openModal("makeAdmin")}
                     className="flex items-center justify-center px-4 py-2 bg-white text-purple-600 rounded-xl border border-purple-200 hover:bg-purple-50 transition cursor-pointer"
                   >
-                    Make Admin
+                    {t("adminUserDetails.makeAdmin")}
                   </button>
                   <button
                     onClick={() => openModal("makeTeacher")}
                     className="flex items-center justify-center px-4 py-2 bg-white text-blue-600 rounded-xl border border-blue-200 hover:bg-blue-50 transition cursor-pointer"
                   >
-                    Make Teacher
+                    {t("adminUserDetails.makeTeacher")}
                   </button>
                 </>
               )}
@@ -493,13 +524,13 @@ const UserDetails = () => {
                     onClick={() => openModal("makeAdmin")}
                     className="flex items-center justify-center px-4 py-2 bg-white text-purple-600 rounded-xl border border-purple-200 hover:bg-purple-50 transition cursor-pointer"
                   >
-                    Make Admin
+                    {t("adminUserDetails.makeAdmin")}
                   </button>
                   <button
                     onClick={() => openModal("makeUser")}
                     className="flex items-center justify-center px-4 py-2 bg-white text-green-600 rounded-xl border border-green-200 hover:bg-green-50 transition cursor-pointer"
                   >
-                    Make User
+                    {t("adminUserDetails.makeStudent")}
                   </button>
                 </>
               )}
@@ -510,13 +541,13 @@ const UserDetails = () => {
                     onClick={() => openModal("makeTeacher")}
                     className="flex items-center justify-center px-4 py-2 bg-white text-blue-600 rounded-xl border border-blue-200 hover:bg-blue-50 transition cursor-pointer"
                   >
-                    Make Teacher
+                    {t("adminUserDetails.makeTeacher")}
                   </button>
                   <button
                     onClick={() => openModal("makeUser")}
                     className="flex items-center justify-center px-4 py-2 bg-white text-green-600 rounded-xl border border-green-200 hover:bg-green-50 transition cursor-pointer"
                   >
-                    Make User
+                    {t("adminUserDetails.makeStudent")}
                   </button>
                 </>
               )}
@@ -527,7 +558,7 @@ const UserDetails = () => {
                   className="flex items-center justify-center px-4 py-2 bg-white text-green-600 rounded-xl border border-green-200 hover:bg-green-50 transition cursor-pointer"
                 >
                   <FiUserCheck className="mr-2" />
-                  Unbanned User
+                  {t("adminUserDetails.unbanUser")}
                 </button>
               ) : (
                 <button
@@ -535,7 +566,7 @@ const UserDetails = () => {
                   className="flex items-center justify-center px-4 py-2 bg-white text-amber-600 rounded-xl border border-amber-200 hover:bg-amber-50 transition cursor-pointer"
                 >
                   <FiUserX className="mr-2" />
-                  Ban User
+                  {t("adminUserDetails.banUser")}
                 </button>
               )}
 
@@ -544,7 +575,7 @@ const UserDetails = () => {
                 className="flex items-center justify-center px-4 py-2 bg-white text-red-600 rounded-xl border border-red-200 hover:bg-red-50 transition cursor-pointer"
               >
                 <FiTrash2 className="mr-2" />
-                Delete User
+                {t("adminUserDetails.deleteUser")}
               </button>
             </div>
           </div>

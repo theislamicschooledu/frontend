@@ -19,12 +19,19 @@ import {
   FiXCircle,
 } from "react-icons/fi";
 import api from "../utils/axios";
+import { useLanguage } from "../hooks/useLanguage";
 
 const MyCourses = () => {
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRejection, setSelectedRejection] = useState(null);
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
+  const formatDate = (value, options = {}) =>
+    new Date(value).toLocaleDateString(locale, options);
 
   useEffect(() => {
     fetchEnrollments();
@@ -59,20 +66,20 @@ const MyCourses = () => {
 
   const getButtonText = (enrollment) => {
     if (enrollment.paymentStatus === "pending") {
-      return "Pending Approval";
+      return t("myCoursesPage.buttons.pendingApproval");
     }
 
     if (enrollment.paymentStatus === "cancelled") {
-      return "Enrollment Cancelled";
+      return t("myCoursesPage.buttons.enrollmentCancelled");
     }
 
     if (enrollment.paymentStatus === "failed") {
-      return "Payment Failed";
+      return t("myCoursesPage.buttons.paymentFailed");
     }
 
     return calculateProgress(enrollment) > 0
-      ? "Continue Learning"
-      : "Start Learning";
+      ? t("myCoursesPage.buttons.continueLearning")
+      : t("myCoursesPage.buttons.startLearning");
   };
 
   const getButtonIcon = (enrollment) => {
@@ -85,25 +92,25 @@ const MyCourses = () => {
 
   const statusConfig = {
     completed: {
-      label: "Active",
+      label: t("myCoursesPage.status.active"),
       badge: "bg-[#e7f5ef] text-[#16745f]",
       dot: "bg-[#46a88d]",
       overlay: "",
     },
     pending: {
-      label: "Pending",
+      label: t("myCoursesPage.status.pending"),
       badge: "bg-[#fff6df] text-[#a87318]",
       dot: "bg-[#e7ad3e]",
       overlay: "bg-[#263c35]/28",
     },
     cancelled: {
-      label: "Cancelled",
+      label: t("myCoursesPage.status.cancelled"),
       badge: "bg-[#fff0e9] text-[#c6573a]",
       dot: "bg-[#df7650]",
       overlay: "bg-[#263c35]/48",
     },
     failed: {
-      label: "Failed",
+      label: t("myCoursesPage.status.failed"),
       badge: "bg-[#fff0e9] text-[#c6573a]",
       dot: "bg-[#df7650]",
       overlay: "bg-[#263c35]/48",
@@ -163,25 +170,25 @@ const MyCourses = () => {
                   type="button"
                   onClick={() => setSelectedRejection(null)}
                   className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e2e6e2] bg-white/80 text-[#71817b] transition hover:border-[#efb49f] hover:bg-[#fff2eb] hover:text-[#d9704b]"
-                  aria-label="Close rejection details"
+                  aria-label={t("myCoursesPage.rejection.closeAria")}
                 >
                   <FiX />
                 </button>
               </div>
 
               <p className="mt-5 text-[11px] font-extrabold uppercase tracking-[0.15em] text-[#c6573a]">
-                Enrollment Status
+                {t("myCoursesPage.rejection.badge")}
               </p>
               <h3
                 id="rejection-modal-title"
                 className="mt-2 text-2xl font-extrabold text-[#263c35]"
               >
-                এনরোলমেন্ট রিজেক্ট করা হয়েছে
+                {t("myCoursesPage.rejection.title")}
               </h3>
 
               <div className="mt-5 rounded-[1.15rem] border border-[#e7e1d6] bg-white p-4">
                 <p className="text-[11px] font-bold uppercase tracking-wide text-[#8a9691]">
-                  Course
+                  {t("myCoursesPage.rejection.course")}
                 </p>
                 <p className="mt-1 font-extrabold leading-6 text-[#263c35]">
                   {selectedRejection.course?.title}
@@ -191,11 +198,11 @@ const MyCourses = () => {
               <div className="mt-4 rounded-[1.15rem] border border-[#f1d8ce] bg-[#fff7f2] p-4">
                 <p className="flex items-center gap-2 text-sm font-extrabold text-[#b85437]">
                   <FiAlertCircle />
-                  রিজেক্ট করার কারণ
+                  {t("myCoursesPage.rejection.reason")}
                 </p>
                 <p className="mt-2 text-sm leading-7 text-[#76594f]">
                   {selectedRejection.paymentDetails?.rejectionReason ||
-                    "কোনো নির্দিষ্ট কারণ প্রদান করা হয়নি।"}
+                    t("myCoursesPage.rejection.noReason")}
                 </p>
               </div>
 
@@ -204,12 +211,10 @@ const MyCourses = () => {
                   <FiCalendar className="mt-0.5 shrink-0 text-[#a87318]" />
                   <div>
                     <p className="text-xs font-bold text-[#856d3b]">
-                      রিজেক্ট করার সময়
+                      {t("myCoursesPage.rejection.rejectedAt")}
                     </p>
                     <p className="mt-1 text-sm text-[#796b50]">
-                      {new Date(
-                        selectedRejection.paymentDetails.rejectedAt,
-                      ).toLocaleDateString("bn-BD", {
+                      {formatDate(selectedRejection.paymentDetails.rejectedAt, {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -224,8 +229,7 @@ const MyCourses = () => {
               <div className="mt-4 flex items-start gap-3 rounded-[1.15rem] border border-[#d4e9e1] bg-[#f1f9f6] p-4">
                 <FiInfo className="mt-0.5 shrink-0 text-[#16745f]" />
                 <p className="text-sm leading-6 text-[#4f7065]">
-                  প্রয়োজন হলে সাপোর্ট টিমের সঙ্গে যোগাযোগ করুন অথবা কোর্স পেজ
-                  থেকে পুনরায় এনরোলমেন্টের চেষ্টা করুন।
+                  {t("myCoursesPage.rejection.supportNote")}
                 </p>
               </div>
             </div>
@@ -237,7 +241,7 @@ const MyCourses = () => {
                   onClick={() => setSelectedRejection(null)}
                   className="inline-flex h-12 flex-1 items-center justify-center rounded-xl border border-[#dfe5e0] bg-white px-5 text-sm font-extrabold text-[#53665e] transition hover:bg-[#f7faf8]"
                 >
-                  বন্ধ করুন
+                  {t("myCoursesPage.rejection.close")}
                 </button>
 
                 <Link
@@ -245,7 +249,7 @@ const MyCourses = () => {
                   onClick={() => setSelectedRejection(null)}
                   className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#d96343] px-5 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(217,99,67,0.22)] transition hover:bg-[#bd4f32]"
                 >
-                  আবার চেষ্টা করুন
+                  {t("myCoursesPage.rejection.retry")}
                   <FiArrowRight />
                 </Link>
               </div>
@@ -279,10 +283,10 @@ const MyCourses = () => {
           </div>
 
           <h3 className="text-xl font-extrabold text-[#263c35]">
-            আপনার কোর্সগুলো লোড হচ্ছে
+            {t("myCoursesPage.loadingTitle")}
           </h3>
           <p className="mt-2 text-sm leading-6 text-[#6d7c76]">
-            এনরোলমেন্ট ও শেখার অগ্রগতি প্রস্তুত করা হচ্ছে।
+            {t("myCoursesPage.loadingDescription")}
           </p>
 
           <div className="mt-5 flex justify-center gap-1.5">
@@ -339,20 +343,19 @@ const MyCourses = () => {
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-[#d7e9e2] bg-white/80 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#16745f] shadow-sm backdrop-blur">
                 <FiBook />
-                Learning Dashboard
+                {t("myCoursesPage.badge")}
               </span>
 
               <h1 className="mt-4 text-3xl font-extrabold leading-[1.16] text-[#263c35] sm:text-4xl lg:text-[3.1rem]">
-                আপনার শেখার
+                {t("myCoursesPage.headingPrefix")}
                 <span className="relative ml-2 inline-block text-[#16745f]">
-                  যাত্রা চালিয়ে যান
+                  {t("myCoursesPage.headingAccent")}
                   <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
                 </span>
               </h1>
 
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[#687a73] sm:text-base">
-                আপনার সক্রিয় কোর্স, পেমেন্ট স্ট্যাটাস এবং শেখার অগ্রগতি এক জায়গা
-                থেকে দেখুন।
+                {t("myCoursesPage.description")}
               </p>
             </motion.div>
 
@@ -366,7 +369,7 @@ const MyCourses = () => {
                 <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-[#7d8c86]" />
                 <input
                   type="text"
-                  placeholder="কোর্সের নাম লিখে খুঁজুন..."
+                  placeholder={t("myCoursesPage.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="h-12 w-full rounded-[1.1rem] bg-[#f8faf7] pl-11 pr-11 text-sm text-[#263c35] outline-none transition placeholder:text-[#9aa6a1] focus:bg-white focus:ring-2 focus:ring-[#8bcdbd]/45"
@@ -377,7 +380,7 @@ const MyCourses = () => {
                     type="button"
                     onClick={() => setSearchTerm("")}
                     className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#7d8c86] transition hover:bg-[#f0ebe2] hover:text-[#d96f4a]"
-                    aria-label="Clear course search"
+                    aria-label={t("myCoursesPage.clearSearchAria")}
                   >
                     <FiX />
                   </button>
@@ -395,29 +398,29 @@ const MyCourses = () => {
           >
             {[
               {
-                label: "মোট কোর্স",
-                value: enrollments.length,
+                label: t("myCoursesPage.stats.totalCourses"),
+                value: formatNumber(enrollments.length),
                 icon: FiBook,
                 bg: "bg-[#fff0e8]",
                 text: "text-[#d9704b]",
               },
               {
-                label: "সক্রিয়",
-                value: activeCourses,
+                label: t("myCoursesPage.stats.active"),
+                value: formatNumber(activeCourses),
                 icon: FiPlay,
                 bg: "bg-[#e5f4ee]",
                 text: "text-[#16745f]",
               },
               {
-                label: "পেন্ডিং",
-                value: pendingCourses,
+                label: t("myCoursesPage.stats.pending"),
+                value: formatNumber(pendingCourses),
                 icon: FiClock,
                 bg: "bg-[#fff6df]",
                 text: "text-[#a87318]",
               },
               {
-                label: "গড় অগ্রগতি",
-                value: `${averageProgress}%`,
+                label: t("myCoursesPage.stats.averageProgress"),
+                value: `${formatNumber(averageProgress)}%`,
                 icon: FiBarChart2,
                 bg: "bg-[#eeeafd]",
                 text: "text-[#6e5bb4]",
@@ -471,14 +474,14 @@ const MyCourses = () => {
 
               <h2 className="mt-5 text-2xl font-extrabold text-[#263c35]">
                 {searchTerm
-                  ? "মিলছে এমন কোনো কোর্স পাওয়া যায়নি"
-                  : "আপনি এখনো কোনো কোর্সে এনরোল করেননি"}
+                  ? t("myCoursesPage.empty.searchTitle")
+                  : t("myCoursesPage.empty.noCoursesTitle")}
               </h2>
 
               <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#6d7c76]">
                 {searchTerm
-                  ? "অন্য কোনো শব্দ ব্যবহার করে আবার খুঁজুন অথবা সার্চটি পরিষ্কার করুন।"
-                  : "আপনার পছন্দের কোর্স নির্বাচন করে আজই শেখার যাত্রা শুরু করুন।"}
+                  ? t("myCoursesPage.empty.searchDescription")
+                  : t("myCoursesPage.empty.noCoursesDescription")}
               </p>
 
               <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -489,7 +492,7 @@ const MyCourses = () => {
                     className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d8dfd9] px-5 py-3 font-extrabold text-[#40554d] transition hover:border-[#ef8f6d] hover:text-[#d96f4a]"
                   >
                     <FiX />
-                    সার্চ পরিষ্কার করুন
+                    {t("myCoursesPage.clearSearch")}
                   </button>
                 )}
 
@@ -498,7 +501,7 @@ const MyCourses = () => {
                     to="/courses"
                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#16745f] px-6 py-3 font-extrabold text-white shadow-[0_12px_30px_rgba(22,116,95,0.22)] transition hover:-translate-y-0.5 hover:bg-[#115f4e]"
                   >
-                    কোর্স দেখুন
+                    {t("myCoursesPage.browseCourses")}
                     <FiArrowRight />
                   </Link>
                 )}
@@ -509,15 +512,17 @@ const MyCourses = () => {
               <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#d9704b]">
-                    Course Collection
+                    {t("myCoursesPage.collectionBadge")}
                   </p>
                   <h2 className="mt-1 text-2xl font-extrabold text-[#263c35]">
-                    আমার কোর্সসমূহ
+                    {t("myCoursesPage.title")}
                   </h2>
                 </div>
 
                 <span className="w-fit rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-extrabold text-[#16745f]">
-                  {filtered.length}টি কোর্স
+                  {t("myCoursesPage.courseCount", {
+                    count: formatNumber(filtered.length),
+                  })}
                 </span>
               </div>
 
@@ -573,7 +578,7 @@ const MyCourses = () => {
                               className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-[#c6573a] shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5"
                             >
                               <FiAlertCircle />
-                              কারণ দেখুন
+                              {t("myCoursesPage.rejection.viewReason")}
                             </button>
                           </div>
                         )}
@@ -582,7 +587,7 @@ const MyCourses = () => {
                           <div className="absolute inset-0 flex items-center justify-center bg-[#263c35]/26 p-4 backdrop-blur-[1px]">
                             <div className="inline-flex items-center gap-2 rounded-xl bg-white/94 px-4 py-2.5 text-sm font-extrabold text-[#8b681f] shadow-lg">
                               <FiClock className="text-[#d89d2d]" />
-                              অনুমোদনের অপেক্ষায়
+                              {t("myCoursesPage.pendingApproval")}
                             </div>
                           </div>
                         )}
@@ -590,13 +595,15 @@ const MyCourses = () => {
                         <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3 text-white">
                           <span className="inline-flex items-center gap-1.5 text-xs font-bold">
                             <FiClock />
-                            {item.course?.duration || 0}h
+                            {t("myCoursesPage.durationHours", {
+                              count: formatNumber(item.course?.duration || 0),
+                            })}
                           </span>
 
                           {item.paymentStatus === "completed" && (
                             <span className="inline-flex items-center gap-1.5 text-xs font-bold">
                               <FiBarChart2 />
-                              {progress}%
+                              {formatNumber(progress)}%
                             </span>
                           )}
                         </div>
@@ -607,9 +614,11 @@ const MyCourses = () => {
                         {item.paymentStatus === "completed" ? (
                           <div>
                             <div className="flex items-center justify-between text-xs font-bold">
-                              <span className="text-[#71817b]">Progress</span>
+                              <span className="text-[#71817b]">
+                                {t("myCoursesPage.progress")}
+                              </span>
                               <span className="text-[#16745f]">
-                                {progress}%
+                                {formatNumber(progress)}%
                               </span>
                             </div>
 
@@ -636,7 +645,7 @@ const MyCourses = () => {
                             {item.paymentStatus === "pending" ? (
                               <span className="inline-flex items-center gap-2">
                                 <FiClock />
-                                Admin approval pending
+                                {t("myCoursesPage.adminApprovalPending")}
                               </span>
                             ) : (
                               <button
@@ -645,22 +654,21 @@ const MyCourses = () => {
                                 className="inline-flex items-center gap-2 font-extrabold underline decoration-dotted underline-offset-4"
                               >
                                 <FiXCircle />
-                                Access denied — কারণ দেখুন
+                                {t("myCoursesPage.accessDeniedViewReason")}
                               </button>
                             )}
                           </div>
                         )}
 
                         <h3 className="mt-4 line-clamp-2 min-h-14 text-lg font-extrabold leading-7 text-[#263c35] transition group-hover:text-[#16745f]">
-                          {item.course?.title || "Course Unavailable"}
+                          {item.course?.title ||
+                            t("myCoursesPage.courseUnavailable")}
                         </h3>
 
                         <div className="mt-3 flex items-center gap-2 text-xs font-medium text-[#86928d]">
                           <FiCalendar />
-                          Enrolled{" "}
-                          {new Date(
-                            item.enrolledAt || item.createdAt,
-                          ).toLocaleDateString("en-US", {
+                          {t("myCoursesPage.enrolled")}{" "}
+                          {formatDate(item.enrolledAt || item.createdAt, {
                             year: "numeric",
                             month: "short",
                             day: "numeric",
@@ -690,7 +698,8 @@ const MyCourses = () => {
 
                           {item.paymentStatus === "pending" && (
                             <p className="mt-3 truncate text-center text-[11px] font-semibold text-[#8a9691]">
-                              Transaction ID: {item.transactionId}
+                              {t("myCoursesPage.transactionId")}:{" "}
+                              {item.transactionId}
                             </p>
                           )}
 
@@ -700,7 +709,7 @@ const MyCourses = () => {
                               onClick={() => setSelectedRejection(item)}
                               className="mt-3 w-full text-center text-xs font-extrabold text-[#c6573a] underline decoration-dotted underline-offset-4 transition hover:text-[#a8432a]"
                             >
-                              কেন রিজেক্ট করা হয়েছে দেখুন
+                              {t("myCoursesPage.rejection.whyRejected")}
                             </button>
                           )}
                         </div>

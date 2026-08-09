@@ -32,29 +32,30 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../../utils/axios";
 import ConfirmModal from "../../../components/ConfirmModal";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 // Course Status Badge Component
-const CourseStatusBadge = ({ status, isUpcoming, featured }) => {
+const CourseStatusBadge = ({ status, t }) => {
   const getStatusConfig = (status) => {
     switch (status) {
       case 'coming_soon':
-        return { text: 'Coming Soon', bg: 'bg-purple-100', textColor: 'text-purple-700', icon: FiClock };
+        return { text: t("adminCourse.common.comingSoon"), bg: 'bg-purple-100', textColor: 'text-purple-700', icon: FiClock };
       case 'upcoming':
-        return { text: 'Upcoming', bg: 'bg-blue-100', textColor: 'text-blue-700', icon: FiCalendar };
+        return { text: t("adminCourse.common.upcoming"), bg: 'bg-blue-100', textColor: 'text-blue-700', icon: FiCalendar };
       case 'enrollment_open':
-        return { text: 'Enrollment Open', bg: 'bg-green-100', textColor: 'text-green-700', icon: FiUsers };
+        return { text: t("adminCourse.common.enrollmentOpen"), bg: 'bg-green-100', textColor: 'text-green-700', icon: FiUsers };
       case 'enrollment_closed':
-        return { text: 'Enrollment Closed', bg: 'bg-orange-100', textColor: 'text-orange-700', icon: FiXCircle };
+        return { text: t("adminCourse.common.enrollmentClosed"), bg: 'bg-orange-100', textColor: 'text-orange-700', icon: FiXCircle };
       case 'course_started':
-        return { text: 'Course Started', bg: 'bg-teal-100', textColor: 'text-teal-700', icon: FaGraduationCap };
+        return { text: t("adminCourse.common.courseStarted"), bg: 'bg-teal-100', textColor: 'text-teal-700', icon: FaGraduationCap };
       case 'published':
-        return { text: 'Published', bg: 'bg-green-100', textColor: 'text-green-700', icon: FiCheckCircle };
+        return { text: t("adminCourse.common.published"), bg: 'bg-green-100', textColor: 'text-green-700', icon: FiCheckCircle };
       case 'pending':
-        return { text: 'Pending', bg: 'bg-yellow-100', textColor: 'text-yellow-700', icon: FiClock };
+        return { text: t("adminCourse.common.pending"), bg: 'bg-yellow-100', textColor: 'text-yellow-700', icon: FiClock };
       case 'rejected':
-        return { text: 'Rejected', bg: 'bg-red-100', textColor: 'text-red-700', icon: FiXCircle };
+        return { text: t("adminCourse.common.rejected"), bg: 'bg-red-100', textColor: 'text-red-700', icon: FiXCircle };
       default:
-        return { text: status || 'Unknown', bg: 'bg-gray-100', textColor: 'text-gray-700', icon: FiInfo };
+        return { text: status ? t(`adminCourse.common.${status}`) : t("adminCourse.common.unknown"), bg: 'bg-gray-100', textColor: 'text-gray-700', icon: FiInfo };
     }
   };
 
@@ -80,6 +81,9 @@ const CourseDetailsAdmin = () => {
   const [modalAction, setModalAction] = useState(null);
   const [expandedLectures, setExpandedLectures] = useState({});
   const [currentStatus, setCurrentStatus] = useState(null);
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
 
   const fetchCourseDetails = useCallback(async () => {
     try {
@@ -92,10 +96,10 @@ const CourseDetailsAdmin = () => {
         setCourse(courseData);
         setCurrentStatus(courseData.currentStatus);
       } else {
-        toast.error("Failed to load course details");
+        toast.error(t("adminCourse.details.loadFailed"));
       }
     } catch (err) {
-      toast.error("Failed to load course details");
+      toast.error(t("adminCourse.details.loadFailed"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -119,7 +123,7 @@ const CourseDetailsAdmin = () => {
         setExpandedLectures(initialExpandedState);
       }
     } catch (error) {
-      toast.error("Failed to load lectures");
+      toast.error(t("adminCourse.details.lecturesLoadFailed"));
       console.error(error);
     } finally {
       setLecturesLoading(false);
@@ -144,14 +148,14 @@ const CourseDetailsAdmin = () => {
   };
 
   const handleDeleteLecture = async (lectureId) => {
-    if (!window.confirm("Are you sure you want to delete this lecture?")) {
+    if (!window.confirm(t("adminCourse.details.lectureDeleteConfirm"))) {
       return;
     }
 
     try {
       const { data } = await api.delete(`/courses/lectures/${lectureId}`);
       if (data.success) {
-        toast.success("✅ Lecture deleted successfully!");
+        toast.success(t("adminCourse.details.toasts.lectureDeleted"));
         setLectures((prev) =>
           prev.filter((lecture) => lecture._id !== lectureId)
         );
@@ -160,7 +164,7 @@ const CourseDetailsAdmin = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("❌ Failed to delete lecture");
+      toast.error(t("adminCourse.details.toasts.lectureDeleteFailed"));
     }
   };
 
@@ -170,7 +174,7 @@ const CourseDetailsAdmin = () => {
         `/courses/lectures/${lectureId}/resources/${resourceId}`
       );
       if (data.success) {
-        toast.success("✅ Resource deleted successfully!");
+        toast.success(t("adminCourse.details.toasts.resourceDeleted"));
         setLectures((prev) =>
           prev.map((lecture) =>
             lecture._id === lectureId
@@ -186,7 +190,7 @@ const CourseDetailsAdmin = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("❌ Failed to delete resource");
+      toast.error(t("adminCourse.details.toasts.resourceDeleteFailed"));
     }
   };
 
@@ -198,7 +202,7 @@ const CourseDetailsAdmin = () => {
       switch (modalAction) {
         case "delete":
           await api.delete(`/courses/${id}`);
-          toast.success("🗑️ Course deleted successfully");
+          toast.success(t("adminCourse.details.toasts.deleted"));
           navigate("/admin/courses");
           return; // Return early to avoid fetching course details
 
@@ -262,17 +266,16 @@ const CourseDetailsAdmin = () => {
         await api.put(`/courses/${id}`, updateData);
         
         const actionMessages = {
-          publish: "✅ Course published successfully",
-          publish_as_upcoming: "⏳ Course published as Coming Soon",
-          unpublish: "🕒 Course unpublished successfully",
-          feature: "🌟 Course featured successfully",
-          unfeature: "⭐ Course unfeatured successfully",
-          reject: "❌ Course rejected successfully",
-          mark_upcoming: "⏳ Course marked as Coming Soon",
-          remove_upcoming: "📅 Course removed from Coming Soon"
+          publish: t("adminCourse.details.toasts.published"),
+          publish_as_upcoming: t("adminCourse.details.toasts.publishedComingSoon"),
+          unpublish: t("adminCourse.details.toasts.unpublished"),
+          feature: t("adminCourse.details.toasts.featured"),
+          unfeature: t("adminCourse.details.toasts.unfeatured"),
+          reject: t("adminCourse.details.toasts.rejected"),
+          mark_upcoming: t("adminCourse.details.toasts.markedComingSoon"),
+          remove_upcoming: t("adminCourse.details.toasts.removedComingSoon"),
         };
-        
-        toast.success(actionMessages[modalAction] || "✅ Action completed successfully");
+        toast.success(actionMessages[modalAction] || t("adminCourse.details.toasts.actionCompleted"));
       }
 
       fetchCourseDetails();
@@ -290,51 +293,48 @@ const CourseDetailsAdmin = () => {
     switch (modalAction) {
       case "delete":
         return {
-          title: "Delete Course",
-          message:
-            "Are you sure you want to delete this course? This action cannot be undone. All lectures and resources will also be deleted.",
+          title: t("adminCourse.details.modal.deleteTitle"),
+          message: t("adminCourse.details.modal.deleteMessage"),
         };
       case "publish":
         return {
-          title: "Publish Course",
-          message: "Publish this course as a regular course? Students will be able to enroll.",
+          title: t("adminCourse.details.modal.publishTitle"),
+          message: t("adminCourse.details.modal.publishMessage"),
         };
       case "publish_as_upcoming":
         return {
-          title: "Publish as Coming Soon",
-          message: "Publish this course as Coming Soon? Students will see it with a 'Coming Soon' badge.",
+          title: t("adminCourse.details.modal.publishComingSoonTitle"),
+          message: t("adminCourse.details.modal.publishComingSoonMessage"),
         };
       case "unpublish":
         return {
-          title: "Unpublish Course",
-          message:
-            "Unpublish this course? It will no longer be visible to students.",
+          title: t("adminCourse.details.modal.unpublishTitle"),
+          message: t("adminCourse.details.modal.unpublishMessage"),
         };
       case "feature":
         return {
-          title: "Feature Course",
-          message:
-            "Feature this course? It will be highlighted on the homepage.",
+          title: t("adminCourse.details.modal.featureTitle"),
+          message: t("adminCourse.details.modal.featureMessage"),
         };
       case "unfeature":
         return {
-          title: "Unfeature Course",
-          message: "Remove this course from featured listings?",
+          title: t("adminCourse.details.modal.unfeatureTitle"),
+          message: t("adminCourse.details.modal.unfeatureMessage"),
         };
       case "reject":
         return {
-          title: "Reject Course",
-          message: "Reject this course? It will be marked as rejected.",
+          title: t("adminCourse.details.modal.rejectTitle"),
+          message: t("adminCourse.details.modal.rejectMessage"),
         };
       case "mark_upcoming":
         return {
-          title: "Mark as Coming Soon",
-          message: "Mark this course as Coming Soon? It will show 'Coming Soon' badge on frontend.",
+          title: t("adminCourse.details.modal.markComingSoonTitle"),
+          message: t("adminCourse.details.modal.markComingSoonMessage"),
         };
       case "remove_upcoming":
         return {
-          title: "Remove Coming Soon Status",
-          message: "Remove Coming Soon status? This will convert it to a regular course.",
+          title: t("adminCourse.details.modal.removeComingSoonTitle"),
+          message: t("adminCourse.details.modal.removeComingSoonMessage"),
         };
       default:
         return { title: "", message: "" };
@@ -351,7 +351,7 @@ const CourseDetailsAdmin = () => {
       badges.push(
         <span key="featured" className={`${baseClasses} bg-amber-100 text-amber-700`}>
           <FiStar size={12} />
-          Featured
+          {t("adminCourse.common.featured")}
         </span>
       );
     }
@@ -360,8 +360,8 @@ const CourseDetailsAdmin = () => {
     badges.push(
       <CourseStatusBadge 
         key="status" 
-        status={status} 
-        isUpcoming={isUpcoming} 
+        status={status}
+        t={t}
       />
     );
 
@@ -370,11 +370,11 @@ const CourseDetailsAdmin = () => {
 
   // Helper function to format date
   const formatDate = (dateString) => {
-    if (!dateString) return "Not Set";
+    if (!dateString) return t("adminCourse.common.notSet");
     
     try {
       const date = new Date(dateString);
-      return date.toLocaleString("en-US", {
+      return date.toLocaleString(locale, {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -383,14 +383,14 @@ const CourseDetailsAdmin = () => {
         hour12: true,
       });
     } catch (error) {
-      return "Invalid Date";
+      return t("adminCourse.common.invalidDate");
     }
   };
 
   // Format duration from weeks to readable format
   const formatDuration = (weeks) => {
-    if (!weeks) return "Not specified";
-    return `${weeks} week${weeks > 1 ? "s" : ""}`;
+    if (!weeks) return t("adminCourse.common.notSpecified");
+    return t("adminCourse.common.weeks", { count: formatNumber(weeks) });
   };
 
   // Check if course is coming soon
@@ -402,7 +402,7 @@ const CourseDetailsAdmin = () => {
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-            <p className="text-gray-500 mt-4">Loading course details...</p>
+            <p className="text-gray-500 mt-4">{t("adminCourse.details.loading")}</p>
           </div>
         </div>
       </main>
@@ -415,16 +415,16 @@ const CourseDetailsAdmin = () => {
         <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
           <FiBookOpen className="text-gray-300 text-5xl mx-auto mb-4" />
           <h3 className="text-xl font-medium text-gray-700 mb-2">
-            Course not found
+            {t("adminCourse.details.notFound")}
           </h3>
           <p className="text-gray-500 mb-4">
-            The course you're looking for doesn't exist.
+            {t("adminCourse.details.notFoundDesc")}
           </p>
           <Link
             to="/admin/courses"
             className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
           >
-            Back to Courses
+            {t("adminCourse.common.backToCourses")}
           </Link>
         </div>
       </main>
@@ -441,7 +441,7 @@ const CourseDetailsAdmin = () => {
             className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition"
           >
             <FiArrowLeft className="mr-2" />
-            Back to Courses
+            {t("adminCourse.common.backToCourses")}
           </Link>
         </div>
         <div className="flex gap-2 mt-4 md:mt-0">
@@ -450,21 +450,21 @@ const CourseDetailsAdmin = () => {
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
           >
             <FiEdit className="mr-2" />
-            Edit Course
+            {t("adminCourse.details.editCourse")}
           </Link>
           <button
             onClick={() => openModal("delete")}
             className="flex items-center px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
           >
             <FiTrash2 className="mr-2" />
-            Delete Course
+            {t("adminCourse.details.deleteCourse")}
           </button>
         </div>
       </div>
 
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-800">{course.title}</h1>
-        <p className="text-gray-600">Course details and management</p>
+        <p className="text-gray-600">{t("adminCourse.details.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -497,10 +497,10 @@ const CourseDetailsAdmin = () => {
                 <FiInfo className="text-purple-500 text-xl mt-1 shrink-0" />
                 <div>
                   <h3 className="font-bold text-purple-800 text-lg mb-2">
-                    Coming Soon Course
+                    {t("adminCourse.common.comingSoonCourse")}
                   </h3>
                   <p className="text-purple-700 mb-3">
-                    This course is marked as "Coming Soon". Students will see a "Coming Soon" badge and can express interest.
+                    {t("adminCourse.details.comingSoonDesc")}
                   </p>
                   <div className="flex gap-2">
                     {!course.enrollmentStart && !course.enrollmentEnd && !course.courseStart ? (
@@ -509,15 +509,15 @@ const CourseDetailsAdmin = () => {
                           onClick={() => openModal("remove_upcoming")}
                           disabled
                           className="px-4 py-2 bg-purple-400 text-white rounded-xl text-sm cursor-not-allowed"
-                          title="Add dates first to remove coming soon status"
+                          title={t("adminCourse.details.addDatesFirst")}
                         >
-                          Remove Coming Soon
+                          {t("adminCourse.details.removeComingSoon")}
                         </button>
                         <Link
                           to={`/admin/courses/update/${course._id}`}
                           className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-sm"
                         >
-                          Add Dates
+                          {t("adminCourse.details.addDates")}
                         </Link>
                       </>
                     ) : (
@@ -526,13 +526,13 @@ const CourseDetailsAdmin = () => {
                           onClick={() => openModal("remove_upcoming")}
                           className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition text-sm"
                         >
-                          Remove Coming Soon
+                          {t("adminCourse.details.removeComingSoon")}
                         </button>
                         <button
                           onClick={() => openModal("publish")}
                           className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-sm"
                         >
-                          Publish as Regular
+                          {t("adminCourse.details.publishRegular")}
                         </button>
                       </>
                     )}
@@ -545,12 +545,12 @@ const CourseDetailsAdmin = () => {
           {/* Course Description */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
-              Description
+              {t("adminCourse.details.description")}
             </h2>
             <div
               className="prose prose-lg max-w-none text-gray-600"
               dangerouslySetInnerHTML={{
-                __html: course.description || "<p>No description available.</p>",
+                __html: course.description || `<p>${t("adminCourse.details.noDescription")}</p>`,
               }}
             />
           </div>
@@ -560,7 +560,7 @@ const CourseDetailsAdmin = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <FiCheck className="text-green-600" />
-                Course Features
+                {t("adminCourse.details.features")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {course.features.map((feature, index) => (
@@ -586,9 +586,9 @@ const CourseDetailsAdmin = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FiVideo className="text-green-600" />
-                Course Lectures
+                {t("adminCourse.details.courseLectures")}
                 <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                  {lectures.length} lectures
+                  {t("adminCourse.common.lecturesCount", { count: formatNumber(lectures.length) })}
                 </span>
               </h2>
               <Link
@@ -596,30 +596,30 @@ const CourseDetailsAdmin = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
               >
                 <FiPlus size={16} />
-                Add Lecture
+                {t("adminCourse.details.addLecture")}
               </Link>
             </div>
 
             {lecturesLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                <p className="text-gray-500 mt-2">Loading lectures...</p>
+                <p className="text-gray-500 mt-2">{t("adminCourse.details.loadingLectures")}</p>
               </div>
             ) : lectures.length === 0 ? (
               <div className="text-center py-8">
                 <FiVideo className="text-4xl text-gray-300 mx-auto mb-3" />
                 <h3 className="text-lg font-medium text-gray-600 mb-2">
-                  No Lectures Yet
+                  {t("adminCourse.details.noLectures")}
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  Start by adding lectures to this course.
+                  {t("adminCourse.details.noLecturesDesc")}
                 </p>
                 <Link
                   to={`/admin/courses/${course._id}/AddLecture`}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
                 >
                   <FiPlus size={16} />
-                  Create First Lecture
+                  {t("adminCourse.details.createFirstLecture")}
                 </Link>
               </div>
             ) : (
@@ -648,16 +648,16 @@ const CourseDetailsAdmin = () => {
                           <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
                             <div className="flex items-center gap-1">
                               <FiVideo size={14} />
-                              <span>Video Lecture</span>
+                              <span>{t("adminCourse.details.videoLecture")}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <FiFile size={14} />
                               <span>
-                                {lecture.resources?.length || 0} resources
+                                {t("adminCourse.common.resourcesCount", { count: formatNumber(lecture.resources?.length || 0) })}
                               </span>
                             </div>
                             {lecture.duration && (
-                              <span>{lecture.duration} min</span>
+                              <span>{t("adminCourse.common.minutes", { count: formatNumber(lecture.duration) })}</span>
                             )}
                           </div>
                         </div>
@@ -670,7 +670,7 @@ const CourseDetailsAdmin = () => {
                           onClick={(e) => e.stopPropagation()}
                         >
                           <FiEdit3 size={14} />
-                          Edit
+                          {t("adminCourse.details.edit")}
                         </Link>
                         <button
                           onClick={(e) => {
@@ -680,7 +680,7 @@ const CourseDetailsAdmin = () => {
                           className="flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
                         >
                           <FiTrash2 size={14} />
-                          Delete
+                          {t("adminCourse.details.delete")}
                         </button>
                         {expandedLectures[lecture._id] ? (
                           <FiChevronUp className="text-gray-500 ml-2" />
@@ -705,7 +705,7 @@ const CourseDetailsAdmin = () => {
                             <div className="mb-4">
                               <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
                                 <FiPlay className="text-green-600" />
-                                Video Content
+                                {t("adminCourse.details.videoContent")}
                               </h4>
                               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-3">
@@ -721,7 +721,7 @@ const CourseDetailsAdmin = () => {
                                         {lecture.videoUrl}
                                       </a>
                                     ) : (
-                                      "No video URL provided"
+                                      t("adminCourse.details.noVideoUrl")
                                     )}
                                   </span>
                                 </div>
@@ -733,7 +733,7 @@ const CourseDetailsAdmin = () => {
                                     className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
                                   >
                                     <FiPlay size={14} />
-                                    Watch Video
+                                    {t("adminCourse.details.watchVideo")}
                                   </a>
                                 )}
                               </div>
@@ -744,7 +744,7 @@ const CourseDetailsAdmin = () => {
                               <div>
                                 <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
                                   <FiFile className="text-blue-600" />
-                                  Resources ({lecture.resources.length})
+                                  {t("adminCourse.details.resources")} ({formatNumber(lecture.resources.length)})
                                 </h4>
                                 <div className="space-y-2">
                                   {lecture.resources.map((resource) => (
@@ -766,7 +766,7 @@ const CourseDetailsAdmin = () => {
                                           className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
                                         >
                                           <FiDownload size={14} />
-                                          Download
+                                          {t("adminCourse.details.download")}
                                         </a>
                                         <button
                                           onClick={() =>
@@ -778,7 +778,7 @@ const CourseDetailsAdmin = () => {
                                           className="flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
                                         >
                                           <FiTrash2 size={14} />
-                                          Remove
+                                          {t("adminCourse.details.remove")}
                                         </button>
                                       </div>
                                     </div>
@@ -801,7 +801,7 @@ const CourseDetailsAdmin = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <FaChalkboardTeacher />
-                Instructors
+                {t("adminCourse.details.instructors")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {course.teachers.map((teacher, index) => (
@@ -828,7 +828,7 @@ const CourseDetailsAdmin = () => {
                         {teacher.name}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {teacher.role || "Instructor"}
+                        {teacher.role || t("adminCourse.common.instructor")}
                       </p>
                     </div>
                   </motion.div>
@@ -843,7 +843,7 @@ const CourseDetailsAdmin = () => {
           {/* Course Stats */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
-              Course Statistics
+              {t("adminCourse.details.statistics")}
             </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -851,10 +851,10 @@ const CourseDetailsAdmin = () => {
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <FiUsers className="text-blue-600" />
                   </div>
-                  <span className="text-gray-700">Students Enrolled</span>
+                  <span className="text-gray-700">{t("adminCourse.details.studentsEnrolled")}</span>
                 </div>
                 <span className="font-bold text-gray-800">
-                  {course.studentCount || 0}
+                  {formatNumber(course.studentCount || 0)}
                 </span>
               </div>
 
@@ -863,10 +863,10 @@ const CourseDetailsAdmin = () => {
                   <div className="p-2 bg-green-100 rounded-lg">
                     <FiList className="text-green-600" />
                   </div>
-                  <span className="text-gray-700">Lectures</span>
+                  <span className="text-gray-700">{t("adminCourse.common.lectures")}</span>
                 </div>
                 <span className="font-bold text-gray-800">
-                  {lectures.length}
+                  {formatNumber(lectures.length)}
                 </span>
               </div>
 
@@ -875,14 +875,14 @@ const CourseDetailsAdmin = () => {
                   <div className="p-2 bg-amber-100 rounded-lg">
                     <FiStar className="text-amber-600" />
                   </div>
-                  <span className="text-gray-700">Rating</span>
+                  <span className="text-gray-700">{t("adminCourse.details.rating")}</span>
                 </div>
                 <div className="text-right">
                   <span className="font-bold text-gray-800">
                     {course.averageRating?.toFixed(1) || "0.0"}
                   </span>
                   <span className="text-sm text-gray-600 ml-1">
-                    ({course.ratingCount || 0} reviews)
+                    ({t("adminCourse.common.reviewsCount", { count: formatNumber(course.ratingCount || 0) })})
                   </span>
                 </div>
               </div>
@@ -892,7 +892,7 @@ const CourseDetailsAdmin = () => {
                   <div className="p-2 bg-purple-100 rounded-lg">
                     <FiClock className="text-purple-600" />
                   </div>
-                  <span className="text-gray-700">Duration</span>
+                  <span className="text-gray-700">{t("adminCourse.details.duration")}</span>
                 </div>
                 <span className="font-bold text-gray-800">
                   {formatDuration(course.duration)}
@@ -904,7 +904,7 @@ const CourseDetailsAdmin = () => {
                   <div className="p-2 bg-emerald-100 rounded-lg">
                     <FiDollarSign className="text-emerald-600" />
                   </div>
-                  <span className="text-gray-700">Price</span>
+                  <span className="text-gray-700">{t("adminCourse.details.price")}</span>
                 </div>
                 <span className="font-bold text-gray-800">
                   ৳{course.price || 0}
@@ -916,13 +916,13 @@ const CourseDetailsAdmin = () => {
           {/* Course Info */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
-              Course Information
+              {t("adminCourse.details.courseInformation")}
             </h2>
             <div className="space-y-3">
               <div>
-                <span className="text-sm text-gray-600">Category</span>
+                <span className="text-sm text-gray-600">{t("adminCourse.details.category")}</span>
                 <p className="font-medium text-gray-800">
-                  {course.category?.name || "Uncategorized"}
+                  {course.category?.name || t("adminCourse.common.uncategorized")}
                 </p>
               </div>
               
@@ -932,52 +932,52 @@ const CourseDetailsAdmin = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <FiInfo className="text-purple-500" />
                     <span className="text-sm font-medium text-purple-800">
-                      Coming Soon Course
+                      {t("adminCourse.common.comingSoonCourse")}
                     </span>
                   </div>
                   {course.enrollmentStart || course.enrollmentEnd || course.courseStart ? (
                     <>
                       <p className="text-sm text-purple-700 mb-1">
-                        Tentative Dates (Optional):
+                        {t("adminCourse.details.tentativeDates")}
                       </p>
                       {course.enrollmentStart && (
                         <p className="text-sm text-gray-700">
-                          <span className="font-medium">Enrollment Start:</span> {formatDate(course.enrollmentStart)}
+                          <span className="font-medium">{t("adminCourse.common.enrollmentStart")}:</span> {formatDate(course.enrollmentStart)}
                         </p>
                       )}
                       {course.enrollmentEnd && (
                         <p className="text-sm text-gray-700">
-                          <span className="font-medium">Enrollment End:</span> {formatDate(course.enrollmentEnd)}
+                          <span className="font-medium">{t("adminCourse.common.enrollmentEnd")}:</span> {formatDate(course.enrollmentEnd)}
                         </p>
                       )}
                       {course.courseStart && (
                         <p className="text-sm text-gray-700">
-                          <span className="font-medium">Course Start:</span> {formatDate(course.courseStart)}
+                          <span className="font-medium">{t("adminCourse.common.courseStart")}:</span> {formatDate(course.courseStart)}
                         </p>
                       )}
                     </>
                   ) : (
                     <p className="text-sm text-purple-600">
-                      Dates not set. Course is marked as "Coming Soon".
+                      {t("adminCourse.details.datesNotSet")}
                     </p>
                   )}
                 </div>
               ) : (
                 <>
                   <div>
-                    <span className="text-sm text-gray-600">Enrollment Start</span>
+                    <span className="text-sm text-gray-600">{t("adminCourse.common.enrollmentStart")}</span>
                     <p className="font-medium text-gray-800">
                       {formatDate(course.enrollmentStart)}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">Enrollment End</span>
+                    <span className="text-sm text-gray-600">{t("adminCourse.common.enrollmentEnd")}</span>
                     <p className="font-medium text-gray-800">
                       {formatDate(course.enrollmentEnd)}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">Course Start</span>
+                    <span className="text-sm text-gray-600">{t("adminCourse.common.courseStart")}</span>
                     <p className="font-medium text-gray-800">
                       {formatDate(course.courseStart)}
                     </p>
@@ -986,13 +986,13 @@ const CourseDetailsAdmin = () => {
               )}
               
               <div>
-                <span className="text-sm text-gray-600">Created</span>
+                <span className="text-sm text-gray-600">{t("adminCourse.common.created")}</span>
                 <p className="font-medium text-gray-800">
                   {formatDate(course.createdAt)}
                 </p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Last Updated</span>
+                <span className="text-sm text-gray-600">{t("adminCourse.common.lastUpdated")}</span>
                 <p className="font-medium text-gray-800">
                   {formatDate(course.updatedAt)}
                 </p>
@@ -1003,7 +1003,7 @@ const CourseDetailsAdmin = () => {
           {/* Quick Actions */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
-              Quick Actions
+              {t("adminCourse.details.quickActions")}
             </h2>
             <div className="space-y-3">
               <Link
@@ -1011,14 +1011,14 @@ const CourseDetailsAdmin = () => {
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
               >
                 <FiPlus />
-                Add Lecture
+                {t("adminCourse.details.addLecture")}
               </Link>
               <Link
                 to={`/admin/courses/${course._id}/coupons`}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition"
               >
                 <FiEye size={16} />
-                View Coupons
+                {t("adminCourse.details.viewCoupons")}
               </Link>
               
               {/* Status-specific actions */}
@@ -1029,21 +1029,21 @@ const CourseDetailsAdmin = () => {
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
                   >
                     <FiCheckCircle />
-                    Publish as Regular
+                    {t("adminCourse.details.publishRegular")}
                   </button>
                   <button
                     onClick={() => openModal("publish_as_upcoming")}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
                   >
                     <FiCalendar />
-                    Publish as Coming Soon
+                    {t("adminCourse.details.publishComingSoon")}
                   </button>
                   <button
                     onClick={() => openModal("reject")}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
                   >
                     <FiXCircle />
-                    Reject Course
+                    {t("adminCourse.details.rejectCourse")}
                   </button>
                 </>
               )}
@@ -1055,14 +1055,14 @@ const CourseDetailsAdmin = () => {
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700 transition"
                   >
                     <FiXCircle />
-                    Unpublish
+                    {t("adminCourse.details.unpublish")}
                   </button>
                   <button
                     onClick={() => openModal("mark_upcoming")}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
                   >
                     <FiCalendar />
-                    Mark as Coming Soon
+                    {t("adminCourse.details.markComingSoon")}
                   </button>
                   {course.featured ? (
                     <button
@@ -1070,7 +1070,7 @@ const CourseDetailsAdmin = () => {
                       className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition"
                     >
                       <FiXCircle />
-                      Remove Featured
+                      {t("adminCourse.details.removeFeatured")}
                     </button>
                   ) : (
                     <button
@@ -1078,7 +1078,7 @@ const CourseDetailsAdmin = () => {
                       className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition"
                     >
                       <FiCheckCircle />
-                      Mark as Featured
+                      {t("adminCourse.details.markFeatured")}
                     </button>
                   )}
                 </>
@@ -1091,14 +1091,14 @@ const CourseDetailsAdmin = () => {
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
                   >
                     <FiCheckCircle />
-                    Publish as Regular
+                    {t("adminCourse.details.publishRegular")}
                   </button>
                   <button
                     onClick={() => openModal("publish_as_upcoming")}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
                   >
                     <FiCalendar />
-                    Publish as Coming Soon
+                    {t("adminCourse.details.publishComingSoon")}
                   </button>
                 </>
               )}
@@ -1108,7 +1108,7 @@ const CourseDetailsAdmin = () => {
                   <button
                     onClick={() => {
                       if (!course.enrollmentStart || !course.enrollmentEnd || !course.courseStart) {
-                        toast.error("Please add all dates before converting to regular course");
+                        toast.error(t("adminCourse.details.toasts.datesRequiredRegular"));
                         return;
                       }
                       openModal("publish");
@@ -1116,14 +1116,14 @@ const CourseDetailsAdmin = () => {
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
                   >
                     <FiCheckCircle />
-                    Publish as Regular
+                    {t("adminCourse.details.publishRegular")}
                   </button>
                   <button
                     onClick={() => openModal("remove_upcoming")}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition"
                   >
                     <FiXCircle />
-                    Remove Coming Soon
+                    {t("adminCourse.details.removeComingSoon")}
                   </button>
                 </>
               )}
@@ -1134,7 +1134,7 @@ const CourseDetailsAdmin = () => {
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition"
               >
                 <FiEye />
-                View Live Course
+                {t("adminCourse.details.viewLive")}
               </Link>
             </div>
           </div>

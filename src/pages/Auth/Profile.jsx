@@ -24,6 +24,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth.js";
+import { useLanguage } from "../../hooks/useLanguage.js";
 import api from "../../utils/axios";
 
 const Profile = () => {
@@ -43,6 +44,15 @@ const Profile = () => {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const { user, logout, setUser } = useAuth();
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
+  const getRoleLabel = (role) => t(`profilePage.roles.${role || "student"}`);
+  const getPaymentStatusLabel = (status) =>
+    t(`profilePage.paymentStatus.${status || "unknown"}`);
+  const getCompletionStatusLabel = (status) =>
+    t(`profilePage.completionStatus.${status || "in-progress"}`);
 
   const fetchProfileData = useCallback(async () => {
     if (!user?._id) return;
@@ -64,11 +74,11 @@ const Profile = () => {
       }
     } catch (error) {
       console.error("Error fetching profile data:", error);
-      toast.error("প্রোফাইল লোড করা যায়নি");
+      toast.error(t("profilePage.loadFailed"));
     } finally {
       setPageLoading(false);
     }
-  }, [user]);
+  }, [user, t]);
 
   useEffect(() => {
     fetchProfileData();
@@ -85,7 +95,7 @@ const Profile = () => {
   }, [userData]);
 
   const formattedDate = userData?.createdAt
-    ? new Date(userData.createdAt).toLocaleDateString("en-US", {
+    ? new Date(userData.createdAt).toLocaleDateString(locale, {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -115,22 +125,22 @@ const Profile = () => {
 
   const stats = [
     {
-      label: "মোট Enrollment",
-      value: enrollments.length,
+      label: t("profilePage.stats.totalEnrollments"),
+      value: formatNumber(enrollments.length),
       icon: FiBookOpen,
       iconBg: "bg-[#fff0e8]",
       iconText: "text-[#d9704b]",
     },
     {
-      label: "Approved Courses",
-      value: completedEnrollments.length,
+      label: t("profilePage.stats.approvedCourses"),
+      value: formatNumber(completedEnrollments.length),
       icon: FiCheckCircle,
       iconBg: "bg-[#e5f4ee]",
       iconText: "text-[#16745f]",
     },
     {
-      label: "Average Progress",
-      value: `${averageProgress}%`,
+      label: t("profilePage.stats.averageProgress"),
+      value: `${formatNumber(averageProgress)}%`,
       icon: FiBarChart2,
       iconBg: "bg-[#eeeafd]",
       iconText: "text-[#6e5bb4]",
@@ -140,11 +150,11 @@ const Profile = () => {
   const handleLogOut = async () => {
     try {
       await logout();
-      toast.success("সফলভাবে লগ আউট হয়েছে");
+      toast.success(t("profilePage.logoutSuccess"));
       navigate("/login");
     } catch (error) {
       console.log(error);
-      toast.error("লগ আউট করতে সমস্যা হয়েছে");
+      toast.error(t("profilePage.logoutFailed"));
     }
   };
 
@@ -160,12 +170,12 @@ const Profile = () => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("শুধু image file দিন");
+      toast.error(t("profilePage.validation.imageOnly"));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("ছবির সাইজ 5MB এর কম হতে হবে");
+      toast.error(t("profilePage.validation.imageSize"));
       return;
     }
 
@@ -185,7 +195,7 @@ const Profile = () => {
 
   const handleSaveChanges = async () => {
     if (!editData.name.trim()) {
-      toast.error("নাম লিখুন");
+      toast.error(t("profilePage.validation.nameRequired"));
       return;
     }
 
@@ -222,14 +232,14 @@ const Profile = () => {
           }
         }
 
-        toast.success(response.data.message || "প্রোফাইল আপডেট হয়েছে");
+        toast.success(response.data.message || t("profilePage.updateSuccess"));
       } else {
-        toast.error(response.data.message || "প্রোফাইল আপডেট করা যায়নি");
+        toast.error(response.data.message || t("profilePage.updateFailed"));
       }
     } catch (error) {
       console.error("Update profile error:", error);
       toast.error(
-        error?.response?.data?.message || "প্রোফাইল আপডেট করতে সমস্যা হয়েছে",
+        error?.response?.data?.message || t("profilePage.updateError"),
       );
     } finally {
       setLoading(false);
@@ -283,10 +293,10 @@ const Profile = () => {
           </div>
 
           <h3 className="text-xl font-extrabold text-[#263c35]">
-            প্রোফাইল লোড হচ্ছে
+            {t("profilePage.loadingTitle")}
           </h3>
           <p className="mt-2 text-sm leading-6 text-[#6d7c76]">
-            আপনার অ্যাকাউন্ট ও কোর্সের তথ্য প্রস্তুত করা হচ্ছে।
+            {t("profilePage.loadingDescription")}
           </p>
         </motion.div>
       </div>
@@ -301,16 +311,16 @@ const Profile = () => {
             <FiUser className="text-2xl" />
           </div>
           <h2 className="mt-4 text-xl font-extrabold text-[#263c35]">
-            প্রোফাইল তথ্য পাওয়া যায়নি
+            {t("profilePage.notFoundTitle")}
           </h2>
           <p className="mt-2 text-sm leading-6 text-[#71817b]">
-            পুনরায় লগইন করে চেষ্টা করুন অথবা সাপোর্টের সঙ্গে যোগাযোগ করুন।
+            {t("profilePage.notFoundDescription")}
           </p>
           <Link
             to="/login"
             className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 text-sm font-extrabold text-white"
           >
-            সাইন ইন করুন
+            {t("profilePage.signIn")}
             <FiArrowRight />
           </Link>
         </div>
@@ -351,20 +361,19 @@ const Profile = () => {
             >
               <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#16745f]">
                 <FiUser />
-                My Profile
+                {t("profilePage.badge")}
               </div>
 
               <h1 className="mt-4 text-3xl font-extrabold leading-[1.18] text-[#263c35] sm:text-4xl lg:text-[3.05rem]">
-                আপনার অ্যাকাউন্ট
+                {t("profilePage.headingPrefix")}
                 <span className="relative ml-2 inline-block text-[#16745f]">
-                  ও শেখার অগ্রগতি
+                  {t("profilePage.headingAccent")}
                   <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#f7c969]/45" />
                 </span>
               </h1>
 
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[#687a73] sm:text-base">
-                ব্যক্তিগত তথ্য, প্রোফাইল ছবি, কোর্স enrollment এবং learning
-                progress এক জায়গা থেকে পরিচালনা করুন।
+                {t("profilePage.description")}
               </p>
             </motion.div>
 
@@ -386,17 +395,17 @@ const Profile = () => {
               {loading ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current" />
-                  সংরক্ষণ হচ্ছে...
+                  {t("profilePage.saving")}
                 </>
               ) : isEditing ? (
                 <>
                   <FiSave />
-                  পরিবর্তন সংরক্ষণ করুন
+                  {t("profilePage.saveChanges")}
                 </>
               ) : (
                 <>
                   <FiEdit3 />
-                  প্রোফাইল এডিট করুন
+                  {t("profilePage.editProfile")}
                 </>
               )}
             </motion.button>
@@ -426,7 +435,7 @@ const Profile = () => {
                           {previewImage ? (
                             <img
                               src={previewImage}
-                              alt="Profile"
+                              alt={t("profilePage.profilePhotoAlt")}
                               className="h-full w-full object-cover"
                             />
                           ) : (
@@ -442,7 +451,7 @@ const Profile = () => {
                               type="button"
                               onClick={() => fileInputRef.current?.click()}
                               className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#263c35] bg-[#f7c969] text-[#263c35] shadow-lg transition hover:scale-105"
-                              aria-label="Upload profile photo"
+                              aria-label={t("profilePage.uploadPhoto")}
                             >
                               <FiUpload />
                             </button>
@@ -452,7 +461,7 @@ const Profile = () => {
                                 type="button"
                                 onClick={handleRemoveImage}
                                 className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#d96343] text-white shadow-lg transition hover:bg-[#bd4f32]"
-                                aria-label="Remove selected profile photo"
+                                aria-label={t("profilePage.removePhoto")}
                               >
                                 <FiX />
                               </button>
@@ -478,17 +487,17 @@ const Profile = () => {
                               handleInputChange("name", e.target.value)
                             }
                             className="h-11 w-full rounded-xl border border-white/15 bg-white/10 px-3 text-center text-lg font-extrabold text-white outline-none transition placeholder:text-white/45 focus:border-white/35 focus:bg-white/15"
-                            placeholder="আপনার নাম লিখুন"
+                            placeholder={t("profilePage.namePlaceholder")}
                           />
                         ) : (
                           <h2 className="text-2xl font-extrabold">
-                            {userData.name || "User"}
+                            {userData.name || t("profilePage.userFallback")}
                           </h2>
                         )}
 
                         <div className="mt-3 flex flex-wrap justify-center gap-2">
                           <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold capitalize text-white/75">
-                            {userData.role || "student"}
+                            {getRoleLabel(userData.role)}
                           </span>
 
                           <span
@@ -499,13 +508,15 @@ const Profile = () => {
                             }`}
                           >
                             {userData.verified && <FiCheckCircle />}
-                            {userData.verified ? "Verified" : "Not Verified"}
+                            {userData.verified
+                              ? t("profilePage.verified")
+                              : t("profilePage.notVerified")}
                           </span>
                         </div>
 
                         <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-white/50">
                           <FiCalendar />
-                          Joined {formattedDate}
+                          {t("profilePage.joined")} {formattedDate}
                         </p>
                       </div>
                     </div>
@@ -520,7 +531,7 @@ const Profile = () => {
                       </span>
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                          Email
+                          {t("profilePage.fields.email")}
                         </p>
                         <p className="mt-1 break-all text-sm font-extrabold text-[#40554d]">
                           {userData.email || "-"}
@@ -534,7 +545,7 @@ const Profile = () => {
                       </span>
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                          Phone
+                          {t("profilePage.fields.phone")}
                         </p>
                         <p className="mt-1 text-sm font-extrabold text-[#40554d]">
                           {userData.phone || "-"}
@@ -549,7 +560,7 @@ const Profile = () => {
 
                       <div className="min-w-0 flex-1">
                         <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                          Address
+                          {t("profilePage.fields.address")}
                         </p>
 
                         {isEditing ? (
@@ -560,7 +571,7 @@ const Profile = () => {
                               handleInputChange("address", e.target.value)
                             }
                             className="mt-1 h-10 w-full rounded-lg border border-[#dfe5e0] bg-white px-3 text-sm font-medium text-[#263c35] outline-none transition focus:border-[#8bcdbd] focus:ring-3 focus:ring-[#8bcdbd]/15"
-                            placeholder="আপনার ঠিকানা লিখুন"
+                            placeholder={t("profilePage.addressPlaceholder")}
                           />
                         ) : (
                           <p className="mt-1 text-sm font-extrabold text-[#40554d]">
@@ -574,7 +585,7 @@ const Profile = () => {
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     <div className="rounded-xl border border-[#dfe7e1] bg-[#f8faf7] p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                        Account
+                        {t("profilePage.fields.account")}
                       </p>
                       <p
                         className={`mt-1 text-sm font-extrabold ${
@@ -583,16 +594,18 @@ const Profile = () => {
                             : "text-[#16745f]"
                         }`}
                       >
-                        {userData.isBanned ? "Banned" : "Active"}
+                        {userData.isBanned
+                          ? t("profilePage.accountStatus.banned")
+                          : t("profilePage.accountStatus.active")}
                       </p>
                     </div>
 
                     <div className="rounded-xl border border-[#eee5cb] bg-[#fffaf0] p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a9691]">
-                        Pending
+                        {t("profilePage.fields.pending")}
                       </p>
                       <p className="mt-1 text-sm font-extrabold text-[#a87318]">
-                        {pendingEnrollments.length}
+                        {formatNumber(pendingEnrollments.length)}
                       </p>
                     </div>
                   </div>
@@ -603,7 +616,7 @@ const Profile = () => {
                       className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#dfe5e0] bg-white text-sm font-extrabold text-[#53665e] transition hover:border-[#8bcdbd] hover:bg-[#f1f8f5] hover:text-[#16745f]"
                     >
                       <FiLock />
-                      পাসওয়ার্ড পরিবর্তন করুন
+                      {t("profilePage.changePassword")}
                     </Link>
 
                     <button
@@ -612,7 +625,7 @@ const Profile = () => {
                       className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#f1d8ce] bg-[#fff7f2] text-sm font-extrabold text-[#c6573a] transition hover:bg-[#fff0e9]"
                     >
                       <FiLogOut />
-                      লগ আউট করুন
+                      {t("profilePage.logout")}
                     </button>
                   </div>
                 </div>
@@ -668,12 +681,12 @@ const Profile = () => {
                     {[
                       {
                         id: "courses",
-                        label: "আমার কোর্সসমূহ",
+                        label: t("profilePage.tabs.courses"),
                         icon: FiBookOpen,
                       },
                       {
                         id: "account",
-                        label: "অ্যাকাউন্ট তথ্য",
+                        label: t("profilePage.tabs.account"),
                         icon: FiShield,
                       },
                     ].map((tab) => {
@@ -719,19 +732,20 @@ const Profile = () => {
                         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                           <div>
                             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#d9704b]">
-                              Learning Collection
+                              {t("profilePage.courses.badge")}
                             </p>
                             <h3 className="mt-1 text-2xl font-extrabold text-[#263c35]">
-                              আমার কোর্সসমূহ
+                              {t("profilePage.courses.title")}
                             </h3>
                             <p className="mt-1 text-sm leading-6 text-[#71817b]">
-                              Enrollment status ও learning progress এখানে দেখা
-                              যাচ্ছে।
+                              {t("profilePage.courses.description")}
                             </p>
                           </div>
 
                           <span className="w-fit rounded-full bg-[#eef8f4] px-3 py-1.5 text-xs font-extrabold text-[#16745f]">
-                            {enrollments.length}টি enrollment
+                            {t("profilePage.courses.enrollmentCount", {
+                              count: formatNumber(enrollments.length),
+                            })}
                           </span>
                         </div>
 
@@ -742,12 +756,11 @@ const Profile = () => {
                             </div>
 
                             <h4 className="mt-4 text-xl font-extrabold text-[#263c35]">
-                              এখনো কোনো কোর্সে যুক্ত হননি
+                              {t("profilePage.courses.emptyTitle")}
                             </h4>
 
                             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#71817b]">
-                              আপনার প্রয়োজন অনুযায়ী একটি কোর্স বেছে নিয়ে
-                              enrollment শুরু করুন।
+                              {t("profilePage.courses.emptyDescription")}
                             </p>
 
                             <button
@@ -755,7 +768,7 @@ const Profile = () => {
                               onClick={() => navigate("/courses")}
                               className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#16745f] px-5 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(22,116,95,0.22)] transition hover:bg-[#115f4e]"
                             >
-                              কোর্স দেখুন
+                              {t("profilePage.courses.browseCourses")}
                               <FiArrowRight />
                             </button>
                           </div>
@@ -780,7 +793,12 @@ const Profile = () => {
                                     {item.course?.thumbnail ? (
                                       <img
                                         src={item.course.thumbnail}
-                                        alt={item.course?.title || "Course"}
+                                        alt={
+                                          item.course?.title ||
+                                          t(
+                                            "profilePage.courses.courseFallback",
+                                          )
+                                        }
                                         className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                                       />
                                     ) : (
@@ -796,47 +814,61 @@ const Profile = () => {
                                         item.paymentStatus,
                                       )}`}
                                     >
-                                      {item.paymentStatus || "unknown"}
+                                      {getPaymentStatusLabel(
+                                        item.paymentStatus,
+                                      )}
                                     </span>
 
                                     <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-3 text-xs font-bold text-white">
                                       <span className="inline-flex items-center gap-1.5">
                                         <FiClock />
                                         {item.course?.duration
-                                          ? `${item.course.duration} days`
+                                          ? t(
+                                              "profilePage.courses.durationDays",
+                                              {
+                                                count: formatNumber(
+                                                  item.course.duration,
+                                                ),
+                                              },
+                                            )
                                           : "-"}
                                       </span>
 
                                       <span className="inline-flex items-center gap-1.5">
                                         <FiBarChart2 />
-                                        {progress}%
+                                        {formatNumber(progress)}%
                                       </span>
                                     </div>
                                   </div>
 
                                   <div className="p-4">
                                     <h4 className="line-clamp-2 min-h-12 text-base font-extrabold leading-6 text-[#263c35] transition group-hover:text-[#16745f]">
-                                      {item.course?.title || "Untitled Course"}
+                                      {item.course?.title ||
+                                        t("profilePage.courses.untitledCourse")}
                                     </h4>
 
                                     <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold">
                                       <span className="rounded-full bg-[#f8faf7] px-2.5 py-1 text-[#6f7e78]">
                                         {item.course?.category?.name ||
-                                          "No category"}
+                                          t("profilePage.courses.noCategory")}
                                       </span>
 
                                       <span className="rounded-full bg-[#fff9eb] px-2.5 py-1 text-[#8b6b2e]">
-                                        Paid ৳{item.amount || 0}
+                                        {t("profilePage.courses.paid", {
+                                          amount: formatNumber(
+                                            item.amount || 0,
+                                          ),
+                                        })}
                                       </span>
                                     </div>
 
                                     <div className="mt-4">
                                       <div className="flex items-center justify-between text-xs font-bold">
                                         <span className="text-[#71817b]">
-                                          Progress
+                                          {t("profilePage.courses.progress")}
                                         </span>
                                         <span className="text-[#16745f]">
-                                          {progress}%
+                                          {formatNumber(progress)}%
                                         </span>
                                       </div>
 
@@ -853,7 +885,9 @@ const Profile = () => {
                                     <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#eee8dc] pt-3 text-[11px] font-medium text-[#86928d]">
                                       <span className="inline-flex items-center gap-1.5">
                                         <FiClock />
-                                        {item.completionStatus || "in-progress"}
+                                        {getCompletionStatusLabel(
+                                          item.completionStatus,
+                                        )}
                                       </span>
 
                                       <span>
@@ -861,7 +895,7 @@ const Profile = () => {
                                           item.createdAt ||
                                             item.enrolledAt ||
                                             Date.now(),
-                                        ).toLocaleDateString()}
+                                        ).toLocaleDateString(locale)}
                                       </span>
                                     </div>
                                   </div>
@@ -883,13 +917,13 @@ const Profile = () => {
                       >
                         <div className="mb-5">
                           <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#6e5bb4]">
-                            Account Overview
+                            {t("profilePage.account.badge")}
                           </p>
                           <h3 className="mt-1 text-2xl font-extrabold text-[#263c35]">
-                            অ্যাকাউন্ট তথ্য
+                            {t("profilePage.account.title")}
                           </h3>
                           <p className="mt-1 text-sm leading-6 text-[#71817b]">
-                            আপনার account এবং learning summary একসাথে দেখুন।
+                            {t("profilePage.account.description")}
                           </p>
                         </div>
 
@@ -902,23 +936,43 @@ const Profile = () => {
 
                               <div>
                                 <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#7f8d87]">
-                                  Account
+                                  {t("profilePage.fields.account")}
                                 </p>
                                 <h4 className="mt-1 font-extrabold text-[#263c35]">
-                                  Account Summary
+                                  {t("profilePage.account.accountSummary")}
                                 </h4>
                               </div>
                             </div>
 
                             <div className="mt-5 space-y-3">
                               {[
-                                ["Full Name", userData.name || "-"],
-                                ["Email", userData.email || "-"],
-                                ["Phone", userData.phone || "-"],
-                                ["Role", userData.role || "-"],
-                                ["Verified", userData.verified ? "Yes" : "No"],
-                                ["Address", userData.address || "-"],
-                                ["Joined", formattedDate],
+                                [
+                                  t("profilePage.account.fullName"),
+                                  userData.name || "-",
+                                ],
+                                [
+                                  t("profilePage.fields.email"),
+                                  userData.email || "-",
+                                ],
+                                [
+                                  t("profilePage.fields.phone"),
+                                  userData.phone || "-",
+                                ],
+                                [
+                                  t("profilePage.account.role"),
+                                  getRoleLabel(userData.role),
+                                ],
+                                [
+                                  t("profilePage.account.verified"),
+                                  userData.verified
+                                    ? t("profilePage.yes")
+                                    : t("profilePage.no"),
+                                ],
+                                [
+                                  t("profilePage.fields.address"),
+                                  userData.address || "-",
+                                ],
+                                [t("profilePage.joined"), formattedDate],
                               ].map(([label, value]) => (
                                 <div
                                   key={label}
@@ -943,23 +997,32 @@ const Profile = () => {
 
                               <div>
                                 <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#817897]">
-                                  Learning
+                                  {t("profilePage.account.learningLabel")}
                                 </p>
                                 <h4 className="mt-1 font-extrabold text-[#263c35]">
-                                  Learning Summary
+                                  {t("profilePage.account.learningSummary")}
                                 </h4>
                               </div>
                             </div>
 
                             <div className="mt-5 space-y-3">
                               {[
-                                ["Total Enrollments", enrollments.length],
                                 [
-                                  "Approved Courses",
-                                  completedEnrollments.length,
+                                  t("profilePage.stats.totalEnrollments"),
+                                  formatNumber(enrollments.length),
                                 ],
-                                ["Pending Requests", pendingEnrollments.length],
-                                ["Average Progress", `${averageProgress}%`],
+                                [
+                                  t("profilePage.stats.approvedCourses"),
+                                  formatNumber(completedEnrollments.length),
+                                ],
+                                [
+                                  t("profilePage.account.pendingRequests"),
+                                  formatNumber(pendingEnrollments.length),
+                                ],
+                                [
+                                  t("profilePage.stats.averageProgress"),
+                                  `${formatNumber(averageProgress)}%`,
+                                ],
                               ].map(([label, value]) => (
                                 <div
                                   key={label}
@@ -978,10 +1041,10 @@ const Profile = () => {
                             <div className="mt-5 rounded-xl border border-[#e6e0f4] bg-white/70 p-4">
                               <div className="flex items-center justify-between text-xs font-bold">
                                 <span className="text-[#817897]">
-                                  Overall Progress
+                                  {t("profilePage.account.overallProgress")}
                                 </span>
                                 <span className="text-[#6e5bb4]">
-                                  {averageProgress}%
+                                  {formatNumber(averageProgress)}%
                                 </span>
                               </div>
 

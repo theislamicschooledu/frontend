@@ -13,6 +13,7 @@ import {
   FiTag
 } from "react-icons/fi";
 import { useNavigate, useParams } from "react-router-dom";
+import { useLanguage } from "../../../hooks/useLanguage";
 
 const AddCoupon = () => {
   const { courseId } = useParams();
@@ -26,6 +27,9 @@ const AddCoupon = () => {
   const [loading, setLoading] = useState(false);
   const [course, setCourse] = useState(null);
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+  const formatNumber = (value) => Number(value || 0).toLocaleString(locale);
 
   // Fetch course details
   useEffect(() => {
@@ -38,7 +42,7 @@ const AddCoupon = () => {
         }
       } catch (error) {
         console.error(error)
-        toast.error("Failed to fetch course details");
+        toast.error(t("adminCourse.coupon.toasts.loadCourseFailed"));
       }
     };
 
@@ -64,22 +68,22 @@ const AddCoupon = () => {
 
   const validateForm = () => {
     if (!formData.code.trim()) {
-      toast.error("Coupon code is required");
+      toast.error(t("adminCourse.coupon.toasts.codeRequired"));
       return false;
     }
 
     if (!formData.discountValue || formData.discountValue <= 0) {
-      toast.error("Discount value must be a positive number");
+      toast.error(t("adminCourse.coupon.toasts.positiveDiscount"));
       return false;
     }
 
     if (formData.discountType === 'percentage' && formData.discountValue > 100) {
-      toast.error("Percentage discount cannot exceed 100%");
+      toast.error(t("adminCourse.coupon.toasts.percentageLimit"));
       return false;
     }
 
     if (formData.expiryDate && new Date(formData.expiryDate) <= new Date()) {
-      toast.error("Expiry date must be in the future");
+      toast.error(t("adminCourse.coupon.toasts.futureExpiry"));
       return false;
     }
 
@@ -108,12 +112,12 @@ const AddCoupon = () => {
       });
 
       if (data.success) {
-        toast.success("✅ Coupon created successfully!");
+        toast.success(t("adminCourse.coupon.toasts.created"));
         navigate(`/admin/courses/${courseId}/coupons`);
       }
     } catch (error) {
       console.error("Create coupon error:", error);
-      toast.error(`❌ ${error.response?.data?.message || "Failed to create coupon"}`);
+      toast.error(error.response?.data?.message || t("adminCourse.coupon.toasts.createFailed"));
     } finally {
       setLoading(false);
     }
@@ -156,11 +160,11 @@ const AddCoupon = () => {
           onClick={() => navigate(`/admin/courses/${courseId}/coupons`)}
           className="flex items-center px-4 py-2 text-gray-600 hover:bg-white rounded-xl transition"
         >
-          <FiArrowLeft className="mr-2" /> Back to Coupons
+          <FiArrowLeft className="mr-2" /> {t("adminCourse.coupon.backToCoupons")}
         </button>
         <div className="text-center sm:text-left">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Create New Coupon
+            {t("adminCourse.coupon.addTitle")}
           </h1>
           <p className="text-gray-600 mt-1">{course?.title}</p>
         </div>
@@ -177,7 +181,7 @@ const AddCoupon = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <FiTag className="mr-2" /> Coupon Code
+                <FiTag className="mr-2" /> {t("adminCourse.coupon.couponCode")}
               </h2>
               
               <div className="flex gap-4">
@@ -187,7 +191,7 @@ const AddCoupon = () => {
                     name="code"
                     value={formData.code}
                     onChange={handleChange}
-                    placeholder="Enter coupon code (e.g., SUMMER25)"
+                    placeholder={t("adminCourse.coupon.codePlaceholder")}
                     className="w-full p-4 text-lg bg-gray-100 rounded-xl focus:ring-2 focus:ring-green-300 outline-none uppercase"
                     required
                   />
@@ -197,11 +201,11 @@ const AddCoupon = () => {
                   onClick={generateRandomCode}
                   className="px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition whitespace-nowrap"
                 >
-                  Generate Code
+                  {t("adminCourse.coupon.generate")}
                 </button>
               </div>
               <p className="text-sm text-gray-500 mt-2">
-                Use uppercase letters and numbers. Code will be automatically converted to uppercase.
+                {t("adminCourse.coupon.codeHelp")}
               </p>
             </motion.div>
 
@@ -212,14 +216,14 @@ const AddCoupon = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Discount Settings
+                {t("adminCourse.coupon.discountSettings")}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Discount Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Discount Type
+                    {t("adminCourse.coupon.discountType")}
                   </label>
                   <div className="flex gap-2">
                     <button
@@ -232,7 +236,7 @@ const AddCoupon = () => {
                       }`}
                     >
                       <FiPercent />
-                      Percentage
+                      {t("adminCourse.coupon.percentage")}
                     </button>
                     <button
                       type="button"
@@ -244,7 +248,7 @@ const AddCoupon = () => {
                       }`}
                     >
                       <FiDollarSign />
-                      Flat Amount
+                      {t("adminCourse.coupon.flatAmount")}
                     </button>
                   </div>
                 </div>
@@ -252,7 +256,7 @@ const AddCoupon = () => {
                 {/* Discount Value */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Discount Value
+                    {t("adminCourse.coupon.discountValue")}
                     {formData.discountType === 'percentage' ? ' (%)' : ' (৳)'}
                   </label>
                   <div className="relative">
@@ -283,14 +287,14 @@ const AddCoupon = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <FiUsers className="mr-2" /> Usage Limits
+                <FiUsers className="mr-2" /> {t("adminCourse.coupon.usageLimits")}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Usage Limit */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Maximum Usage Limit
+                    {t("adminCourse.coupon.maxUsage")}
                   </label>
                   <div className="relative">
                     <input
@@ -307,14 +311,14 @@ const AddCoupon = () => {
                     </div>
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
-                    Number of times this coupon can be used
+                    {t("adminCourse.coupon.usageHelp")}
                   </p>
                 </div>
 
                 {/* Expiry Date */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Expiry Date (Optional)
+                    {t("adminCourse.coupon.expiryDate")}
                   </label>
                   <div className="relative">
                     <input
@@ -330,7 +334,7 @@ const AddCoupon = () => {
                     </div>
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
-                    Leave empty for no expiration
+                    {t("adminCourse.coupon.expiryHelp")}
                   </p>
                 </div>
               </div>
@@ -344,27 +348,27 @@ const AddCoupon = () => {
                 className="bg-white rounded-2xl shadow-lg p-6"
               >
                 <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Discount Preview
+                  {t("adminCourse.coupon.discountPreview")}
                 </h2>
                 
                 <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-xl p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Original Price</p>
+                      <p className="text-sm text-gray-600 mb-1">{t("adminCourse.coupon.originalPrice")}</p>
                       <p className="text-2xl font-bold text-gray-800 line-through">
-                        ৳{discountPreview.original}
+                        ৳{formatNumber(discountPreview.original)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Discounted Price</p>
+                      <p className="text-sm text-gray-600 mb-1">{t("adminCourse.coupon.discountedPrice")}</p>
                       <p className="text-2xl font-bold text-green-600">
-                        ৳{discountPreview.discounted.toFixed(2)}
+                        ৳{Number(discountPreview.discounted).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">You Save</p>
+                      <p className="text-sm text-gray-600 mb-1">{t("adminCourse.coupon.youSave")}</p>
                       <p className="text-2xl font-bold text-blue-600">
-                        ৳{discountPreview.savings.toFixed(2)}
+                        ৳{Number(discountPreview.savings).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
@@ -382,21 +386,21 @@ const AddCoupon = () => {
               className="bg-white rounded-2xl shadow-lg p-6"
             >
               <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Course Information
+                {t("adminCourse.coupon.courseInformation")}
               </h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-gray-600">Course:</span>
+                  <span className="text-gray-600">{t("adminCourse.coupon.course")}</span>
                   <p className="font-medium text-gray-800">{course?.title}</p>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Original Price:</span>
+                  <span className="text-gray-600">{t("adminCourse.coupon.originalPrice")}:</span>
                   <span className="font-medium">৳{course?.price || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Coupons:</span>
+                  <span className="text-gray-600">{t("adminCourse.coupon.totalCoupons")}</span>
                   <span className="font-medium">
-                    {course?.coupons?.length || 0}
+                    {formatNumber(course?.coupons?.length || 0)}
                   </span>
                 </div>
               </div>
@@ -412,10 +416,10 @@ const AddCoupon = () => {
               }`}
             >
               {loading ? (
-                "Creating Coupon..."
+                t("adminCourse.coupon.creating")
               ) : (
                 <>
-                  <FiSave className="mr-2" /> Create Coupon
+                  <FiSave className="mr-2" /> {t("adminCourse.coupon.create")}
                 </>
               )}
             </motion.button>

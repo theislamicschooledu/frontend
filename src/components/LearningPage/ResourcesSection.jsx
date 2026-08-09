@@ -1,7 +1,11 @@
 import React from "react";
 import { FiDownload } from "react-icons/fi";
+import { useLanguage } from "../../hooks/useLanguage";
 
 const ResourcesSection = ({ resources }) => {
+  const { language, t } = useLanguage();
+  const locale = language === "bn" ? "bn-BD" : "en-US";
+
   return (
     <section className="bg-gray-800/50 p-4 rounded-2xl border border-gray-700/40">
       <div className="flex items-center gap-3 mb-4">
@@ -9,10 +13,10 @@ const ResourcesSection = ({ resources }) => {
           <FiDownload className="text-white" />
         </div>
         <h3 className="text-lg font-semibold">
-          Lecture Resources
+          {t("learningPage.resources.title")}
         </h3>
         <span className="text-sm text-gray-400">
-          ({resources.length})
+          ({Number(resources.length).toLocaleString(locale)})
         </span>
       </div>
 
@@ -29,11 +33,9 @@ const ResourcesSection = ({ resources }) => {
               <FiDownload />
             </div>
             <div className="min-w-0">
-              <div className="text-sm font-medium truncate">
-                {res.title}
-              </div>
+              <div className="text-sm font-medium truncate">{res.title}</div>
               <div className="text-xs text-gray-400">
-                Click to download
+                {t("learningPage.resources.download")}
               </div>
             </div>
           </a>
